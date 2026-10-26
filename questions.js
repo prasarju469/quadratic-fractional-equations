@@ -34,13 +34,13 @@ const mk = (o) => Object.assign({ kind: 'tuple', tol: 0.011, hint: '', solution:
 function gFactor() {
   let r1, r2;
   do { r1 = nz(-9, 9); r2 = nz(-9, 9); } while (r1 === r2 || r1 + r2 === 0);
-  const b = -(r1 + r2), c = r1 * r2;
+  const b = -(r1 + r2), c = r1 * r2, hp = factorPair(b, c).hit;
   return mk({
     topic: 'factor', kind: 'set', tol: 1e-6,
     prompt: `Solve ${M(poly(1, b, c) + '=0')} by factorising.`,
     fields: [M('x =')], answer: [r1, r2],
     hint: `Find two numbers that multiply to ${c} and add to ${b}.`,
-    solution: `${M(poly(1, b, c) + '=0')}<br>${M(fac(r1) + fac(r2) + '=0')}<br>${M('x=' + orList([r1, r2]))}`,
+    solution: `${M(poly(1, b, c) + '=0')}<br>${factorHow(b, c)}A product is zero only when one of the brackets is zero:<br>${M(`x ${plus(hp[0])} = 0 \\text{ or } x ${plus(hp[1])} = 0`)}<br>${M('x=' + orList([r1, r2]))}`,
   });
 }
 
@@ -154,7 +154,7 @@ function gFrac() {
       prompt: `Solve ${M(`\\dfrac{${a}}{${lin(m)}} = ${lin(n)}`)}.`,
       fields: [M('x =')], answer: [r1, r2],
       hint: `Multiply both sides by ${M(`(${lin(m)})`)} to remove the fraction. You should get a quadratic.`,
-      solution: `${M(`${a} = (${lin(n)})(${lin(m)})`)}<br>${M(poly(1, B, C) + ' = 0')}<br>${M(fac(r1) + fac(r2) + '=0')}<br>` +
+      solution: `${M(`${a} = (${lin(n)})(${lin(m)})`)}<br>${M(poly(1, B, C) + ' = 0')}<br>${factorHow(B, C)}` +
         `${M('x=' + orList([r1, r2]))} (neither makes the denominator zero)`,
     });
   }
@@ -167,7 +167,7 @@ function gFrac() {
     prompt: `Solve ${M(`${lhs} = ${b}`)}.`,
     fields: [M('x =')], answer: [r1, r2],
     hint: `Multiply every term by x. Then move everything to one side.`,
-    solution: `${M(`x^2 ${plus(a)} = ${par(b)}x`)}<br>${M(poly(1, -b, a) + '=0')}<br>${M(fac(r1) + fac(r2) + '=0')}<br>${M('x=' + orList([r1, r2]))}`,
+    solution: `${M(`x^2 ${plus(a)} = ${par(b)}x`)}<br>${M(poly(1, -b, a) + '=0')}<br>${factorHow(-b, a)}${M('x=' + orList([r1, r2]))}`,
   });
 }
 
@@ -182,7 +182,7 @@ function gExtra() {
       `<span class="muted">Type only the <b>valid</b> solution(s).</span>`,
     fields: [M('x =')], answer: [r],
     hint: `Multiply both sides by ${M(`(${lin(-a)})`)}, solve the quadratic, then test each answer in the ORIGINAL equation. What is x not allowed to be?`,
-    solution: `${M(`${poly(1, u, v)} = ${poly(0, w, z)}`)}<br>${M(poly(1, u - w, v - z) + ' = 0')}<br>${M(fac(a) + fac(r) + '=0')}<br>` +
+    solution: `${M(`${poly(1, u, v)} = ${poly(0, w, z)}`)}<br>${M(poly(1, u - w, v - z) + ' = 0')}<br>${factorHow(u - w, v - z)}` +
       `${M('x=' + orList([a, r]))}. But ${M('x=' + a)} makes the denominator ${M(lin(-a))} equal to 0, so it is rejected.<br>Only ${M('x=' + r)} is valid.`,
   });
 }
@@ -247,7 +247,7 @@ function gRect() {
       `This gives an equation ${M('x^2 + bx + c = 0')}. Find ${M('b')} and ${M('c')}, then solve it to find the width.`,
     fields: [M('b ='), M('c ='), 'width (cm) ='], answer: [d, -A, x0],
     hint: `Length = ${M(`x+${d}`)}. Area = width × length. Set it equal to ${A} and move everything to one side. One of the roots will be negative - can a width be negative?`,
-    solution: `${M(`x(x+${d}) = ${A}`)}<br>${M(`x^2 + ${d}x - ${A} = 0`)}<br>${M(`(x + ${x0 + d})(x - ${x0}) = 0`)}<br>` +
+    solution: `${M(`x(x+${d}) = ${A}`)}<br>${M(`x^2 + ${d}x - ${A} = 0`)}<br>${factorHow(d, -A)}` +
       `${M(`x = ${x0}`)} or ${M(`x = -${x0 + d}`)}. A width cannot be negative, so the width is <b>${x0} cm</b>.`,
   });
 }
@@ -266,7 +266,7 @@ function gSpeed() {
     fields: [M('x \\text{ (km/h)} =')], answer: [x],
     hint: `Time = distance ÷ speed. Bus time − car time = ${m} minutes = ${M(`\\dfrac{${m}}{60}`)} hours. Then multiply through by the common denominator.`,
     solution: `${M(`\\dfrac{${D}}{x} - \\dfrac{${D}}{x+${d}} = \\dfrac{${m}}{60}`)}<br>` +
-      `${M(`x^2 + ${d}x - ${fmt(K)} = 0`)}<br>${M(`(x + ${x + d})(x - ${x}) = 0`)}<br>` +
+      `${M(`x^2 + ${d}x - ${fmt(K)} = 0`)}<br>${factorHow(d, -K)}` +
       `A speed cannot be negative, so ${M(`x = ${x}`)} km/h.`,
   });
 }
@@ -350,7 +350,7 @@ function gRearr() {
       prompt: `Solve ${M(inL(tex))}. Give answers to 2 decimal places if they are not exact.`,
       fields: [M(L + ' =')], answer: ans,
       hint: 'Expand the brackets, then move everything to one side so it looks like ax² + bx + c = 0. Then choose your method.',
-      solution: `Expand and collect: ${M(inL(poly(1, B, C)) + '=0')}<br>Then use factorising, completing the square or the formula.<br>${M(L + '=' + orList(ans))}`,
+      solution: `Expand and collect: ${M(inL(poly(1, B, C)) + '=0')}<br>${formulaHow(1, B, C).replace(/\bx\b/g, L)}${M(L + '=' + orList(ans))} (2 d.p.)`,
     });
     return withRes(q, f);
   }
@@ -420,7 +420,7 @@ function gFrac2() {
       topic: 'frac2', kind: 'set',
       prompt: `Solve ${M(tex)}. Give answers to 2 decimal places.`,
       fields: [M('x =')], answer: ans, hint,
-      solution: `Cannot be: ${bad.map((z) => M('x=' + fmt(z))).join(', ')}.<br>After clearing the fractions: ${M(poly(A, B, C) + '=0')}<br>${M('x=' + orList(ans))} (2 d.p.) Neither is an excluded value.`,
+      solution: `Cannot be: ${bad.map((z) => M('x=' + fmt(z))).join(', ')}.<br>After clearing the fractions: ${M(poly(A, B, C) + '=0')}<br>${formulaHow(A, B, C)}${M('x=' + orList(ans))} (2 d.p.) Neither is an excluded value.`,
     });
     return withRes(q, f);
   }
@@ -490,7 +490,7 @@ function gPyth() {
     prompt: `A right-angled triangle has sides ${M('x')} cm, ${M(`(x+${d})`)} cm and ${M(`(x+${e})`)} cm, where the longest side is ${M(`(x+${e})`)} cm. Using Pythagoras' Theorem, you get ${M('x^2+bx+c=0')}. Find ${M('b')} and ${M('c')}, solve for ${M('x')}, then find the perimeter in cm.`,
     fields: [M('b ='), M('c ='), M('x ='), 'perimeter (cm) ='], answer: [b, c, p, p + q + r],
     hint: `${M(`x^2 + (x+${d})^2 = (x+${e})^2`)}. Expand every bracket carefully and collect the terms. Reject any negative value of x.`,
-    solution: `${M(`x^2 + (x+${d})^2 = (x+${e})^2`)}<br>${M(`x^2 ${plus(b)}x ${plus(c)} = 0`)}<br>${M(`${fac(p)}${fac(2 * (e - d) - p)} = 0`)}<br>${M('x=' + p)} (reject the negative root). Sides ${p}, ${q}, ${r} cm, so the perimeter is ${p + q + r} cm.`,
+    solution: `${M(`x^2 + (x+${d})^2 = (x+${e})^2`)}<br>${M(`x^2 ${plus(b)}x ${plus(c)} = 0`)}<br>${factorHow(b, c)}${M('x=' + p)} (reject the negative root). Sides ${p}, ${q}, ${r} cm, so the perimeter is ${p + q + r} cm.`,
   });
 }
 
@@ -501,7 +501,7 @@ function gConsec() {
     prompt: `The product of two consecutive ${v === 1 ? 'positive integers' : 'positive odd numbers'} is ${P}. Let the smaller number be ${M('x')}. This gives ${M('x^2+bx+c=0')}. Find ${M('b')} and ${M('c')}, then find the smaller number.`,
     fields: [M('b ='), M('c ='), 'smaller number ='], answer: [step, -P, x0],
     hint: `The numbers are ${M('x')} and ${M(`x+${step}`)}. Their product is ${P}. Expand, move to one side, solve, and reject the negative root.`,
-    solution: `${M(`x(x+${step}) = ${P}`)}<br>${M(`x^2 + ${step}x - ${P} = 0`)}<br>${M(`(x + ${x0 + step})(x - ${x0}) = 0`)}<br>The numbers are positive, so ${M('x=' + x0)}.`,
+    solution: `${M(`x(x+${step}) = ${P}`)}<br>${M(`x^2 + ${step}x - ${P} = 0`)}<br>${factorHow(step, -P)}The numbers are positive, so ${M('x=' + x0)}.`,
   });
 }
 
@@ -513,7 +513,7 @@ function gWork() {
     prompt: `Pipe A can fill a tank in ${M('x')} minutes. Pipe B takes ${d} minutes longer than Pipe A. Together they fill the tank in ${t} minutes. Form an equation ${M('x^2+bx+c=0')}, then find ${M('b')}, ${M('c')} and ${M('x')}.`,
     fields: [M('b ='), M('c ='), M('x =')], answer: [d - 2 * t, -t * d, x],
     hint: `In one minute, Pipe A fills ${M('\\dfrac{1}{x}')} of the tank and Pipe B fills ${M(`\\dfrac{1}{x+${d}}`)}. Together in one minute: ${M(`\\dfrac{1}{${t}}`)}.`,
-    solution: `${M(`\\dfrac{1}{x}+\\dfrac{1}{x+${d}}=\\dfrac{1}{${t}}`)}<br>${M(`${t}(x+${d}) + ${t}x = x(x+${d})`)}<br>${M(`x^2 ${plus(d - 2 * t)}x ${plus(-t * d)} = 0`)}<br>${M('x=' + x)} (reject the negative root).`,
+    solution: `${M(`\\dfrac{1}{x}+\\dfrac{1}{x+${d}}=\\dfrac{1}{${t}}`)}<br>${M(`${t}(x+${d}) + ${t}x = x(x+${d})`)}<br>${M(`x^2 ${plus(d - 2 * t)}x ${plus(-t * d)} = 0`)}<br>${factorHow(d - 2 * t, -t * d)}${M('x=' + x)} (reject the negative root).`,
   });
 }
 
@@ -536,8 +536,44 @@ function gPath() {
     prompt: `A rectangular garden is ${L} m by ${W} m. A path of the same width ${M('x')} m goes all the way around it. The area of the garden and path together is ${A} m². Find ${M('x')}.`,
     fields: [M('x \\text{ (m)} =')], answer: [x0],
     hint: `The outside rectangle is ${M(`(${L}+2x)`)} by ${M(`(${W}+2x)`)}. Set its area equal to ${A}. Expand, collect and solve. Reject the negative root.`,
-    solution: `${M(`(${L}+2x)(${W}+2x) = ${A}`)}<br>${M(`4x^2 + ${2 * (L + W)}x + ${L * W - A} = 0`)}<br>${M(`x = ${x0}`)} (the other root is negative, so rejected).`,
+    solution: `${M(`(${L}+2x)(${W}+2x) = ${A}`)}<br>${M(`4x^2 + ${2 * (L + W)}x + ${L * W - A} = 0`)}<br>${formulaHow(4, 2 * (L + W), L * W - A)}${M(`x = ${x0}`)} (the other root is negative, so rejected).`,
   });
+}
+
+
+/* The two numbers that multiply to C and add to B, or null. */
+function factorPair(B, C) {
+  const n = Math.abs(C), sets = [], seen = new Set();
+  if (C === 0) return null;
+  for (let i = 1; i * i <= n; i++) if (n % i === 0) {
+    const j = n / i;
+    (C > 0 ? [[i, j], [-i, -j]] : [[i, -j], [-i, j]]).forEach((p) => { const k = [...p].sort((x, y) => x - y).join(','); if (!seen.has(k)) { seen.add(k); sets.push(p); } });
+  }
+  const hit = sets.find((p) => p[0] + p[1] === B && p[0] * p[1] === C);
+  return hit ? { hit, sets } : null;
+}
+
+/* Show HOW the brackets are found: two numbers that multiply to c and add to b. */
+function factorHow(B, C) {
+  if (C === 0) {
+    return `<b>How to find the brackets:</b> there is no constant term, so take out the common factor <i>x</i>.<br>${M(`${poly(1, B, 0)} = x(${lin(B)})`)}<br>So the equation becomes ${M(`x(${lin(B)}) = 0`)}.<br>`;
+  }
+  const f = factorPair(B, C); if (!f) return '';
+  const { hit, sets } = f;
+  const pairs = sets.length <= 8
+    ? `Try the pairs that multiply to ${C}: ` + sets.map((p) => { const t = `${p[0]} × ${par(p[1])} has sum ${p[0] + p[1]}`; return p === hit ? `<b>${t} ✔</b>` : t; }).join('; ') + '.<br>'
+    : '';
+  return `<b>How to find the brackets:</b> look for two numbers that <b>multiply to ${C}</b> and <b>add to ${B}</b>.<br>${pairs}` +
+    `So the numbers are ${hit[0]} and ${hit[1]}: ${hit[0]} × ${par(hit[1])} = ${C} and ${hit[0]} + ${par(hit[1])} = ${B}.<br>` +
+    `${M(`${poly(1, B, C)} = (${lin(hit[0])})(${lin(hit[1])})`)}<br>So the equation becomes ${M(`(${lin(hit[0])})(${lin(hit[1])}) = 0`)}.<br>`;
+}
+
+/* Show the quadratic formula being used, step by step. */
+function formulaHow(A, B, C) {
+  const D = B * B - 4 * A * C, ans = quad(A, B, C);
+  if (!ans) return '';
+  return `Use the formula with ${M(`a=${A},\\; b=${B},\\; c=${C}`)}:<br>` +
+    `${M(`x=\\dfrac{-${par(B)}\\pm\\sqrt{${par(B)}^2-4(${A})(${par(C)})}}{2(${A})}=\\dfrac{${fmt(-B)}\\pm\\sqrt{${D}}}{${2 * A}}`)}<br>`;
 }
 
 /* ---------- registry ---------- */
