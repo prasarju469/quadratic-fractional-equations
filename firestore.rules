@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Put the real Gmail addresses (lowercase) in these two lists, then publish the rules in the Firebase console.
+    function teachers() { return ['TEACHER-GMAIL@gmail.com']; }
+    function students() { return ['STUDENT-GMAIL@gmail.com']; }
+
+    function signedIn()  { return request.auth != null && request.auth.token.email_verified == true; }
+    function me()        { return request.auth.token.email.lower(); }
+    function isTeacher() { return signedIn() && me() in teachers(); }
+    function isStudent() { return signedIn() && me() in students(); }
+
+    // One document per person, named by their Gmail address.
+    match /users/{docEmail} {
+      // Students read only their own. Teachers can read everyone's.
+      allow read:  if isTeacher() || (isStudent() && me() == docEmail);
+      // Everyone writes only their own.
+      allow write: if (isTeacher() || isStudent()) && me() == docEmail;
+    }
+  }
+}
