@@ -270,7 +270,7 @@ widgets.jigsaw = function (host) {
 widgets.court = function (host) {
   const TOTAL = 5; let round = 0, score = 0, cur;
   host.innerHTML = `<div class="widget"><h4>⚖️ Rejection Court</h4>
-    <p class="muted">A student solved the equation and found two answers. Decide for each answer: <b>valid</b>, or <b>reject</b> (it would make a denominator zero).</p>
+    <p class="muted">A classmate solved the equation and found two answers. Decide for each answer: <b>valid</b>, or <b>reject</b> (it would make a denominator zero).</p>
     <div id="ct-eq" class="eqline"></div><div id="ct-rows"></div>
     <div class="actions"><button class="btn primary" id="ct-go">Deliver verdict</button></div><div id="ct-fb" class="fb"></div></div>`;
   const eq = host.querySelector('#ct-eq'), rows = host.querySelector('#ct-rows'), fb = host.querySelector('#ct-fb'), go = host.querySelector('#ct-go');
@@ -289,7 +289,7 @@ widgets.court = function (host) {
   }
   function newRound() {
     cur = build(); cur.pick = {}; go.disabled = false; fb.innerHTML = '';
-    eq.innerHTML = `Round ${round + 1} of ${TOTAL}: \\(${cur.tex}\\)<br>The student's answers:`;
+    eq.innerHTML = `Round ${round + 1} of ${TOTAL}: \\(${cur.tex}\\)<br>The classmate's answers:`;
     rows.innerHTML = cur.cands.map((c, i) => `<div class="ct-row"><b>\\(x=${c}\\)</b>
       <button class="opt sm" data-i="${i}" data-v="valid">✅ Valid</button><button class="opt sm" data-i="${i}" data-v="reject">🚫 Reject</button></div>`).join('');
     rows.querySelectorAll('button').forEach((b) => { b.onclick = () => {

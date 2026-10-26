@@ -19,7 +19,7 @@ const DAYS = [
         <p>Babylonian scribes carved puzzles into clay tablets. One says: <i>"I took away the side of my square from its area and got 870."</i> In our notation, that is \\(x^2-x=870\\).</p>
         <p>They had no algebra, no formulas, not even the letter x. They solved it by <b>cutting and rearranging squares</b>, the exact trick you learn today. At the end of this mission you will crack their puzzle.</p>` },
 
-      { t: 'practice', id: 'd1-warm', title: 'Warm-up: what he already knows', topics: ['factor'], need: 3,
+      { t: 'practice', id: 'd1-warm', title: 'Warm-up: what you might already know', topics: ['factor'], need: 3,
         intro: 'Factorising and the Zero Product Principle. If any of these feel shaky, fix them before moving on.' },
 
       { t: 'predict', id: 'd1-p1',
@@ -76,11 +76,11 @@ const DAYS = [
         intro: 'Give r and u as fractions (like 3/8) or decimals to 2 d.p.' },
 
       { t: 'errors', id: 'd1-err', title: 'Spot the mistake', items: [
-        { title: 'A student writes:', lines: ['x^2+8x', '= x^2+8x+16', '= (x+4)^2'], wrong: 1,
+        { title: 'A classmate writes:', lines: ['x^2+8x', '= x^2+8x+16', '= (x+4)^2'], wrong: 1,
           why: 'Line 2 adds 16 for free. The two sides are no longer equal. Correct: \\(x^2+8x=(x^2+8x+16)-16=(x+4)^2-16\\).' },
-        { title: 'A student writes:', lines: ['x^2-6x+1', '=(x^2-6x+9)-9+1', '=(x-3)^2-9+1', '=(x-3)^2+1'], wrong: 3,
+        { title: 'A classmate writes:', lines: ['x^2-6x+1', '=(x^2-6x+9)-9+1', '=(x-3)^2-9+1', '=(x-3)^2+1'], wrong: 3,
           why: 'Line 4 forgot to combine \\(-9+1\\). It is \\(-8\\), so the answer is \\((x-3)^2-8\\).' },
-        { title: 'A student writes:', lines: ['(x-5)^2=9', 'x-5=3', 'x=8'], wrong: 1,
+        { title: 'A classmate writes:', lines: ['(x-5)^2=9', 'x-5=3', 'x=8'], wrong: 1,
           why: 'Line 2 loses the negative square root. It should be \\(x-5=\\pm 3\\), giving \\(x=8\\) or \\(x=2\\).' },
       ] },
 
@@ -101,7 +101,7 @@ const DAYS = [
   /* ------------------------------------------------------------------ DAY 2 */
   {
     n: 2, title: 'Solve any quadratic, then build the formula', minutes: 100,
-    tagline: 'The formula is not magic. He will derive it.',
+    tagline: 'The formula is not magic. You will build it.',
     blocks: [
       { t: 'goal', items: [
         'Solve any quadratic by completing the square.',
@@ -198,7 +198,7 @@ const DAYS = [
         intro: 'Use b² − 4ac and the number of solutions.' },
 
       { t: 'paper', title: 'The big test: derive it on blank paper',
-        tasks: ['Start from \\(ax^2+bx+c=0\\) and derive the quadratic formula. No notes, no screen.', 'Next to every line he writes what he did (e.g. "divided by a").'],
+        tasks: ['Start from \\(ax^2+bx+c=0\\) and derive the quadratic formula. No notes, no screen.', 'Next to every line, write what you did (for example "divided by a").'],
         checks: ['Divides by a', 'Moves c/a to the right', 'Adds (b/2a)² to both sides', 'Writes the left side as a perfect square', 'Takes ± the square root', 'Isolates x'],
         tip: 'Do not help. If he is stuck for more than 2 minutes, only ask: "What did we do in the \\(x^2+4x-3=0\\) example at this step?"' },
 
