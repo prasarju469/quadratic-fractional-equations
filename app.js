@@ -44,9 +44,9 @@
   };
 
   /* ---------- XP, ranks and level progress ---------- */
-  const RANKS = ['Rookie', 'Apprentice', 'Equation Solver', 'Square Master', 'Root Hunter', 'Parabola Pro', 'Story Solver', 'Boss Slayer', 'Legend'];
+  const RANKS = ['Rookie', 'Code Breaker', 'Equation Solver', 'Square Master', 'Formula Wizard', 'Root Hunter', 'Parabola Pro', 'Story Solver', 'Boss Slayer', 'Legend'];
   const AVATARS = ['🦊', '🐲', '🤖', '🐱', '🦉', '🐺', '🚀', '🦖'];
-  const SHORT = ['Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Rates', 'Mock exam', 'Repair', 'Castle'];
+  const SHORT = ['Factors', 'Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Rates', 'Mock exam', 'Repair', 'Castle'];
   const doneCount = () => DAYS.filter((d) => Store.d.done[d.n]).length;
   function xp() {
     const clean = Object.values(Store.d.stats).reduce((a, s) => a + s.c, 0);
@@ -83,7 +83,7 @@
     const rows = Object.keys(TOPICS).filter((t) => (Store.d.stats[t] || {}).t >= 2)
       .map((t) => ({ t, acc: Store.d.stats[t].c / Store.d.stats[t].t })).sort((a, b) => a.acc - b.acc);
     const weak = rows.filter((r) => r.acc < 0.85).slice(0, 4).map((r) => r.t);
-    return weak.length ? weak : allTopics(6);
+    return weak.length ? weak : allTopics(7);
   }
   const answerText = (q) => q.answerText || q.answer.map((v) => fmt(v)).join(q.kind === 'set' ? ' or ' : ',  ');
 
@@ -205,6 +205,8 @@
       const w = el('section', 'block');
       w.innerHTML = `<span class="tag">⚡ Level up</span><h3>${b.title}</h3><p class="muted">${b.intro || ''}</p>
         <div class="dots"></div><div class="qhost"></div>`;
+      const rc = recipeFor(b.topics[0]);
+      if (rc) w.querySelector('.dots').insertAdjacentHTML('beforebegin', `<details class="recipe"><summary>📘 Open the recipe: ${rc.title}</summary>${recipeHtml(rc)}</details>`);
       const dots = w.querySelector('.dots'), host = w.querySelector('.qhost');
       let streak = 0;
       function drawDots() {
@@ -255,6 +257,7 @@
 
     drill(b) { return drillBlock(b); },
     mock(b) { return mockBlock(b); },
+    recipe(b) { const r = RECIPES.find((x) => x.id === b.id); return el('section', 'block recipecard', `<span class="tag">📘 The recipe</span>${recipeHtml(r)}`); },
 
     done(b, day) {
       const d = DAYS.find((x) => x.n === day), w = el('section', 'block finish');
@@ -418,6 +421,18 @@
     return w;
   }
 
+  /* ---------- recipes: the fixed steps for each kind of problem ---------- */
+  const recipeFor = (topic) => RECIPES.find((r) => (r.topics || []).includes(topic));
+  function recipeHtml(r) {
+    return `<h4>${r.title}</h4><p class="muted">${r.when || ''}</p>${r.html ? r.html : `<ol class="recipe-steps">${r.steps.map((x) => `<li>${x}</li>`).join('')}</ol>`}` +
+      (r.example ? `<div class="callout">${r.example}</div>` : '') + (r.tip ? `<p class="muted"><b>Watch out:</b> ${r.tip}</p>` : '');
+  }
+  function rulesPage() {
+    root.innerHTML = `<p><a href="#/">← Back to the map</a></p><h1>📘 The Rulebook</h1><p class="sub">Maths runs on rules. Learn the steps once, then every problem is just the same steps joined together.</p>` +
+      RECIPES.map((r) => `<details class="block recipe" ${r.open ? 'open' : ''}><summary><b>${r.title}</b></summary>${recipeHtml(r)}</details>`).join('');
+    math(root);
+  }
+
   /* ---------- timed mock paper ---------- */
   function markItem(q, vals, marks) {
     if (q.kind === 'tuple') {
@@ -503,7 +518,7 @@
         ? `<a class="btn primary big" href="#/day/${next.n}">▶ Play Level ${next.n}: ${next.title}</a>`
         : `<a class="btn primary big" href="#/wake">🏰 Enter the castle</a>`}</div>
       <div class="hero-pick"><span class="muted">Your hero:</span> ${AVATARS.map((a) => `<button class="av-btn ${a === Store.d.avatar ? 'on' : ''}" data-a="${a}">${a}</button>`).join('')}</div>
-      <div class="actions"><a class="btn big" href="#/wake">⏰ Wake-up mode</a>${doneCount() >= 6 ? '<a class="btn big" href="#/mock">📄 Mock paper</a>' : ''}<a class="btn big" href="#/progress">Stats</a></div>`;
+      <div class="actions"><a class="btn big" href="#/wake">⏰ Wake-up mode</a>${doneCount() >= 7 ? '<a class="btn big" href="#/mock">📄 Mock paper</a>' : ''}<a class="btn big" href="#/progress">Stats</a></div>`;
     root.querySelectorAll('.av-btn').forEach((b) => { b.onclick = () => { Store.d.avatar = b.dataset.a; Store.save(); hud(); home(); }; });
     const from = Math.min(Store.d.pos || 0, cur);
     walkHero(root.querySelector('.mapsvg'), from, cur);
@@ -575,7 +590,7 @@
   function wake() {
     root.innerHTML = `<div class="wake"><h1>⏰ Wake-up mode</h1>
       <p>Ten random questions from the whole chapter, ten minutes, no hints, no topic labels. Wake up, sit down, solve.</p></div>`;
-    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 6, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
+    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 7, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
   }
 
   function progress() {
@@ -627,7 +642,7 @@
   }
 
   function mockPage() {
-    if (!(isTeacher() || doneCount() >= 6)) return home();
+    if (!(isTeacher() || doneCount() >= 7)) return home();
     root.innerHTML = '<p><a href="#/">← Back to the map</a></p><h1>📄 Mock paper</h1><p class="muted">A fresh paper every time, with new questions in the same layout.</p>';
     root.appendChild(mockBlock(Object.assign({}, MOCK_PAPER, { id: 'mock-free' })));
   }
@@ -668,6 +683,7 @@
     else if (h === '/review') review();
     else if (h === '/coverage') coverage();
     else if (h === '/mock') mockPage();
+    else if (h === '/rules') rulesPage();
     else if (h === '/coverage') coverage();
     else home();
     window.scrollTo(0, 0); math(root); hud(); document.documentElement.style.setProperty('--hh', document.querySelector('.top').offsetHeight + 'px');

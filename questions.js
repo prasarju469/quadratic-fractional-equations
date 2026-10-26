@@ -31,16 +31,39 @@ const orList = (arr) => arr.map(fmt).join(' \\text{ or } ');
 const mk = (o) => Object.assign({ kind: 'tuple', tol: 0.011, hint: '', solution: '' }, o);
 
 /* ---------- Day 1 ---------- */
-function gFactor() {
-  let r1, r2;
-  do { r1 = nz(-9, 9); r2 = nz(-9, 9); } while (r1 === r2 || r1 + r2 === 0);
-  const b = -(r1 + r2), c = r1 * r2, hp = factorPair(b, c).hit;
+const gcdi = (x, y) => (y ? gcdi(y, x % y) : Math.abs(x));
+
+function genFactor(topic, rootFn) {
+  let r1, r2; do { [r1, r2] = rootFn(); } while (r1 === r2 || r1 + r2 === 0);
+  const b = -(r1 + r2), c = r1 * r2;
   return mk({
-    topic: 'factor', kind: 'set', tol: 1e-6,
+    topic, kind: 'set', tol: 1e-6,
     prompt: `Solve ${M(poly(1, b, c) + '=0')} by factorising.`,
     fields: [M('x =')], answer: [r1, r2],
-    hint: `Find two numbers that multiply to ${c} and add to ${b}.`,
-    solution: `${M(poly(1, b, c) + '=0')}<br>${factorHow(b, c)}A product is zero only when one of the brackets is zero:<br>${M(`x ${plus(hp[0])} = 0 \\text{ or } x ${plus(hp[1])} = 0`)}<br>${M('x=' + orList([r1, r2]))}`,
+    hint: `Step 1: P = ${c} (the constant) and S = ${b} (the number in front of x). Step 2: find two numbers that multiply to P and add to S. ${signSentence(b, c)}`,
+    solution: `${M(poly(1, b, c) + '=0')}<br>${factorHow(b, c)}${M('x=' + orList([r1, r2]))}`,
+  });
+}
+const gFactor = () => genFactor('factor', () => [nz(-9, 9), nz(-9, 9)]);
+const gFactorPP = () => genFactor('fpp', () => [-R(1, 9), -R(1, 9)]);   // P > 0 and S > 0: both numbers positive
+const gFactorPN = () => genFactor('fpn', () => [R(1, 9), R(1, 9)]);     // P > 0 and S < 0: both numbers negative
+
+/* Guided: the five steps one at a time. */
+function gFstep() {
+  let r1, r2; do { r1 = nz(-9, 9); r2 = nz(-9, 9); } while (r1 === r2 || r1 + r2 === 0);
+  const b = -(r1 + r2), c = r1 * r2, n = [-r1, -r2].sort((x, y) => x - y), rr = [r1, r2].sort((x, y) => x - y);
+  const has = (v, set) => Math.abs(v - set[0]) < 1e-9 || Math.abs(v - set[1]) < 1e-9;
+  return mk({
+    topic: 'fstep', kind: 'steps',
+    prompt: `Solve ${M(poly(1, b, c) + '=0')} by factorising, one step at a time.<br><span class="muted">1. Find P and S (keep the signs) · 2. Find the two numbers · 3. Write the brackets · 4. Zero Product Principle · 5. Solve each bracket</span>`,
+    fields: [M('\\text{Step 1: } P ='), M('\\text{Step 1: } S ='), 'Step 2: one number =', 'Step 2: the other number =', 'Step 5: one solution, x =', 'Step 5: the other solution, x ='],
+    answer: [c, b, n[0], n[1], rr[0], rr[1]],
+    answerText: `P = ${c}, S = ${b}; numbers ${n[0]} and ${n[1]}; x = ${rr[0]} or ${rr[1]}`,
+    mask: (v) => [Math.abs(v[0] - c) > 1e-9, Math.abs(v[1] - b) > 1e-9,
+      !(has(v[2], n) && has(v[3], n) && v[2] !== v[3]), !(has(v[2], n) && has(v[3], n) && v[2] !== v[3]),
+      !(has(v[4], rr) && has(v[5], rr) && v[4] !== v[5]), !(has(v[4], rr) && has(v[5], rr) && v[4] !== v[5])],
+    hint: `P is the constant term and S is the number in front of x, both with their signs. Then: ${signSentence(b, c)} The solutions are the <b>opposite</b> of the numbers in the brackets.`,
+    solution: `${M(poly(1, b, c) + '=0')}<br>${factorHow(b, c)}`,
   });
 }
 
@@ -553,19 +576,39 @@ function factorPair(B, C) {
   return hit ? { hit, sets } : null;
 }
 
-/* Show HOW the brackets are found: two numbers that multiply to c and add to b. */
+/* The rule that tells you the signs before you look for the numbers. */
+function signSentence(B, C) {
+  if (C > 0) return `P is positive, so the two numbers have the <b>same sign</b>. S is ${B > 0 ? 'positive, so both are <b>positive</b>' : 'negative, so both are <b>negative</b>'}. Look for positive factors of ${C} that <b>add up to ${Math.abs(B)}</b>${B < 0 ? ', then make both negative' : ''}.`;
+  if (C < 0) return `P is negative, so the two numbers have <b>different signs</b> (one + and one −). Look for factors of ${-C} that <b>differ by ${Math.abs(B)}</b>${B === 0 ? ', so the same size with opposite signs' : `. The bigger one takes the sign of S, which is <b>${B > 0 ? 'positive' : 'negative'}</b>`}.`;
+  return 'P is 0, so one of the numbers is 0: take out the common factor x.';
+}
+
+/* Step 1 and step 2 of the P and S method, as text. Returns { text, n1, n2 } or null. */
+function psSteps(B, C, exprHtml) {
+  const f = factorPair(B, C); if (!f) return null;
+  const [n1, n2] = f.hit.slice().sort((x, y) => x - y), n = Math.abs(C), pairs = [];
+  for (let i = 1; i * i <= n; i++) if (n % i === 0) pairs.push([i, n / i]);
+  const metric = ([i, j]) => (C > 0 ? i + j : j - i), word = C > 0 ? 'sum' : 'difference';
+  const hi = pairs.findIndex((p) => metric(p) === Math.abs(B)), line = (p, k) => `${p[0]} × ${p[1]} (${word} ${metric(p)})${k === hi ? ' ✔' : ''}`;
+  let shown = pairs.map(line); if (shown.length > 8) shown = hi < 6 ? [...shown.slice(0, hi + 1), '…'] : [...shown.slice(0, 3), '…', shown[hi]];
+  return { n1, n2, text:
+    `<b>Step 1. Find P and S.</b> In ${exprHtml}, the product is ${M('P = ' + C)} (the constant term) and the sum is ${M('S = ' + B)} (the number in front of x). Keep the signs.<br>` +
+    `<b>Step 2. Find the two numbers</b> that multiply to P and add to S. ${signSentence(B, C)}<br>Factor pairs of ${n}: ${shown.join('; ')}.<br>` +
+    `So the numbers are <b>${n1}</b> and <b>${n2}</b>. Check: ${n1} × ${par(n2)} = ${C} and ${n1} + ${par(n2)} = ${B}.<br>` };
+}
+
+/* Show HOW the brackets are found, in the same five steps every time. */
 function factorHow(B, C, asEquation = true) {
   if (C === 0) {
-    return `<b>How to find the brackets:</b> there is no constant term, so take out the common factor <i>x</i>.<br>${M(`${poly(1, B, 0)} = x(${lin(B)})`)}<br>${asEquation ? `So the equation becomes ${M(`x(${lin(B)}) = 0`)}.<br>` : ''}`;
+    return `<b>P = 0</b>, so there is no constant term: take out the common factor <i>x</i>.<br>${M(`${poly(1, B, 0)} = x(${lin(B)})`)}<br>` +
+      (asEquation ? `<b>Zero Product Principle:</b> one factor must be 0, so ${M('x = 0')} or ${M(`${lin(B)} = 0`)}, which gives ${M('x = 0')} or ${M(`x = ${-B}`)}.<br>` : '');
   }
-  const f = factorPair(B, C); if (!f) return '';
-  const { hit, sets } = f;
-  const pairs = sets.length <= 8
-    ? `Try the pairs that multiply to ${C}: ` + sets.map((p) => { const t = `${p[0]} × ${par(p[1])} has sum ${p[0] + p[1]}`; return p === hit ? `<b>${t} ✔</b>` : t; }).join('; ') + '.<br>'
-    : '';
-  return `<b>How to find the brackets:</b> look for two numbers that <b>multiply to ${C}</b> and <b>add to ${B}</b>.<br>${pairs}` +
-    `So the numbers are ${hit[0]} and ${hit[1]}: ${hit[0]} × ${par(hit[1])} = ${C} and ${hit[0]} + ${par(hit[1])} = ${B}.<br>` +
-    `${M(`${poly(1, B, C)} = (${lin(hit[0])})(${lin(hit[1])})`)}<br>${asEquation ? `So the equation becomes ${M(`(${lin(hit[0])})(${lin(hit[1])}) = 0`)}.<br>` : ''}`;
+  const ps = psSteps(B, C, M(poly(1, B, C))); if (!ps) return '';
+  const { n1, n2 } = ps;
+  return ps.text + `<b>Step 3. Write the brackets:</b> ${M(`${poly(1, B, C)} = (${lin(n1)})(${lin(n2)})`)}<br>` +
+    (asEquation
+      ? `<b>Step 4. Zero Product Principle:</b> if two things multiply to give 0, one of them must be 0. So ${M(`${lin(n1)} = 0`)} or ${M(`${lin(n2)} = 0`)}.<br><b>Step 5. Solve each one:</b> ${M(`x = ${-n1}`)} or ${M(`x = ${-n2}`)}. The solution is the <b>opposite</b> of the number in the bracket.<br>`
+      : 'Check by expanding the brackets.<br>');
 }
 
 /* Show the quadratic formula being used, step by step. */
@@ -643,24 +686,33 @@ function isFullyFactored(e) {
 
 /* ---- D: factorise an expression (monic with -x^2, a not 1, difference of squares, common factor) ---- */
 function crossHow(a, b, c) {
-  const divs = (n) => { const o = []; for (let i = 1; i <= n; i++) if (n % i === 0) o.push(i); return o; };
-  const cs = []; divs(Math.abs(c)).forEach((d) => { const e = Math.abs(c) / d; [[d, c > 0 ? e : -e], [-d, c > 0 ? -e : e]].forEach((p) => cs.push(p)); });
-  const tries = []; let hit = null;
-  divs(a).forEach((m) => { const p = a / m; if (p > m) return; cs.forEach(([n, q]) => { [[n, q], [q, n]].forEach(([n1, q1]) => { const mid = m * q1 + p * n1; tries.push({ m, p, n: n1, q: q1, mid }); if (!hit && mid === b) hit = tries[tries.length - 1]; }); }); });
-  if (!hit) return '';
-  const br = (t) => `(${t.m === 1 ? '' : t.m}x ${plus(t.n) || '+ 0'})(${t.p === 1 ? '' : t.p}x ${plus(t.q) || '+ 0'})`;
-  const seen = new Set(), uniq = [];
-  for (const t of tries) { const k = [`${t.m},${t.n}`, `${t.p},${t.q}`].sort().join('|'); if (seen.has(k)) continue; seen.add(k); uniq.push(t); if (t === hit) break; }
-  const hi = uniq.indexOf(hit), pick_ = hi <= 6 ? uniq : [...uniq.slice(0, 4), null, hit];
-  const list = pick_.map((t) => (t === null ? '… (keep trying pairs until the middle term matches)' : `${br(t)} gives middle term ${t.m}×${par(t.q)} + ${t.p}×${par(t.n)} = ${t.mid}${t === hit ? ' ✔' : ''}`));
-  return `<b>How to find the brackets (multiplication frame):</b> the brackets are ${M('(mx + n)(px + q)')}, where ${M('m \\times p = ' + a)} and ${M('n \\times q = ' + c)}. The middle term comes from ${M('m q + p n')}, and we need it to be ${b}.<br>` +
-    `Try factor pairs:<br>${list.join('<br>')}<br>So ${M(`${poly(a, b, c)} = ${br(hit).replace(/\(/g, '(').replace(/\)\(/g, ')(')}`)}.<br>`;
+  const P = a * c, ps = psSteps(b, P, M(`${poly(a, b, c)}`)); if (!ps) return '';
+  const [u, v] = [ps.n1, ps.n2]; let res = null;
+  for (const [x1, x2] of [[u, v], [v, u]]) {
+    const g1 = gcdi(a, Math.abs(x1));
+    for (const sg of [1, -1]) {
+      const g2 = sg * gcdi(Math.abs(x2), Math.abs(c)), A1 = [a / g1, x1 / g1], A2 = [x2 / g2, c / g2];
+      if (A1[0] === A2[0] && A1[1] === A2[1]) { res = { x1, x2, g1, g2, A1 }; break; }
+    }
+    if (res) break;
+  }
+  const head = `<b>When x² has a number in front (a = ${a}):</b> use P = a × c = ${a} × ${par(c)} = ${P} and S = ${b}.<br>` + ps.text.replace('Step 1. Find P and S.', 'Step 1. P = a × c, and S = b.').replace('(the constant term)', '(a × c)').replace('(the number in front of x)', '(the middle number, b)');
+  if (!res) return head + `<b>Step 3.</b> Split the middle term and group: ${M(`${poly(a, b, c)}`)}.<br>`;
+  const br = poly(0, res.A1[0], res.A1[1]), pre = (g) => (g === 1 ? '' : g);
+  return head +
+    `<b>Step 3. Split the middle term</b> using those two numbers: ${M(`${poly(a, b, c)} = ${a === 1 ? '' : a}x^2 ${plus(res.x1)}x ${plus(res.x2)}x ${plus(c)}`)}<br>` +
+    `<b>Step 4. Group in pairs</b> and take out the common factor of each pair: ${M(`= ${pre(res.g1)}x(${br}) ${res.g2 < 0 ? '-' : '+'} ${Math.abs(res.g2)}(${br})`)}<br>` +
+    `<b>Step 5. Take out the common bracket</b> ${M(`(${br})`)}: ${M(`= (${br})(${pre(res.g1)}x ${plus(res.g2)})`)}<br>Check by expanding the brackets.<br>`;
 }
 
-function gFactExp() {
+function gFactExp(vv, topicName) {
   const g_ = (x, y) => (y ? g_(y, x % y) : Math.abs(x));
-  const v = pick([1, 2, 2, 3, 4]); let target, display, answer, how, hint = 'Type the brackets like (x+1)(2x-3). Use ^ for powers. Factorise completely.';
-  if (v === 1) {
+  const v = vv === undefined ? pick([0, 1, 2, 2, 3, 4]) : vv; let target, display, answer, how, hint = 'Type the brackets like (x+1)(2x-3). Use ^ for powers. Factorise completely.';
+  if (v === 0) {
+    let r1, r2; do { r1 = nz(-8, 8); r2 = nz(-8, 8); } while (r1 === r2);
+    target = [r1 * r2, -(r1 + r2), 1]; display = poly(1, -(r1 + r2), r1 * r2); answer = `${fac(r1)}${fac(r2)}`.replace(/ /g, '');
+    how = factorHow(-(r1 + r2), r1 * r2, false); hint = 'Use P and S. Type the brackets like (x+1)(x-6).';
+  } else if (v === 1) {
     let r1, r2; do { r1 = nz(-7, 7); r2 = nz(-7, 7); } while (r1 === r2);
     const b = r1 + r2, c = -r1 * r2;                       // -(x - r1)(x - r2) = -x^2 + (r1+r2)x - r1 r2
     target = [c, b, -1]; display = poly(-1, b, c); answer = `-${fac(r1)}${fac(r2)}`;
@@ -686,7 +738,7 @@ function gFactExp() {
     hint = 'Take out any common factor first, then factorise what is left in the bracket.';
   }
   const q = mk({
-    topic: 'factexp', kind: 'factor', tol: 0, target, placeholder: 'e.g. (x+1)(2x-3)',
+    topic: topicName || 'factexp', kind: 'factor', tol: 0, target, placeholder: 'e.g. (x+1)(2x-3)',
     prompt: `Factorise completely ${M(display)}.`,
     fields: ['answer ='], answer: [], answerText: answer.replace(/\*/g, ''),
     hint, solution: how,
@@ -1034,54 +1086,62 @@ function gSumProd() {
 
 /* ---------- registry ---------- */
 const TOPICS = {
+  fstep:   { name: 'Guided: solve by factorising, 5 steps', gen: gFstep,   day: 1 },
+  fpp:     { name: 'Factorising: P and S both positive',  gen: gFactorPP,  day: 1 },
+  fpn:     { name: 'Factorising: P positive, S negative', gen: gFactorPN,  day: 1 },
   factor:  { name: 'Solve by factorising',                gen: gFactor,    day: 1 },
-  sqrt:    { name: 'Solve (x + r)² = s',                  gen: gSqrt,      day: 1 },
-  ctsx:    { name: 'Complete the square (rewrite)',       gen: gCtsExpr,   day: 1 },
-  factexp: { name: 'Factorise an expression',             gen: gFactExp,   day: 1 },
-  ctsd:    { name: 'Complete the square: fractions and decimals', gen: gCtsDec, day: 1 },
-  ctss:    { name: 'Solve by completing the square',      gen: gCtsSolve,  day: 2 },
-  hence:   { name: 'Express, then hence solve',             gen: gHence,     day: 2 },
-  ctsa:    { name: 'Stretch: complete the square, a not 1', gen: gCtsA,      day: 2, stretch: true },
-  ctssa:   { name: 'Stretch: solve by completing the square, a not 1', gen: gCtsSolveA, day: 2, stretch: true },
-  formula: { name: 'Quadratic formula',                   gen: gFormula,   day: 2 },
-  rearr:   { name: 'Tidy up first, then solve',           gen: gRearr,     day: 2 },
-  subst:   { name: 'Hence: substitution',                  gen: gSubst,     day: 2 },
-  disc:    { name: 'Discriminant and number of roots',    gen: gDisc,      day: 2 },
-  kval:    { name: 'Stretch: find an unknown using the discriminant', gen: gKval,   day: 2, stretch: true },
-  fromroots: { name: 'Form an equation from its solutions', gen: gFromRoots, day: 2 },
-  frac:    { name: 'Fractional equations',                gen: gFrac,      day: 3 },
-  frac2:   { name: 'Harder fractional equations',         gen: gFrac2,     day: 3 },
-  frac3:   { name: 'Fractions with factorisable denominators', gen: gFrac3, day: 3 },
-  extra:   { name: 'Rejecting invalid roots',             gen: gExtra,     day: 3 },
-  table:   { name: 'Table of values for a graph',         gen: gTable,     day: 4 },
-  gfact:   { name: 'Graphs: factorised form',             gen: gGraphFact, day: 4 },
-  gcs:     { name: 'Graphs: completed-square form',       gen: gGraphCS,   day: 4 },
-  ctsn:    { name: 'Complete the square with −x²',        gen: gCtsNeg,    day: 4 },
-  ggen:    { name: 'Graphs from the general form',        gen: gGGen,      day: 4 },
-  gline:   { name: 'Which line solves another equation',  gen: gGLine,     day: 4 },
-  hline:   { name: 'Horizontal lines and a curve',        gen: gHLine,     day: 4 },
-  pq:      { name: 'Find p and q from a graph',           gen: gPQ,        day: 4 },
-  readgraph: { name: 'Read values from a graph',            gen: gReadGraph, day: 4 },
-  simult:  { name: 'Stretch: a line and a curve, simultaneous', gen: gSimult, day: 4, stretch: true },
-  oneint:  { name: 'Stretch: exactly one x-intercept',     gen: gOneInt,    day: 4, stretch: true },
-  gcsa:    { name: 'Stretch: graphs when a is not 1',    gen: gGCsA,      day: 4, stretch: true },
-  rect:    { name: 'Word problems: area',                 gen: gRect,      day: 5 },
-  speed:   { name: 'Word problems: speed and time',       gen: gSpeed,     day: 5 },
-  proj:    { name: 'Word problems: maximum height',       gen: gProj,      day: 5 },
-  pyth:    { name: 'Word problems: Pythagoras',           gen: gPyth,      day: 5 },
-  consec:  { name: 'Word problems: consecutive numbers',  gen: gConsec,    day: 5 },
-  work:    { name: 'Word problems: working together',     gen: gWork,      day: 5 },
-  profit:  { name: 'Word problems: profit model',         gen: gProfit,    day: 5 },
-  path:    { name: 'Word problems: path around a garden', gen: gPath,      day: 5 },
-  price:   { name: 'Word problems: price per kilogram',   gen: gPrice,     day: 6 },
-  exch:    { name: 'Word problems: exchange rates',       gen: gExch,      day: 6 },
-  rate:    { name: 'Word problems: litres per minute',    gen: gRate,      day: 6 },
-  stream:  { name: 'Word problems: upstream and downstream', gen: gStream, day: 6 },
-  journey: { name: 'Word problems: a journey in two parts', gen: gJourney, day: 6 },
-  border:  { name: 'Word problems: border inside a room', gen: gBorder,    day: 6 },
-  perim:   { name: 'Word problems: perimeter and area',   gen: gPerim,     day: 6 },
-  cakes:   { name: 'Word problems: grams per cake',       gen: gCakes,     day: 6 },
-  sumprod: { name: 'Stretch: sum and product of solutions', gen: gSumProd, day: 2, stretch: true },
+  sqrt:    { name: 'Solve (x + r)² = s',                  gen: gSqrt,      day: 2 },
+  ctsx:    { name: 'Complete the square (rewrite)',       gen: gCtsExpr,   day: 2 },
+  femon:   { name: 'Factorise: x² + bx + c',              gen: () => gFactExp(0, 'femon'), day: 1 },
+  fecom:   { name: 'Factorise: common factor',            gen: () => gFactExp(4, 'fecom'), day: 1 },
+  fesq:    { name: 'Factorise: difference of two squares', gen: () => gFactExp(3, 'fesq'), day: 1 },
+  feneg:   { name: 'Factorise: negative x²',              gen: () => gFactExp(1, 'feneg'), day: 1 },
+  feac:    { name: 'Factorise: a number in front of x²',  gen: () => gFactExp(2, 'feac'), day: 1 },
+  factexp: { name: 'Factorise an expression (mixed)',     gen: () => gFactExp(),   day: 1 },
+  ctsd:    { name: 'Complete the square: fractions and decimals', gen: gCtsDec, day: 2 },
+  ctss:    { name: 'Solve by completing the square',      gen: gCtsSolve,  day: 3 },
+  hence:   { name: 'Express, then hence solve',             gen: gHence,     day: 3 },
+  ctsa:    { name: 'Stretch: complete the square, a not 1', gen: gCtsA,      day: 3, stretch: true },
+  ctssa:   { name: 'Stretch: solve by completing the square, a not 1', gen: gCtsSolveA, day: 3, stretch: true },
+  formula: { name: 'Quadratic formula',                   gen: gFormula,   day: 3 },
+  rearr:   { name: 'Tidy up first, then solve',           gen: gRearr,     day: 3 },
+  subst:   { name: 'Hence: substitution',                  gen: gSubst,     day: 3 },
+  disc:    { name: 'Discriminant and number of roots',    gen: gDisc,      day: 3 },
+  kval:    { name: 'Stretch: find an unknown using the discriminant', gen: gKval,   day: 3, stretch: true },
+  fromroots: { name: 'Form an equation from its solutions', gen: gFromRoots, day: 3 },
+  frac:    { name: 'Fractional equations',                gen: gFrac,      day: 4 },
+  frac2:   { name: 'Harder fractional equations',         gen: gFrac2,     day: 4 },
+  frac3:   { name: 'Fractions with factorisable denominators', gen: gFrac3, day: 4 },
+  extra:   { name: 'Rejecting invalid roots',             gen: gExtra,     day: 4 },
+  table:   { name: 'Table of values for a graph',         gen: gTable,     day: 5 },
+  gfact:   { name: 'Graphs: factorised form',             gen: gGraphFact, day: 5 },
+  gcs:     { name: 'Graphs: completed-square form',       gen: gGraphCS,   day: 5 },
+  ctsn:    { name: 'Complete the square with −x²',        gen: gCtsNeg,    day: 5 },
+  ggen:    { name: 'Graphs from the general form',        gen: gGGen,      day: 5 },
+  gline:   { name: 'Which line solves another equation',  gen: gGLine,     day: 5 },
+  hline:   { name: 'Horizontal lines and a curve',        gen: gHLine,     day: 5 },
+  pq:      { name: 'Find p and q from a graph',           gen: gPQ,        day: 5 },
+  readgraph: { name: 'Read values from a graph',            gen: gReadGraph, day: 5 },
+  simult:  { name: 'Stretch: a line and a curve, simultaneous', gen: gSimult, day: 5, stretch: true },
+  oneint:  { name: 'Stretch: exactly one x-intercept',     gen: gOneInt,    day: 5, stretch: true },
+  gcsa:    { name: 'Stretch: graphs when a is not 1',    gen: gGCsA,      day: 5, stretch: true },
+  rect:    { name: 'Word problems: area',                 gen: gRect,      day: 6 },
+  speed:   { name: 'Word problems: speed and time',       gen: gSpeed,     day: 6 },
+  proj:    { name: 'Word problems: maximum height',       gen: gProj,      day: 6 },
+  pyth:    { name: 'Word problems: Pythagoras',           gen: gPyth,      day: 6 },
+  consec:  { name: 'Word problems: consecutive numbers',  gen: gConsec,    day: 6 },
+  work:    { name: 'Word problems: working together',     gen: gWork,      day: 6 },
+  profit:  { name: 'Word problems: profit model',         gen: gProfit,    day: 6 },
+  path:    { name: 'Word problems: path around a garden', gen: gPath,      day: 6 },
+  price:   { name: 'Word problems: price per kilogram',   gen: gPrice,     day: 7 },
+  exch:    { name: 'Word problems: exchange rates',       gen: gExch,      day: 7 },
+  rate:    { name: 'Word problems: litres per minute',    gen: gRate,      day: 7 },
+  stream:  { name: 'Word problems: upstream and downstream', gen: gStream, day: 7 },
+  journey: { name: 'Word problems: a journey in two parts', gen: gJourney, day: 7 },
+  border:  { name: 'Word problems: border inside a room', gen: gBorder,    day: 7 },
+  perim:   { name: 'Word problems: perimeter and area',   gen: gPerim,     day: 7 },
+  cakes:   { name: 'Word problems: grams per cake',       gen: gCakes,     day: 7 },
+  sumprod: { name: 'Stretch: sum and product of solutions', gen: gSumProd, day: 3, stretch: true },
 };
 const generate = (topic) => TOPICS[topic].gen();
 
@@ -1096,6 +1156,10 @@ function parseNum(s) {
 }
 
 function checkAnswer(q, vals) {
+  if (q.kind === 'steps') {
+    const nums = vals.map(parseNum); if (nums.some(Number.isNaN)) return { bad: true, msg: 'Fill in every box with a number (keep the minus signs).' };
+    const wrong = q.mask(nums); return { ok: !wrong.some(Boolean), wrong };
+  }
   if (q.kind === 'factor') {
     const bad = { bad: true, msg: 'I could not read that. Type it like (x+1)(2x-3), using x, brackets, and ^ for powers.' };
     const ast = parseAlg(vals[0]); if (!ast) return bad;

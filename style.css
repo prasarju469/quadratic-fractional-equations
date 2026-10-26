@@ -289,3 +289,14 @@ body.locked .top nav { visibility: hidden; }
 .mockq .marks { color: var(--cyan); font-weight: 700; }
 .mockq.full { border-color: var(--good); } .mockq.part { border-color: var(--yellow); } .mockq.none { border-color: var(--bad); }
 .rgsvg { background: #0a0820; border: 2px solid var(--line); border-radius: 12px; max-width: 100%; height: auto; display: block; margin: .6rem 0; }
+
+/* recipes */
+.recipe-steps { counter-reset: st; list-style: none; padding: 0; margin: .5rem 0; }
+.recipe-steps li { counter-increment: st; position: relative; padding: .45rem .5rem .45rem 2.6rem; margin: .35rem 0; background: #120f33; border: 2px solid var(--line); border-radius: 12px; }
+.recipe-steps li::before { content: counter(st); position: absolute; left: .55rem; top: .4rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--lime); color: #14210a; font-weight: 800; display: grid; place-items: center; }
+details.recipe { margin: .5rem 0 1rem; background: #120f33; border: 2px dashed var(--line); border-radius: 14px; padding: .4rem .9rem; }
+details.recipe > summary { cursor: pointer; font-weight: 700; color: var(--cyan); }
+.recipecard { border-color: var(--lime); }
+table.signs { width: 100%; border-collapse: collapse; margin: .5rem 0; }
+table.signs th, table.signs td { border: 2px solid var(--line); padding: .4rem .6rem; text-align: left; }
+table.signs th { background: var(--card2); }

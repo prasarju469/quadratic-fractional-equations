@@ -4,6 +4,187 @@ const SPINE = `Everything in this chapter grows from <b>one idea: completing the
 The quadratic formula is completing the square done once with letters. The turning point of a graph is what completing the square shows you.
 Fractional equations and word problems both <i>end</i> in a quadratic.`;
 
+/* The Rulebook: the fixed steps for each kind of problem. Maths runs on rules; join the rules to solve bigger problems. */
+const RECIPES = [
+  { id: 'factorise-solve', open: true, title: 'Solve by factorising: the P and S method',
+    when: 'For equations like x² + bx + c = 0 when the answers are whole numbers.',
+    steps: [
+      `<b>Find P and S.</b> P is the constant term (the product). S is the number in front of x (the sum). Keep their signs.`,
+      `<b>Find the two numbers</b> that multiply to P and add to S. Use the sign rules first, then list the factor pairs of P.`,
+      `<b>Write the brackets:</b> \\((x + \\text{first number})(x + \\text{second number}) = 0\\).`,
+      `<b>Zero Product Principle:</b> if two things multiply to give 0, one of them must be 0. So each bracket can equal 0.`,
+      `<b>Solve each bracket.</b> The solution is the <b>opposite</b> of the number in the bracket.` ],
+    example: `Solve \\(x^2+12x+32=0\\).<br>1. P = +32 and S = +12.<br>2. P and S are both positive, so both numbers are positive. Pairs of 32: 1×32, 2×16, 4×8. Only 4 + 8 = 12, so the numbers are 4 and 8.<br>3. \\((x+4)(x+8)=0\\)<br>4. \\(x+4=0\\) or \\(x+8=0\\)<br>5. \\(x=-4\\) or \\(x=-8\\)`,
+    tip: `The brackets say +4 and +8, but the solutions are −4 and −8. A solution always has the <b>opposite</b> sign to the number in the bracket.`,
+    topics: ['fstep', 'fpp', 'fpn', 'factor'] },
+
+  { id: 'sign-rules', title: 'Sign rules for P and S', when: 'Use these before you search for the numbers. They tell you the signs for free.',
+    html: `<table class="signs"><tr><th>P (product)</th><th>S (sum)</th><th>The two numbers</th><th>What to look for</th></tr>
+      <tr><td>+</td><td>+</td><td>both <b>+</b></td><td>factors of P that <b>add</b> to S</td></tr>
+      <tr><td>+</td><td>−</td><td>both <b>−</b></td><td>factors of P that add to the size of S, then make both negative</td></tr>
+      <tr><td>−</td><td>+</td><td>one + and one −. The <b>bigger</b> number is +</td><td>factors of P that <b>differ</b> by S</td></tr>
+      <tr><td>−</td><td>−</td><td>one + and one −. The <b>bigger</b> number is −</td><td>factors of P that <b>differ</b> by the size of S</td></tr>
+      <tr><td>0</td><td>any</td><td>one number is 0</td><td>take out the common factor x</td></tr></table>`,
+    example: `\\(x^2-3x-10\\): P = −10 (different signs) and S = −3 (so the bigger number is negative). Pairs of 10: 1×10 (differ by 9), 2×5 (differ by 3 ✔). The bigger one, 5, is negative, so the numbers are −5 and +2.`,
+    topics: [] },
+
+  { id: 'factorise-expr', title: 'Factorising an expression (no equals sign)', when: 'When the question says "factorise" and there is no "= 0".',
+    steps: [
+      `Look for a <b>common factor</b> of every term and take it out first: \\(3x^2-12x=3x(x-4)\\).`,
+      `Two terms, both perfect squares, with a minus between? <b>Difference of two squares:</b> \\(A^2-B^2=(A-B)(A+B)\\).`,
+      `Three terms and the x² has no number in front? Use <b>P and S</b>: steps 1 to 3 of the factorising recipe.`,
+      `If the x² is negative, take out \\(-1\\) first, then carry on.`,
+      `If the x² has a number in front, use the <b>ac-method</b> (next recipe).`,
+      `Always <b>check by expanding</b> your brackets.` ],
+    tip: `Factorising rewrites an expression. It does not "solve" anything, so there is no Zero Product step.`,
+    topics: ['femon', 'fecom', 'fesq', 'feneg', 'factexp'] },
+
+  { id: 'ac-method', title: 'The ac-method: when x² has a number in front', when: 'For expressions like 2x² + 5x − 7.',
+    steps: [
+      `<b>P = a × c</b> and <b>S = b</b>. Keep the signs.`,
+      `Find two numbers that multiply to P and add to S, using the same sign rules.`,
+      `<b>Split the middle term</b> using those two numbers.`,
+      `<b>Group in pairs</b> and take out the common factor of each pair. The two brackets must match.`,
+      `Take out the <b>common bracket</b>. You now have two brackets.` ],
+    example: `\\(2x^2+5x-7\\): P = 2 × (−7) = −14 and S = 5. Pairs of 14 that differ by 5: 2 × 7, so the numbers are −2 and +7.<br>\\(2x^2-2x+7x-7 = 2x(x-1)+7(x-1) = (x-1)(2x+7)\\).`,
+    topics: ['feac'] },
+
+  { id: 'which-method', title: 'Which method? A rule that decides for you', when: 'When the question does not tell you how to solve it.',
+    steps: [
+      `If the question <b>names a method</b> (factorise, complete the square, formula, graph), use that one.`,
+      `Rearrange so one side is 0: \\(ax^2+bx+c=0\\).`,
+      `Work out \\(b^2-4ac\\).`,
+      `If it is <b>negative</b>: there are no real solutions. Stop.`,
+      `If it is a <b>perfect square</b> (0, 1, 4, 9, 16, 25, …): the equation factorises. Use P and S (or the ac-method).`,
+      `If it is <b>not</b> a perfect square: the answers are not whole numbers. Use the <b>formula</b>, or complete the square.` ],
+    tip: `"Give your answer correct to 2 decimal places" is a big hint that factorising will not work.`,
+    topics: [] },
+
+  { id: 'cts-rewrite', title: 'Completing the square: rewrite x² + bx + c', when: 'To write an expression as (x + p)² + q, or to find a turning point.',
+    steps: [
+      `Look at the number in front of x. Call it b.`,
+      `<b>Halve it:</b> \\(\\dfrac b2\\).`,
+      `Write the bracket: \\(\\left(x+\\dfrac b2\\right)^2\\).`,
+      `<b>Subtract</b> the square of that half: \\(-\\left(\\dfrac b2\\right)^2\\). Squaring the bracket added it, so take it away again.`,
+      `Add the original constant c at the end.` ],
+    example: `\\(x^2+6x+2\\): half of 6 is 3, so \\((x+3)^2-9+2=(x+3)^2-7\\).`,
+    tip: `For \\(-x^2+bx+c\\), take out \\(-1\\) from the first two terms first. The number you subtract inside the bracket becomes a number you <b>add</b> outside.`,
+    topics: ['ctsx', 'ctsd', 'ctsn'] },
+
+  { id: 'cts-solve', title: 'Solving by completing the square', when: 'When the question says "by completing the square".',
+    steps: [
+      `Make the x² have no number in front (divide every term by it).`,
+      `Move the constant to the right-hand side.`,
+      `Add \\(\\left(\\dfrac b2\\right)^2\\) to <b>both</b> sides.`,
+      `Write the left side as \\(\\left(x+\\dfrac b2\\right)^2\\) and tidy the right side.`,
+      `Take the square root of both sides. Do not forget <b>±</b>.`,
+      `Solve for x. Round only at the very end.` ],
+    topics: ['ctss', 'sqrt', 'ctssa'] },
+
+  { id: 'hence', title: 'Questions with "hence"', when: 'Two-part questions: express, then hence solve; or solve, then hence find another letter.',
+    steps: [
+      `<b>"Hence"</b> means <b>use your answer to the part before.</b> Do not start again.`,
+      `Look at the second part. Spot what plays the part of x (for example \\((y-1)\\) plays the part of x).`,
+      `Write what that means: \\(y-1=\\) each answer you found.`,
+      `Solve for the new letter. Give the accuracy asked.` ],
+    topics: ['hence', 'subst'] },
+
+  { id: 'formula', title: 'The quadratic formula', when: 'For any equation of the form ax² + bx + c = 0.',
+    steps: [
+      `Rearrange to \\(ax^2+bx+c=0\\).`,
+      `Write a, b, c <b>with their signs</b>.`,
+      `Work out \\(b^2-4ac\\) <b>first</b>, with brackets round negative numbers. Check its sign.`,
+      `Substitute: \\(x=\\dfrac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\).`,
+      `Work out the + answer and the − answer separately.`,
+      `Round as the question asks (usually 2 d.p. or 3 s.f.). Check by putting one answer back in.` ],
+    tip: `If b is negative, then \\(-b\\) is positive. Put the whole top in brackets before you divide by \\(2a\\).`,
+    topics: ['formula', 'rearr'] },
+
+  { id: 'discriminant', title: 'How many solutions? (b² − 4ac)', when: 'To say how many real solutions an equation has, or to find an unknown constant.',
+    steps: [
+      `Work out \\(b^2-4ac\\) with the signs of a, b, c.`,
+      `<b>Positive</b>: two different real solutions (the curve cuts the x-axis twice).`,
+      `<b>Zero</b>: one solution (the curve just touches the x-axis).`,
+      `<b>Negative</b>: no real solutions (the curve never reaches the x-axis).`,
+      `Unknown constant k? Put k in \\(b^2-4ac\\), then use the same three cases.` ],
+    topics: ['disc', 'kval'] },
+
+  { id: 'fractions', title: 'Fractional equations', when: 'Equations with x in a denominator.',
+    steps: [
+      `<b>Factorise every denominator.</b>`,
+      `Write down the values x <b>cannot</b> be (the ones that make a denominator 0).`,
+      `Find the common denominator.`,
+      `Multiply <b>every term, on both sides</b>, by it. Cancel.`,
+      `Expand and collect to \\(ax^2+bx+c=0\\).`,
+      `Solve the quadratic (P and S, or the formula).`,
+      `<b>Reject</b> any answer on your cannot-be list. Give what is left.` ],
+    tip: `\\(1-x\\) is the <b>opposite</b> of \\(x-1\\). A sign flip here is the most common lost mark.`,
+    topics: ['frac', 'frac2', 'frac3', 'extra'] },
+
+  { id: 'sketch', title: 'Sketching a quadratic: SIT', when: 'To sketch y = ax² + bx + c from its equation.',
+    steps: [
+      `<b>S</b>hape: a positive \\(x^2\\) opens up (U-shape). A negative one opens down.`,
+      `<b>I</b>ntercepts: y-axis, put x = 0. x-axis, put y = 0 and solve (factorise).`,
+      `<b>T</b>urning point: x is halfway between the x-intercepts, or read it from \\((x-p)^2+q\\), which gives \\((p,\\,q)\\). Then put x back to find y.`,
+      `Draw axes with a scale, mark only the critical points, join them with a smooth symmetric curve, and label the equation.` ],
+    topics: ['gfact', 'gcs', 'ggen', 'gcsa'] },
+
+  { id: 'graph-line', title: 'Using a graph to solve another equation', when: 'When the curve is drawn and a different equation is to be solved.',
+    steps: [
+      `Write the new equation so the curve's expression is on the left: \\(\\text{(curve)} = \\text{something}\\).`,
+      `Whatever is left over on the right is the <b>straight line</b> to draw.`,
+      `The x-values where the line meets the curve are the solutions.` ],
+    topics: ['gline'] },
+
+  { id: 'horizontal-line', title: 'Horizontal lines and a curve', when: 'How many times does y = k meet the curve?',
+    steps: [
+      `Find the <b>turning point</b>. Its y-value is the greatest or least y the curve ever reaches.`,
+      `Compare k with that y-value.`,
+      `U-shaped: k above it gives 2 points, equal gives 1, below gives 0. Upside-down: the opposite.`,
+      `To touch the curve once, k must equal the turning point's y-value.`,
+      `Explain in words with numbers: "The maximum value of y is 4, which is less than 5."` ],
+    topics: ['hline'] },
+
+  { id: 'build', title: 'Building an equation or a curve from information', when: 'When you are given solutions, intercepts or a turning point.',
+    steps: [
+      `A solution \\(x=r\\) gives the bracket \\((x-r)\\). A fraction \\(x=\\dfrac pq\\) gives \\((qx-p)\\).`,
+      `Multiply the brackets and collect the terms.`,
+      `Whole-number coefficients with no common factor, and \\(a\\) positive, unless told otherwise.`,
+      `Curve cutting the x-axis at m and n: \\(y=(x-m)(x-n)\\), then expand. Minimum point (h, k): \\(y=(x-h)^2+k\\), then expand.` ],
+    topics: ['fromroots', 'pq'] },
+
+  { id: 'read-graph', title: 'Tables, plotting and reading a graph', when: 'When you plot a curve or read values from one.',
+    steps: [
+      `Table: put each x in <b>brackets</b> when you substitute, especially negatives.`,
+      `Plot with small crosses, then draw one smooth curve (no ruler).`,
+      `Greatest or least value: the top or bottom of the curve.`,
+      `x at a given height: go across to the curve, then straight down.`,
+      `Where it lands: where the curve meets the x-axis (y = 0).` ],
+    topics: ['table', 'readgraph'] },
+
+  { id: 'word-problem', title: 'Word problems: the same steps every time', when: 'Any story that ends in an equation.',
+    steps: [
+      `Read it twice. Say what is being asked, with its <b>units</b>.`,
+      `Let the unknown be x, and write down what x stands for.`,
+      `Write every other quantity in terms of x. Draw a picture or a table.`,
+      `Choose the relationship: area = length × width, time = distance ÷ speed, Pythagoras, amount ÷ rate.`,
+      `Build the equation. Fractions? Multiply by the common denominator.`,
+      `Tidy to \\(ax^2+bx+c=0\\) and solve (P and S, or the formula).`,
+      `<b>Reject</b> the answer that makes no sense (a negative length, speed or price).`,
+      `Answer the question that was asked, with units, rounded as asked. Check it in the story.` ],
+    tip: `Change all units first: kg to g, seconds to minutes, minutes to hours.`,
+    topics: ['rect', 'speed', 'proj', 'pyth', 'consec', 'path', 'work', 'profit', 'price', 'exch', 'rate', 'stream', 'journey', 'border', 'perim', 'cakes'] },
+
+  { id: 'exam', title: 'Exam strategy: time and marks', when: 'For the mock paper and the real thing.',
+    steps: [
+      `One mark is worth about 1.5 minutes. A 40-mark paper has about 60 minutes.`,
+      `First pass: do every question you can start. If you are stuck for 2 minutes, skip it.`,
+      `Show the key steps: P and S, the equation, the substitution. Method marks are real marks.`,
+      `Check by <b>putting your answer back</b> into the equation.`,
+      `Last 5 minutes: units, rounding, and rejecting the answer that makes no sense.` ],
+    topics: [] },
+];
+
 /* The timed mock paper: 40 marks, laid out like a school paper. Each item picks one topic at random from its pool. */
 const MOCK_PAPER = {
   title: 'Sec 3 E-Maths mock paper: Quadratic and Fractional Equations', minutes: 60,
@@ -20,7 +201,121 @@ const MOCK_PAPER = {
 const DAYS = [
   /* ------------------------------------------------------------------ DAY 1 */
   {
-    n: 1, title: 'Completing the square', minutes: 90,
+    n: 1, title: 'Factorising: your foundation', minutes: 100,
+    tagline: 'Five steps, the same every time. No guessing.',
+    blocks: [
+      { t: 'goal', items: [
+        'Solve by factorising with the <b>same five steps</b> every time: P and S, the two numbers, the brackets, the Zero Product Principle, then solve.',
+        'Use the signs of P and S to work out the signs of the two numbers <b>before</b> you search.',
+        'Say why a solution is the <b>opposite</b> of the number in its bracket.',
+        'Factorise expressions: common factor, difference of two squares, a negative x², and a number in front of x².' ] },
+
+      { t: 'html', html: `<span class=\"tag\">🔐 The hook</span><h3>Factorising is cracking a two-number lock</h3><p>Every factorising question hides two secret numbers. The lock gives you two clues, and the clues are <b>already written in the equation</b>: what the two numbers multiply to (<b>P</b>) and what they add to (<b>S</b>). There is no guessing, only rules.</p><p>Learn five steps and one sign rule, and you can open every lock in this level.</p>` },
+
+      { t: 'recipe', id: 'factorise-solve' },
+
+      { t: 'recipe', id: 'sign-rules' },
+
+      { t: 'predict', id: 'f0-p1',
+        q: 'In \\(x^2+12x+32=0\\), what are P and S?',
+        options: [
+          { text: 'P = +32 and S = +12', ok: true, why: 'P is the constant term (the product). S is the number in front of x (the sum).' },
+          { text: 'P = +12 and S = +32', ok: false, why: 'These are swapped. P is the constant term, S is the number in front of x.' },
+          { text: 'P = −32 and S = −12', ok: false, why: 'Keep the signs exactly as written. Both are positive here.' } ],
+        explain: 'Always start by writing P and S with their signs. Everything else follows.' },
+
+      { t: 'predict', id: 'f0-p2',
+        q: 'P = +32 and S = +12. What do the sign rules tell you about the two numbers?',
+        options: [
+          { text: 'Both are positive', ok: true, why: 'P is positive, so the numbers have the same sign. S is positive, so that sign is +.' },
+          { text: 'One is positive and one is negative', ok: false, why: 'That only happens when P is negative.' },
+          { text: 'Both are negative', ok: false, why: 'Two negative numbers would add to a negative S, but S is +12.' } ],
+        explain: 'The signs tell you half the answer before you list a single factor pair.' },
+
+      { t: 'predict', id: 'f0-p3',
+        q: 'You have \\((x+4)(x+8)=0\\). What are the solutions?',
+        options: [
+          { text: '\\(x=-4\\) or \\(x=-8\\)', ok: true, why: '\\(x+4=0\\) gives \\(x=-4\\). The solution is the <b>opposite</b> of the number in the bracket.' },
+          { text: '\\(x=4\\) or \\(x=8\\)', ok: false, why: 'This is the most common slip. \\(x+4=0\\) means \\(x=-4\\), not 4.' },
+          { text: '\\(x=32\\)', ok: false, why: '32 is P, the product of the two numbers. It is not a solution.' } ],
+        explain: 'Bracket says +4, solution says −4. Opposite signs, every time.' },
+
+      { t: 'practice', id: 'f0-guided', title: 'Guided practice: the five steps', topics: ['fstep'], need: 3,
+        intro: 'Fill in every step. Open the recipe above if you need it. Keep the minus signs.' },
+
+      { t: 'practice', id: 'f0-pp', title: 'Practice: P and S both positive', topics: ['fpp'], need: 3,
+        intro: 'Both numbers are positive. The brackets show plus signs, the solutions are negative.' },
+
+      { t: 'html', html: `<h3>Now the minus signs</h3><p>When P is positive but S is negative, both numbers are negative. Example: \\(x^2-9x+20=0\\). P = +20 and S = −9. Pairs of 20: 1×20, 2×10, 4×5 (4 + 5 = 9). Both numbers are negative: −4 and −5. So \\((x-4)(x-5)=0\\) and \\(x=4\\) or \\(x=5\\).</p>` },
+
+      { t: 'practice', id: 'f0-pn', title: 'Practice: P positive, S negative', topics: ['fpn'], need: 3,
+        intro: 'Both numbers are negative. The brackets show minus signs, the solutions are positive.' },
+
+      { t: 'html', html: `<h3>When P is negative</h3><p>Now the two numbers have <b>different</b> signs, so you look for pairs that <b>differ</b> by S, and the bigger number takes the sign of S. Example: \\(x^2+x-6=0\\). P = −6 and S = +1. Pairs of 6: 1×6 (differ by 5), 2×3 (differ by 1 ✔). The bigger one, 3, takes the sign of S (+), so the numbers are −2 and +3. \\((x-2)(x+3)=0\\), so \\(x=2\\) or \\(x=-3\\).</p>` },
+
+      { t: 'practice', id: 'f0-mix', title: 'Practice: any signs', topics: ['factor'], need: 4,
+        intro: 'Same five steps. Write P and S first, then decide the signs, then search.' },
+
+      { t: 'errors', id: 'f0-err', title: 'Spot the mistake', items: [
+        { title: 'A student solves \\(x^2+7x+12=0\\).', lines: ['P=12,\\; S=7', '\\text{numbers: } 3 \\text{ and } 4', '(x+3)(x+4)=0', 'x=3 \\text{ or } x=4'], wrong: 3,
+          why: 'The brackets are \\((x+3)\\) and \\((x+4)\\), so the solutions are the <b>opposite</b>: \\(x=-3\\) or \\(x=-4\\).' },
+        { title: 'A student solves \\(x^2+2x-15=0\\).', lines: ['P=-15,\\; S=2', '\\text{numbers: } 3 \\text{ and } -5', '(x+3)(x-5)=0', 'x=-3 \\text{ or } x=5'], wrong: 1,
+          why: 'S is +2, so the <b>bigger</b> number must be positive: the numbers are +5 and −3 (they add to +2). The numbers 3 and −5 add to −2.' },
+        { title: 'A student solves \\(x^2-5x+6=0\\).', lines: ['P=6,\\; S=-5', '\\text{numbers: } 2 \\text{ and } 3', '(x+2)(x+3)=0', 'x=-2 \\text{ or } x=-3'], wrong: 1,
+          why: 'P is positive and S is negative, so both numbers are <b>negative</b>: −2 and −3 (they add to −5). The numbers 2 and 3 add to +5.' },
+      ] },
+
+      { t: 'html', html: `<h3>No equals sign? Then it is an expression</h3><p>If the question says <b>factorise</b> and there is no \"= 0\", you do steps 1 to 3 only: find P and S, find the two numbers, write the brackets. There is nothing to solve, so there is no Zero Product step. Check by expanding.</p>` },
+
+      { t: 'practice', id: 'f0-femon', title: 'Practice: factorise x² + bx + c', topics: ['femon'], need: 3,
+        intro: 'Type the brackets like (x+1)(x-6). Steps 1 to 3 of the recipe.' },
+
+      { t: 'recipe', id: 'factorise-expr' },
+
+      { t: 'practice', id: 'f0-fecom', title: 'Practice: common factor first', topics: ['fecom'], need: 3,
+        intro: 'Take out the number every term shares, then use P and S on what is left.' },
+
+      { t: 'html', html: `<h3>Difference of two squares</h3><p>Two terms, both perfect squares, with a minus between them: \\(A^2-B^2=(A-B)(A+B)\\). For example \\(4x^2-49=(2x-7)(2x+7)\\), because \\(4x^2=(2x)^2\\) and \\(49=7^2\\). There is no middle term, so S = 0: the two numbers are the same size with opposite signs.</p>` },
+
+      { t: 'practice', id: 'f0-fesq', title: 'Practice: difference of two squares', topics: ['fesq'], need: 3,
+        intro: 'Find A and B first: what is squared to give each term?' },
+
+      { t: 'html', html: `<h3>When the x² is negative</h3><p>Take out \\(-1\\) first. That flips every sign inside: \\(-x^2+5x+6=-(x^2-5x-6)\\). Now the x² is positive, so use P and S inside the bracket: \\(-(x+1)(x-6)\\).</p>` },
+
+      { t: 'predict', id: 'f0-p4',
+        q: 'You are asked to <b>factorise</b> \\(-x^2+5x+6\\). What is a sensible first step?',
+        options: [
+          { text: 'Take out −1, so the x² inside the bracket is positive', ok: true, why: '\\(-x^2+5x+6=-(x^2-5x-6)\\). Now find P and S for the bracket: P = −6 and S = −5.' },
+          { text: 'Divide everything by x', ok: false, why: 'Dividing changes the expression into something different. Factorising only rewrites it.' },
+          { text: 'Add 6 to both sides', ok: false, why: 'There are no "sides" here. This is an expression, not an equation, so you rewrite it and keep it equal.' } ],
+        explain: 'An expression is rewritten. An equation is solved. Factorising is rewriting.' },
+
+      { t: 'practice', id: 'f0-feneg', title: 'Practice: negative x²', topics: ['feneg'], need: 3,
+        intro: 'Take out −1 first, then P and S inside the bracket.' },
+
+      { t: 'recipe', id: 'ac-method' },
+
+      { t: 'predict', id: 'f0-p5',
+        q: 'To factorise \\(2x^2+5x-7\\) with the ac-method, what is P?',
+        options: [
+          { text: '\\(P=a\\times c=2\\times(-7)=-14\\)', ok: true, why: 'With a number in front of x², P is a × c. S is still the middle number, 5.' },
+          { text: 'P = −7', ok: false, why: 'That is just c. When a is not 1, P = a × c.' },
+          { text: 'P = 5', ok: false, why: '5 is S, the middle number. P is the product a × c.' } ],
+        explain: 'The same lock, one extra step: multiply a and c to get P.' },
+
+      { t: 'practice', id: 'f0-feac', title: 'Practice: a number in front of x²', topics: ['feac'], need: 3,
+        intro: 'P = a × c, S = b. Split the middle, group, take out the common bracket.' },
+
+      { t: 'practice', id: 'f0-boss', title: 'Level 1 boss: mixed factorising', topics: ['factexp'], need: 4,
+        intro: 'Any of the five types. First decide which type, then follow its recipe.' },
+
+      { t: 'done' },
+    ],
+  },
+
+  /* ------------------------------------------------------------------ DAY 2 */
+  {
+    n: 2, title: 'Completing the square', minutes: 90,
     tagline: 'Why a missing corner makes everything work',
     blocks: [
       { t: 'goal', items: [
@@ -32,20 +327,8 @@ const DAYS = [
         <p>Babylonian scribes carved puzzles into clay tablets. One says: <i>"I took away the side of my square from its area and got 870."</i> In our notation, that is \\(x^2-x=870\\).</p>
         <p>They had no algebra, no formulas, not even the letter x. They solved it by <b>cutting and rearranging squares</b>, the exact trick you learn today. At the end of this mission you will crack their puzzle.</p>` },
 
-      { t: 'practice', id: 'd1-warm', title: 'Warm-up: what you might already know', topics: ['factor'], need: 3,
-        intro: 'Factorising and the Zero Product Principle. If any of these feel shaky, fix them before moving on.' },
-
-      { t: 'html', html: `<h3>Factorising when the x² has a number in front</h3><p>Three patterns come up again and again:</p><ul><li><b>Common factor first:</b> \\(3x^2-12x=3x(x-4)\\). Always look for a number or an x that divides every term.</li><li><b>Difference of two squares:</b> \\(4x^2-49=(2x-7)(2x+7)\\).</li><li><b>Multiplication frame:</b> for \\(2x^2+5x-7\\), the brackets are \\((mx+n)(px+q)\\) with \\(m\\times p=2\\) and \\(n\\times q=-7\\). Try pairs until the middle term \\(mq+pn\\) equals 5. That gives \\((2x+7)(x-1)\\).</li></ul><p>If the \\(x^2\\) is negative, take out \\(-1\\) first: \\(-x^2+5x+6=-(x^2-5x-6)=-(x+1)(x-6)\\). Always check by expanding your brackets.</p>` },
-
-      { t: 'predict', id: 'd1-p4',
-        q: 'You are asked to <b>factorise</b> \\(-x^2+5x+6\\). What is a sensible first step?',
-        options: [
-          { text: 'Take out −1, so the x² inside the bracket is positive', ok: true, why: '\\(-x^2+5x+6=-(x^2-5x-6)\\). Now find two numbers that multiply to \\(-6\\) and add to \\(-5\\).' },
-          { text: 'Divide everything by x', ok: false, why: 'Dividing changes the expression into something different. Factorising only rewrites it.' },
-          { text: 'Add 6 to both sides', ok: false, why: 'There are no "sides" here. This is an expression, not an equation, so you rewrite it and keep it equal.' } ],
-        explain: 'An expression is rewritten. An equation is solved. Factorising is rewriting.' },
-      { t: 'practice', id: 'd1-factexp', title: 'Practice: factorise an expression', topics: ['factexp'], need: 4,
-        intro: 'Type your brackets like (x+1)(2x-3), and check by expanding.' },
+      { t: 'drill', id: 'd1-cold', title: 'Cold start: Level 1 without notes', maxDay: 1, n: 4, minutes: 5,
+        intro: 'Four factorising questions, no hints, 5 minutes. Use P and S.' },
 
       { t: 'predict', id: 'd1-p1',
         q: 'Try to factorise \\(x^2+4x-3\\) into two brackets with whole numbers. What happens?',
@@ -125,7 +408,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 2 */
   {
-    n: 2, title: 'Solve any quadratic, then build the formula', minutes: 100,
+    n: 3, title: 'Solve any quadratic, then build the formula', minutes: 100,
     tagline: 'The formula is not magic. You will build it.',
     blocks: [
       { t: 'goal', items: [
@@ -136,7 +419,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏺 The hook</span><h3>3,000 years to find one formula</h3><p>Babylonian scribes solved quadratics with squares about 4,000 years ago. But one formula that works on <i>every</i> quadratic took roughly 3,000 more years to appear. In 2019, a maths professor, Po-Shen Loh, found a clever new way to see the same idea. So even this old topic is still being explored.</p><p>Today you will not <b>memorise</b> that formula. You will <b>build</b> it, then rebuild it on paper from nothing.</p>` },
 
-      { t: 'drill', id: 'd2-cold', title: 'Cold start: Level 1 without notes', maxDay: 1, n: 4, minutes: 5,
+      { t: 'drill', id: 'd2-cold', title: 'Cold start: Levels 1 and 2', maxDay: 2, n: 4, minutes: 5,
         intro: '4 questions, no hints, 5 minutes. This is how every day begins.' },
 
       { t: 'html', html: `
@@ -209,6 +492,8 @@ const DAYS = [
       { t: 'practice', id: 'd2-subst', title: 'Practice: hence, by substitution', topics: ['subst'], need: 3,
         intro: 'The second equation is the first one in disguise. What plays the part of x?' },
 
+      { t: 'recipe', id: 'which-method' },
+
       { t: 'predict', id: 'd2-p1',
         q: 'In the quadratic formula, what happens if \\(b^2-4ac\\) is negative?',
         options: [
@@ -251,7 +536,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 3 */
   {
-    n: 3, title: 'Fractional equations', minutes: 90,
+    n: 4, title: 'Fractional equations', minutes: 90,
     tagline: 'Clear the fractions, solve, then check every answer',
     blocks: [
       { t: 'goal', items: [
@@ -269,7 +554,7 @@ const DAYS = [
           { text: 'Step 4: divide both sides by \\(a-b\\)', ok: true, why: 'Since \\(a=b\\), \\(a-b=0\\). You cannot divide by zero.' },
           { text: 'Step 6: divide by b', ok: false, why: 'This is fine as long as b is not 0.' } ],
         explain: 'The same trap sits inside fractional equations. If a denominator can be 0, some "solutions" are lies. That is why you will always check.' },
-      { t: 'drill', id: 'd3-cold', title: 'Cold start: Levels 1 and 2', maxDay: 2, n: 5, minutes: 7,
+      { t: 'drill', id: 'd3-cold', title: 'Cold start: Levels 1 to 3', maxDay: 3, n: 5, minutes: 7,
         intro: '5 questions, no hints, 7 minutes.' },
 
       { t: 'html', html: `<h3>The plan</h3>
@@ -346,7 +631,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 4 */
   {
-    n: 4, title: 'Graphs of quadratics', minutes: 125,
+    n: 5, title: 'Graphs of quadratics', minutes: 125,
     tagline: 'Where the curve meets the axis, and where it turns',
     blocks: [
       { t: 'goal', items: [
@@ -357,12 +642,12 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🌉 The hook</span><h3>The curve hiding everywhere</h3><p>A basketball shot, a bridge cable, a satellite dish, a fountain of water: all of them are <b>parabolas</b>, the graph of a quadratic. The turning point is the top of the arch, or the lowest point of the dish.</p><p>Today you will learn to find that point, and where the curve crosses the ground, <b>without plotting a single point</b>.</p>` },
 
-      { t: 'drill', id: 'd4-cold', title: 'Cold start: Levels 1 to 3', maxDay: 3, n: 5, minutes: 8,
+      { t: 'drill', id: 'd4-cold', title: 'Cold start: Levels 1 to 4', maxDay: 4, n: 5, minutes: 8,
         intro: '5 questions, no hints, 8 minutes.' },
 
       { t: 'html', html: `<h3>Equation versus graph</h3>
         <p>Solving \\(2x^2-5x-6=0\\) means: <i>for which x does the height \\(y=2x^2-5x-6\\) equal 0?</i> The height is zero exactly where the curve crosses the x-axis. So <b>solutions are x-intercepts</b>.</p>
-        <p>One equation can have two solutions (curve crosses twice), one (curve just touches), or none (curve misses the axis). This matches the discriminant from Level 2.</p>` },
+        <p>One equation can have two solutions (curve crosses twice), one (curve just touches), or none (curve misses the axis). This matches the discriminant from Level 3.</p>` },
 
       { t: 'widget', name: 'graph' },
       { t: 'widget', name: 'rootHunt', id: 'd4-roothunt' },
@@ -396,7 +681,7 @@ const DAYS = [
           { text: '0 times', ok: false, why: 'The lowest point is <i>below</i> the axis, so the curve has to climb up to it on both sides.' },
           { text: '1 time', ok: false, why: 'It would only touch the axis once if the turning point were exactly on it.' },
           { text: '2 times', ok: true, why: 'The lowest point is below the axis and the curve opens upwards, so it must cross once on the way down and once on the way up.' } ],
-        explain: 'This is what the discriminant told you on Level 2, now seen as a picture.' },
+        explain: 'This is what the discriminant told you on Level 3, now seen as a picture.' },
       { t: 'html', html: `<h3>Plotting means a table first</h3><p>To <b>draw</b> a graph accurately, make a table of x and y for equally spaced x-values, plot the points, and join them with a smooth curve. To <b>solve</b> \\(ax^2+bx+c=0\\), read off where the curve crosses the x-axis, to the nearest 0.1.</p>` },
 
       { t: 'practice', id: 'd4-table', title: 'Practice: table of values', topics: ['table'], need: 3,
@@ -491,7 +776,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 5 */
   {
-    n: 5, title: 'Word problems', minutes: 110,
+    n: 6, title: 'Word problems', minutes: 110,
     tagline: 'Turn a story into an equation, then be sensible about the answer',
     blocks: [
       { t: 'goal', items: [
@@ -501,7 +786,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏀 The hook</span><h3>Every thrown ball is a quadratic</h3><p>Throw a ball, kick a football, shoot a basketball: the height over time follows a quadratic, always an upside-down U. The highest point is the turning point.</p><p>Engineers use this to aim fountains, and games programmers use it for jumps and cannons. Today you will build equations from stories, and then fire a few cannons yourself.</p>` },
 
-      { t: 'drill', id: 'd5-cold', title: 'Cold start: Levels 1 to 4', maxDay: 4, n: 6, minutes: 10,
+      { t: 'drill', id: 'd5-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 6, minutes: 10,
         intro: '6 questions, no hints, 10 minutes.' },
 
       { t: 'html', html: `<h3>Four steps for every word problem</h3>
@@ -584,7 +869,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 6 */
   {
-    n: 6, title: 'Money, rates and journeys', minutes: 130,
+    n: 7, title: 'Money, rates and journeys', minutes: 130,
     tagline: 'The same equation wearing different clothes',
     blocks: [
       { t: 'goal', items: [
@@ -594,7 +879,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🧾 The hook</span><h3>One story, eight disguises</h3><p>Rice and dollars. Pumps and litres. Boats and rivers. Cakes and sugar. They look different, but almost every one hides the same sentence: <b>"the same amount is shared out two ways, and the two answers differ by a fixed amount."</b></p><p>That gives a fraction equation, and a fraction equation gives a quadratic. Once you see the pattern, the stories stop being scary.</p>` },
 
-      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 6, minutes: 10,
+      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 6', maxDay: 6, n: 6, minutes: 10,
         intro: '6 questions, no hints, 10 minutes.' },
 
       { t: 'html', html: `<h3>The one pattern</h3><table class="prog"><tr><th>Story</th><th>Amount</th><th>Rate</th><th>Result</th></tr>
@@ -666,7 +951,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 7 */
   {
-    n: 7, title: 'Mixed test and mock paper', minutes: 110,
+    n: 8, title: 'Mixed test and mock paper', minutes: 110,
     tagline: 'Everything, shuffled, then a full timed paper',
     blocks: [
       { t: 'goal', items: [
@@ -676,7 +961,7 @@ const DAYS = [
       { t: 'html', html: `<span class="tag">🔥 Boss fight</span><h3>The guardian of the castle</h3><p>Fifteen questions stand between you and the castle. They come from every level, in random order, and the guardian gives <b>no hints</b>. Everything you built this week is your weapon.</p>` },
 
       { t: 'html', html: `<div class="callout">Rules: no notes, no phone, a calculator is allowed (like in school). Write your working on paper, then type the answer. If the score is below 12, tomorrow's session fixes the weak spots.</div>` },
-      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 6, n: 15, minutes: 30, test: true, pass: 12,
+      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 7, n: 15, minutes: 30, test: true, pass: 12,
         intro: '15 questions, 30 minutes. One try each. Pass mark: 12.' },
 
       { t: 'mock', id: 'd7-mock', pass: 28, ...MOCK_PAPER },
@@ -687,7 +972,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 7 */
   {
-    n: 8, title: 'Repair, then teach it back', minutes: 50,
+    n: 9, title: 'Repair, then teach it back', minutes: 50,
     tagline: 'Fix the weak spots, then teach the whole chapter',
     blocks: [
       { t: 'goal', items: [
@@ -713,30 +998,31 @@ const DAYS = [
 
 /* Teacher-only map from the book (think! Mathematics, Chapter 1) to where each part is taught here. */
 const COVERAGE = [
-  { sec: '1.1 A', book: 'Recap: solve by factorising (WE 1, Practice Now 1, Ex 1A Q1)', here: 'Level 1 warm-up (factorise), plus factexp for a not 1, difference of squares, common factor and negative x²' },
-  { sec: '1.1 B', book: 'Solve (x + r)² = s with ± (WE 2, PN 2, Ex 1A Q2)', here: 'Level 1 (square-root practice, error hunt)' },
-  { sec: '1.1 C-D', book: 'Perfect squares and the area picture; the (b/2)² investigation (WE 3, PN 3, Ex 1A Q3)', here: 'Level 1 (missing-corner slider, predict, think, ctsx, ctsd for fractions and decimals)' },
-  { sec: '1.1 D', book: 'x² + bx + c, and -x² + bx + c (WE 4, PN 4, Ex 1A Q4)', here: 'Level 1 (+c), Level 4 (-x² practice)' },
-  { sec: '1.1 E', book: 'Solve by completing the square, two methods (WE 5, PN 5, Ex 1A Q5-6)', here: 'Level 2 (ctss), plus a not 1 (ctsa, ctssa)' },
-  { sec: '1.1', book: 'Ex 1A Q7-8: equations to tidy first, and a letter constant (y² - ay - 6 = 0)', here: 'Level 2 (rearr practice, letter-constant predict)' },
-  { sec: '1.1', book: 'Reflection: 2x² + 8x - 6 = 0 when a is not 1', here: 'Level 2 (a not 1: predict, ctsa, ctssa)' },
-  { sec: '1.2', book: 'Derive the quadratic formula; use it (WE 6, PN 6, Ex 1B Q1-2, Q4)', here: 'Level 2 (step-by-step derivation, jigsaw, closed-book derivation, formula practice)' },
-  { sec: '1.2', book: 'Class Discussion: zero, one or two real solutions', here: 'Level 2 (disc, kval, predicts)' },
-  { sec: '1.3', book: 'Fractional equations reducible to quadratics (WE 7-8, PN 7-8, Ex 1B Q3, Q5-8)', here: 'Level 3 (frac, frac2: squared denominators, numbers in front of x, cross-multiplying)' },
-  { sec: '1.3', book: 'Thinking Time: Shufen\'s invalid solution x = 3', here: 'Level 3 (bug hunt, 1 = 2 hook, Rejection Court, extra)' },
-  { sec: '1.4', book: 'Solve graphically; one, two or no x-intercepts (WE 9-10, PN 9-10, Ex 1C)', here: 'Level 4 (table practice, graph paper task, Root Hunter, explorer, predicts)' },
-  { sec: '1.5', book: 'Sketch y = ±(x - h)(x - k) (WE 11, PN 11, Ex 1D Q1, Q3-6)', here: 'Level 4 (explorer, gfact, paper sketches)' },
-  { sec: '1.5', book: 'Sketch y = ±(x - p)² + q (WE 12-13, PN 12-13, Ex 1D Q2, Q7-10)', here: 'Level 4 (gcs, ctsn, ggen, paper sketches)' },
-  { sec: '1.5', book: 'Class Discussion: matching 12 graphs to equations', here: 'Level 4 (Match the Graph game)' },
-  { sec: '1.6', book: 'Word problems: Pythagoras and perimeter (WE 14, PN 14)', here: 'Level 5 (pyth, area, path)' },
-  { sec: '1.6', book: 'Word problems: speed, distance, time with a fraction (WE 15, PN 15)', here: 'Level 5 (speed, work)' },
-  { sec: '1.6', book: 'Modelling by a quadratic function (WE 16, PN 16)', here: 'Level 5 (proj, profit, Launch Lab)' },
+  { sec: 'Method', book: 'Maths runs on fixed rules, joined together to solve bigger problems', here: 'A Rulebook page (📘 Rules in the top bar) with a numbered recipe for every kind of problem, plus a recipe toggle on every practice set. The factorising recipe is the P and S method.' },
+  { sec: '1.1 A', book: 'Recap: solve by factorising (WE 1, Practice Now 1, Ex 1A Q1)', here: 'Level 1 (the whole foundation level): the five-step P and S method with sign rules, a guided step-by-step trainer, then a ladder of expression types (common factor, difference of squares, negative x², number in front of x² by the ac-method)' },
+  { sec: '1.1 B', book: 'Solve (x + r)² = s with ± (WE 2, PN 2, Ex 1A Q2)', here: 'Level 2 (square-root practice, error hunt)' },
+  { sec: '1.1 C-D', book: 'Perfect squares and the area picture; the (b/2)² investigation (WE 3, PN 3, Ex 1A Q3)', here: 'Level 2 (missing-corner slider, predict, think, ctsx, ctsd for fractions and decimals)' },
+  { sec: '1.1 D', book: 'x² + bx + c, and -x² + bx + c (WE 4, PN 4, Ex 1A Q4)', here: 'Level 2 (+c), Level 5 (-x² practice)' },
+  { sec: '1.1 E', book: 'Solve by completing the square, two methods (WE 5, PN 5, Ex 1A Q5-6)', here: 'Level 3 (ctss), plus a not 1 (ctsa, ctssa)' },
+  { sec: '1.1', book: 'Ex 1A Q7-8: equations to tidy first, and a letter constant (y² - ay - 6 = 0)', here: 'Level 3 (rearr practice, letter-constant predict)' },
+  { sec: '1.1', book: 'Reflection: 2x² + 8x - 6 = 0 when a is not 1', here: 'Level 3 (a not 1: predict, ctsa, ctssa)' },
+  { sec: '1.2', book: 'Derive the quadratic formula; use it (WE 6, PN 6, Ex 1B Q1-2, Q4)', here: 'Level 3 (step-by-step derivation, jigsaw, closed-book derivation, formula practice)' },
+  { sec: '1.2', book: 'Class Discussion: zero, one or two real solutions', here: 'Level 3 (disc, kval, predicts)' },
+  { sec: '1.3', book: 'Fractional equations reducible to quadratics (WE 7-8, PN 7-8, Ex 1B Q3, Q5-8)', here: 'Level 4 (frac, frac2: squared denominators, numbers in front of x, cross-multiplying)' },
+  { sec: '1.3', book: 'Thinking Time: Shufen\'s invalid solution x = 3', here: 'Level 4 (bug hunt, 1 = 2 hook, Rejection Court, extra)' },
+  { sec: '1.4', book: 'Solve graphically; one, two or no x-intercepts (WE 9-10, PN 9-10, Ex 1C)', here: 'Level 5 (table practice, graph paper task, Root Hunter, explorer, predicts)' },
+  { sec: '1.5', book: 'Sketch y = ±(x - h)(x - k) (WE 11, PN 11, Ex 1D Q1, Q3-6)', here: 'Level 5 (explorer, gfact, paper sketches)' },
+  { sec: '1.5', book: 'Sketch y = ±(x - p)² + q (WE 12-13, PN 12-13, Ex 1D Q2, Q7-10)', here: 'Level 5 (gcs, ctsn, ggen, paper sketches)' },
+  { sec: '1.5', book: 'Class Discussion: matching 12 graphs to equations', here: 'Level 5 (Match the Graph game)' },
+  { sec: '1.6', book: 'Word problems: Pythagoras and perimeter (WE 14, PN 14)', here: 'Level 6 (pyth, area, path)' },
+  { sec: '1.6', book: 'Word problems: speed, distance, time with a fraction (WE 15, PN 15)', here: 'Level 6 (speed, work)' },
+  { sec: '1.6', book: 'Modelling by a quadratic function (WE 16, PN 16)', here: 'Level 6 (proj, profit, Launch Lab)' },
   { sec: 'Beyond', book: 'Typical Sec 3 and O-Level extras not in the book', here: 'kval (find k), gline (which line solves another equation), gcsa (a not 1), consec, work, profit, path, harder frac2' },
-  { sec: 'Ex 1E', book: 'Q1-Q11: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Levels 5 and 6 (rect, speed, proj, pyth, path, work, price, exch, rate, journey, stream, cakes, border, perim) plus plotting in Level 4. The pyramid-face geometry question is not generated.' },
-  { sec: 'Summary', book: 'Chapter Summary: completing the square, the four methods, LCM method for fractions, graph facts', here: 'Covered across Levels 1 to 4' },
-  { sec: 'Review 1', book: 'Q1-Q3 solve; Q4 substitution; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 1 to 4 (ctsx, ctsd, rearr, subst, fromroots, frac, frac2, frac3, sketching topics)' },
-  { sec: 'Review 1', book: 'Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Level 6 (exch, journey, cakes, border, stream, work) and Level 4 (readgraph, stone-in-context predict)' },
-  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Stretch practice: simult and oneint (Level 4), sumprod (Level 2)' },
-  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q, two word problems', here: 'factexp, frac3, fromroots, pq, hline, hence, plus a 40-mark timed mock paper (Level 7 and the Mock paper button)' },
+  { sec: 'Ex 1E', book: 'Q1-Q11: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Levels 6 and 7 (rect, speed, proj, pyth, path, work, price, exch, rate, journey, stream, cakes, border, perim) plus plotting in Level 5. The pyramid-face geometry question is not generated.' },
+  { sec: 'Summary', book: 'Chapter Summary: completing the square, the four methods, LCM method for fractions, graph facts', here: 'Covered across Levels 2 to 5' },
+  { sec: 'Review 1', book: 'Q1-Q3 solve; Q4 substitution; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 2 to 5 (ctsx, ctsd, rearr, subst, fromroots, frac, frac2, frac3, sketching topics)' },
+  { sec: 'Review 1', book: 'Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Level 7 (exch, journey, cakes, border, stream, work) and Level 5 (readgraph, stone-in-context predict)' },
+  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Stretch practice: simult and oneint (Level 5), sumprod (Level 3)' },
+  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q, two word problems', here: 'factexp, frac3, fromroots, pq, hline, hence, plus a 40-mark timed mock paper (Level 8 and the Mock paper button)' },
   { sec: 'Syllabus', book: 'MOE G3 Mathematics: completing the square is limited to x² + px + q; the word discriminant is not used', here: 'Topics beyond that (a not 1, find k, sum and product, simultaneous, one-intercept) are labelled Stretch and kept out of the tests, mock paper and Wake-up mode' },
 ];
