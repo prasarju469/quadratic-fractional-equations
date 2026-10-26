@@ -516,6 +516,7 @@
       <section class="hero">
         <h1>Quadratic and Fractional Equations</h1>
         <p class="muted">🧑‍🏫 Teacher view. The student does not see this page, the teach-back checklists, or the paper-task checks.</p>
+        ${Cloud.enabled && Cloud.role === 'teacher' ? '<div class="block key" id="snap"><span class="tag">👀 Student progress</span><p class="muted">Loading…</p></div>' : ''}
         <p class="sub">${DAYS.length} missions. Learn it, rebuild it from scratch, and own it. Earn XP for every answer you get right first time.</p>
         <div class="block key"><span class="tag">💡 The one big idea</span><p>${SPINE}</p></div>
         <details class="block"><summary><b>How to use this with a student</b></summary>
@@ -538,6 +539,21 @@
       <h2>Any time</h2>
       <div class="actions"><a class="btn primary big" href="#/wake" style="text-decoration:none">⏰ Wake-up mode</a>
       <a class="btn big" href="#/progress" style="text-decoration:none">Stats</a></div>`;
+    if (Cloud.enabled && Cloud.role === 'teacher') {
+      const box = document.getElementById('snap');
+      Cloud.listStudents().then((list) => {
+        box.innerHTML = '<span class="tag">👀 Student progress</span>' + (list.length ? list.map(snapshotHtml).join('') + '<div class="actions"><a class="btn primary" href="#/review">Full report →</a></div>' : '<p class="muted">No student has signed in and saved progress yet.</p>');
+      }).catch((e) => { box.innerHTML = `<span class="tag">👀 Student progress</span><p class="no">Could not load (${(e && (e.code || e.message)) || 'unknown error'}). Hard-refresh the page and try again.</p>`; });
+    }
+  }
+
+  function snapshotHtml(d) {
+    const done = DAYS.filter((x) => (d.done || {})[x.n]).length, cleared = Object.keys(d.cleared || {}).length;
+    const weak = Object.keys(TOPICS).filter((t) => ((d.stats || {})[t] || {}).t >= 2).map((t) => ({ t, acc: d.stats[t].c / d.stats[t].t })).sort((a, b) => a.acc - b.acc).slice(0, 3);
+    const answered = Object.values(d.stats || {}).reduce((a, x) => a + x.t, 0);
+    return `<p><b>${d._name || d._email}</b> <span class="muted">${d._email}</span><br>Levels complete: <b>${done} of ${DAYS.length}</b> · Tasks cleared: <b>${cleared}</b> · Questions answered: <b>${answered}</b><br>
+      <span class="muted">Last saved: ${d.updated ? new Date(d.updated).toLocaleString() : 'never'}</span><br>
+      ${weak.length ? `Needs most work: ${weak.map((w) => `${TOPICS[w.t].name} (${Math.round(w.acc * 100)}%)`).join(', ')}` : 'Not enough answers yet to show weak spots.'}</p>`;
   }
 
   function day(n) {
@@ -606,7 +622,7 @@
     try {
       const list = await Cloud.listStudents();
       html += list.length ? list.map((d) => studentReport(d._email, d)).join('') : '<div class="block"><p class="muted">No student has signed in and saved progress yet.</p></div>';
-    } catch (e) { html += '<div class="block"><p class="no">Could not load. Check the Firestore rules in SETUP.md.</p></div>'; }
+    } catch (e) { html += `<div class="block"><p class="no">Could not load the student's progress (${(e && (e.code || e.message)) || 'unknown error'}). Hard-refresh the page (Cmd+Shift+R) and try again. If it keeps happening, check the Firestore rules in SETUP.md.</p></div>`; }
     root.innerHTML = html; math(root);
   }
 

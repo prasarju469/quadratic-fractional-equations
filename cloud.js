@@ -79,7 +79,7 @@ const Cloud = (() => {
 
   C.listStudents = async () => {
     const snap = await db.collection('users').get();
-    return snap.docs.filter((x) => x.data().role === 'student')
+    return snap.docs.filter((x) => x.data().role !== 'teacher' && x.id !== C.email)
       .map((x) => Object.assign(JSON.parse(x.data().data || '{}'), { _name: x.data().name, _email: x.id }));
   };
   C.signOut = () => (auth ? auth.signOut() : Promise.resolve()).then(() => location.reload());
