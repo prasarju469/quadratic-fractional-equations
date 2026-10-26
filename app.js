@@ -92,7 +92,7 @@
     host.innerHTML = '';
     const card = el('div', 'qcard');
     card.innerHTML = `<div class="prompt">${q.prompt}</div>
-      <div class="fields">${q.fields.map((f, i) => `<label class="field"><span>${f}</span><input type="text" autocomplete="off" spellcheck="false" data-i="${i}" ${q.kind === 'set' ? 'placeholder="e.g. 2, -5"' : ''}></label>`).join('')}</div>
+      <div class="fields${q.fields.length >= 5 ? ' grid' : ''}">${q.fields.map((f, i) => `<label class="field"><span>${f}</span><input type="text" autocomplete="off" spellcheck="false" data-i="${i}" ${q.kind === 'set' ? 'placeholder="e.g. 2, -5"' : ''}></label>`).join('')}</div>
       <div class="actions"><button class="btn primary chk">Check</button>${opts.hints ? '<button class="btn ghost hintbtn">Hint</button>' : ''}</div>
       <div class="fb"></div>`;
     host.appendChild(card);

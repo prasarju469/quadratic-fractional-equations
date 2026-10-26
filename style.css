@@ -272,3 +272,9 @@ table.prog td, table.prog th { padding: .55rem .4rem; border-bottom: 1px solid v
 .logincard { max-width: 520px; margin: 4rem auto; text-align: center; }
 .top nav a#signout { font-size: .8rem; opacity: .8; }
 body.locked .top nav { visibility: hidden; }
+
+/* many-box answers (table of values) */
+.fields.grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .8rem; }
+.fields.grid .field { flex-direction: column; align-items: flex-start; gap: .25rem; background: #0a0820; border: 2px solid var(--line); border-radius: 12px; padding: .5rem .7rem; }
+.fields.grid .field > span { min-width: 0; }
+.fields.grid .field input { width: 100%; }
