@@ -7,7 +7,7 @@ Fractional equations and word problems both <i>end</i> in a quadratic.`;
 const DAYS = [
   /* ------------------------------------------------------------------ DAY 1 */
   {
-    n: 1, title: 'Completing the square', minutes: 75,
+    n: 1, title: 'Completing the square', minutes: 90,
     tagline: 'Why a missing corner makes everything work',
     blocks: [
       { t: 'goal', items: [
@@ -21,6 +21,18 @@ const DAYS = [
 
       { t: 'practice', id: 'd1-warm', title: 'Warm-up: what you might already know', topics: ['factor'], need: 3,
         intro: 'Factorising and the Zero Product Principle. If any of these feel shaky, fix them before moving on.' },
+
+      { t: 'html', html: `<h3>Factorising when the x² has a number in front</h3><p>Three patterns come up again and again:</p><ul><li><b>Common factor first:</b> \\(3x^2-12x=3x(x-4)\\). Always look for a number or an x that divides every term.</li><li><b>Difference of two squares:</b> \\(4x^2-49=(2x-7)(2x+7)\\).</li><li><b>Multiplication frame:</b> for \\(2x^2+5x-7\\), the brackets are \\((mx+n)(px+q)\\) with \\(m\\times p=2\\) and \\(n\\times q=-7\\). Try pairs until the middle term \\(mq+pn\\) equals 5. That gives \\((2x+7)(x-1)\\).</li></ul><p>If the \\(x^2\\) is negative, take out \\(-1\\) first: \\(-x^2+5x+6=-(x^2-5x-6)=-(x+1)(x-6)\\). Always check by expanding your brackets.</p>` },
+
+      { t: 'predict', id: 'd1-p4',
+        q: 'You are asked to <b>factorise</b> \\(-x^2+5x+6\\). What is a sensible first step?',
+        options: [
+          { text: 'Take out −1, so the x² inside the bracket is positive', ok: true, why: '\\(-x^2+5x+6=-(x^2-5x-6)\\). Now find two numbers that multiply to \\(-6\\) and add to \\(-5\\).' },
+          { text: 'Divide everything by x', ok: false, why: 'Dividing changes the expression into something different. Factorising only rewrites it.' },
+          { text: 'Add 6 to both sides', ok: false, why: 'There are no "sides" here. This is an expression, not an equation, so you rewrite it and keep it equal.' } ],
+        explain: 'An expression is rewritten. An equation is solved. Factorising is rewriting.' },
+      { t: 'practice', id: 'd1-factexp', title: 'Practice: factorise an expression', topics: ['factexp'], need: 4,
+        intro: 'Type your brackets like (x+1)(2x-3), and check by expanding.' },
 
       { t: 'predict', id: 'd1-p1',
         q: 'Try to factorise \\(x^2+4x-3\\) into two brackets with whole numbers. What happens?',
@@ -192,6 +204,11 @@ const DAYS = [
       { t: 'practice', id: 'd2-disc', title: 'Practice: how many solutions?', topics: ['disc'], need: 4,
         intro: 'Work out the discriminant, then decide.' },
 
+      { t: 'html', html: `<h3>Working backwards: from solutions to an equation</h3><p>A solution \\(x=2\\) means the bracket \\((x-2)\\) is zero. A fraction such as \\(x=\\dfrac67\\) means \\(7x-6=0\\), so the bracket is \\((7x-6)\\). Multiply the brackets and check that \\(a\\), \\(b\\) and \\(c\\) have no common factor.</p><p>Example: \\(x=2\\) and \\(x=\\dfrac67\\) give \\((x-2)(7x-6)=7x^2-20x+12=0\\).</p>` },
+
+      { t: 'practice', id: 'd2-fromroots', title: 'Practice: form the equation', topics: ['fromroots'], need: 3,
+        intro: 'Whole numbers a, b, c, with a positive and as small as possible.' },
+
       { t: 'html', html: `<h3>Finding an unknown constant</h3><p>The number of real solutions tells you the sign of \\(b^2-4ac\\): <b>zero</b> for one (equal) solution, <b>positive</b> for two, <b>negative</b> for none. Put the letter into \\(b^2-4ac\\) and solve.</p><p>Example: \\(x^2+kx+9=0\\) has equal roots, so \\(k^2-36=0\\), giving \\(k=6\\) or \\(k=-6\\).</p>` },
 
       { t: 'practice', id: 'd2-kval', title: 'Practice: find the unknown', topics: ['kval'], need: 3,
@@ -208,7 +225,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 3 */
   {
-    n: 3, title: 'Fractional equations', minutes: 75,
+    n: 3, title: 'Fractional equations', minutes: 90,
     tagline: 'Clear the fractions, solve, then check every answer',
     blocks: [
       { t: 'goal', items: [
@@ -257,6 +274,18 @@ const DAYS = [
       { t: 'practice', id: 'd3-frac2', title: 'Practice: harder fractional equations', topics: ['frac2'], need: 4,
         intro: 'Answers to 2 decimal places. Check that neither answer makes a denominator zero.' },
 
+      { t: 'html', html: `<h3>Factorise the denominators first</h3><p>Before multiplying, factorise every denominator. It shows you the smallest common denominator and the values x cannot be.</p><ul><li>\\(x^2-4=(x-2)(x+2)\\)</li><li>\\(1-x^2=(1-x)(1+x)\\). Careful: \\(1-x\\) is the <b>opposite</b> of \\(x-1\\), so \\(\\dfrac{1}{1-x}=-\\dfrac{1}{x-1}\\).</li><li>\\(2x^2-5x-3=(2x+1)(x-3)\\), found with the multiplication frame.</li></ul>` },
+
+      { t: 'predict', id: 'd3-p5',
+        q: 'Which of these is equal to \\(\\dfrac{1}{1-x}\\)?',
+        options: [
+          { text: '\\(-\\dfrac{1}{x-1}\\)', ok: true, why: '\\(1-x=-(x-1)\\), so the fraction is the same number with a minus sign in front.' },
+          { text: '\\(\\dfrac{1}{x-1}\\)', ok: false, why: '\\(x-1\\) and \\(1-x\\) are opposites, so these two fractions have opposite signs. They are not equal.' },
+          { text: '\\(-\\dfrac{1}{1+x}\\)', ok: false, why: '\\(1+x\\) is a different bracket. Check with x = 3: the left side is \\(-\\tfrac12\\), this one is \\(-\\tfrac14\\).' } ],
+        explain: 'Sign flips between brackets like (1 − x) and (x − 1) are a very common source of lost marks.' },
+      { t: 'practice', id: 'd3-frac3', title: 'Practice: denominators that factorise', topics: ['frac3'], need: 4,
+        intro: 'Factorise each denominator first. Answers to 2 decimal places.' },
+
       { t: 'predict', id: 'd3-p1',
         q: 'In \\(\\dfrac{7}{x-3}\\), which value can x never be?',
         options: [
@@ -291,7 +320,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 4 */
   {
-    n: 4, title: 'Graphs of quadratics', minutes: 110,
+    n: 4, title: 'Graphs of quadratics', minutes: 125,
     tagline: 'Where the curve meets the axis, and where it turns',
     blocks: [
       { t: 'goal', items: [
@@ -358,6 +387,30 @@ const DAYS = [
 
       { t: 'practice', id: 'd4-neg', title: 'Practice: completing the square with −x²', topics: ['ctsn'], need: 3,
         intro: 'The minus sign is the trap. Take it out of the first two terms first.' },
+
+      { t: 'html', html: `<h3>Horizontal lines and a curve</h3><p>A horizontal line \\(y=k\\) meets a curve only at heights the curve actually reaches. An upside-down parabola with maximum value 4 never goes above \\(y=4\\), so the line \\(y=5\\) never meets it. The line \\(y=4\\) touches it once, at the turning point. Any line below 4 cuts it twice. A U-shaped curve works the same way, upside down.</p>` },
+
+      { t: 'predict', id: 'd4-p5',
+        q: 'The curve \\(y=-(x-1)^2+4\\) has a maximum value of 4. Which reason explains why it does not meet the line \\(y=5\\)?',
+        options: [
+          { text: 'The curve never goes higher than y = 4, so it never reaches y = 5', ok: true, why: 'Say it like this in an exam: "The maximum value of y is 4, which is less than 5."' },
+          { text: 'The line y = 5 is vertical', ok: false, why: 'y = 5 is horizontal. A vertical line would be x = 5.' },
+          { text: 'The curve has no turning point', ok: false, why: 'It has one: (1, 4). That point is the key to the explanation.' } ],
+        explain: 'The turning point tells you the largest or smallest y the curve can ever reach.' },
+      { t: 'predict', id: 'd4-p6',
+        q: 'Which horizontal line meets \\(y=-x^2+5x+6\\) at exactly one point?',
+        options: [
+          { text: '\\(y=12.25\\)', ok: true, why: 'The maximum value is \\(6+\\dfrac{5^2}{4}=12.25\\). Only the line through the turning point touches the curve once.' },
+          { text: '\\(y=6\\)', ok: false, why: '6 is the y-intercept. The line \\(y=6\\) cuts the curve twice, at \\(x=0\\) and \\(x=5\\).' },
+          { text: '\\(y=2.5\\)', ok: false, why: '2.5 is the x-coordinate of the turning point, not its height.' } ],
+        explain: 'To find the one-touch line, find the turning point and use its y-value.' },
+      { t: 'practice', id: 'd4-hline', title: 'Practice: horizontal lines', topics: ['hline'], need: 3,
+        intro: 'Find the highest or lowest value first.' },
+
+      { t: 'html', html: `<h3>Finding p and q from a graph</h3><p>If \\(y=x^2+px+q\\) cuts the x-axis at \\(x=-3\\) and \\(x=4\\), then \\(y=(x+3)(x-4)=x^2-x-12\\), so \\(p=-1\\) and \\(q=-12\\). If you are told its minimum point is \\((h,k)\\), write \\(y=(x-h)^2+k\\) and expand.</p>` },
+
+      { t: 'practice', id: 'd4-pq', title: 'Practice: find p and q', topics: ['pq'], need: 3,
+        intro: 'Expand the brackets carefully, then compare.' },
 
       { t: 'widget', name: 'match', id: 'd4-match' },
 
@@ -530,7 +583,7 @@ const DAYS = [
 
 /* Teacher-only map from the book (think! Mathematics, Chapter 1) to where each part is taught here. */
 const COVERAGE = [
-  { sec: '1.1 A', book: 'Recap: solve by factorising (WE 1, Practice Now 1, Ex 1A Q1)', here: 'Level 1 warm-up (factorise)' },
+  { sec: '1.1 A', book: 'Recap: solve by factorising (WE 1, Practice Now 1, Ex 1A Q1)', here: 'Level 1 warm-up (factorise), plus factexp for a not 1, difference of squares, common factor and negative x²' },
   { sec: '1.1 B', book: 'Solve (x + r)² = s with ± (WE 2, PN 2, Ex 1A Q2)', here: 'Level 1 (square-root practice, error hunt)' },
   { sec: '1.1 C-D', book: 'Perfect squares and the area picture; the (b/2)² investigation (WE 3, PN 3, Ex 1A Q3)', here: 'Level 1 (missing-corner slider, predict, think, ctsx, ctsd for fractions and decimals)' },
   { sec: '1.1 D', book: 'x² + bx + c, and -x² + bx + c (WE 4, PN 4, Ex 1A Q4)', here: 'Level 1 (+c), Level 4 (-x² practice)' },
@@ -549,5 +602,10 @@ const COVERAGE = [
   { sec: '1.6', book: 'Word problems: speed, distance, time with a fraction (WE 15, PN 15)', here: 'Level 5 (speed, work)' },
   { sec: '1.6', book: 'Modelling by a quadratic function (WE 16, PN 16)', here: 'Level 5 (proj, profit, Launch Lab)' },
   { sec: 'Beyond', book: 'Typical Sec 3 and O-Level extras not in the book', here: 'kval (find k), gline (which line solves another equation), gcsa (a not 1), consec, work, profit, path, harder frac2' },
-  { sec: 'Note', book: 'Ex 1E, the Chapter Summary and Review Exercise 1 are not in the PDF you supplied (it ends at page 32).', here: 'Covered by the topic equivalents above. Share those pages if you want me to align the wording and question types exactly.' },
+  { sec: 'Ex 1E', book: 'Q1-Q11 word problems: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Partly done: rect, speed, proj, pyth, path, work. Still to add: price per item and exchange rates, litres or pages per minute with unit changes, upstream and downstream, multi-stage journeys, plotting from a table' },
+  { sec: 'Summary', book: 'Chapter Summary: completing the square, the four methods, LCM method for fractions, graph facts', here: 'Covered across Levels 1 to 4' },
+  { sec: 'Review 1', book: 'Q1-Q3 solve; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 1 to 4 (ctsx/ctsd, rearr, fromroots, frac, frac2, frac3, sketching topics)' },
+  { sec: 'Review 1', book: 'Q4(ii) substitution, such as 2(y-1)² - 7(y-1) + 4 = 0; Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Still to add (gaps E and F)' },
+  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Not yet (stretch)' },
+  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q from intercepts, two word problems', here: 'Added: factexp (factorise expressions), frac3 (factorisable denominators), fromroots and pq (build from information), hline (horizontal-line reasoning)' },
 ];

@@ -85,14 +85,14 @@
     const weak = rows.filter((r) => r.acc < 0.85).slice(0, 4).map((r) => r.t);
     return weak.length ? weak : allTopics(5);
   }
-  const answerText = (q) => q.answer.map((v) => fmt(v)).join(q.kind === 'set' ? ' or ' : ',  ');
+  const answerText = (q) => q.answerText || q.answer.map((v) => fmt(v)).join(q.kind === 'set' ? ' or ' : ',  ');
 
   /* ---------- a single question ---------- */
   function mountQuestion(host, q, opts) {
     host.innerHTML = '';
     const card = el('div', 'qcard');
     card.innerHTML = `<div class="prompt">${q.prompt}</div>
-      <div class="fields${q.fields.length >= 5 ? ' grid' : ''}">${q.fields.map((f, i) => `<label class="field"><span>${f}</span><input type="text" autocomplete="off" spellcheck="false" data-i="${i}" ${q.kind === 'set' ? 'placeholder="e.g. 2, -5"' : ''}></label>`).join('')}</div>
+      <div class="fields${q.fields.length >= 5 ? ' grid' : ''}">${q.fields.map((f, i) => `<label class="field"><span>${f}</span><input type="text" class="${q.kind === 'factor' ? 'wide' : ''}" autocomplete="off" spellcheck="false" data-i="${i}" ${q.kind === 'set' ? 'placeholder="e.g. 2, -5"' : q.placeholder ? `placeholder="${q.placeholder}"` : ''}></label>`).join('')}</div>
       <div class="actions"><button class="btn primary chk">Check</button>${opts.hints ? '<button class="btn ghost hintbtn">Hint</button>' : ''}</div>
       <div class="fb"></div>`;
     host.appendChild(card);
@@ -112,7 +112,7 @@
     function check() {
       if (finished) return;
       const res = checkAnswer(q, inputs.map((i) => i.value));
-      if (res.bad) { fb.innerHTML = '<span class="no">Type numbers only. Fractions like 3/2 and decimals are fine. Separate several answers with commas.</span>'; return; }
+      if (res.bad) { fb.innerHTML = `<span class="no">${res.msg || 'Type numbers only. Fractions like 3/2 and decimals are fine. Separate several answers with commas.'}</span>`; return; }
       if (res.ok) {
         inputs.forEach((i) => i.classList.add('right'));
         const clean = attempts === 0 && !usedHint;

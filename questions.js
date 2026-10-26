@@ -554,9 +554,9 @@ function factorPair(B, C) {
 }
 
 /* Show HOW the brackets are found: two numbers that multiply to c and add to b. */
-function factorHow(B, C) {
+function factorHow(B, C, asEquation = true) {
   if (C === 0) {
-    return `<b>How to find the brackets:</b> there is no constant term, so take out the common factor <i>x</i>.<br>${M(`${poly(1, B, 0)} = x(${lin(B)})`)}<br>So the equation becomes ${M(`x(${lin(B)}) = 0`)}.<br>`;
+    return `<b>How to find the brackets:</b> there is no constant term, so take out the common factor <i>x</i>.<br>${M(`${poly(1, B, 0)} = x(${lin(B)})`)}<br>${asEquation ? `So the equation becomes ${M(`x(${lin(B)}) = 0`)}.<br>` : ''}`;
   }
   const f = factorPair(B, C); if (!f) return '';
   const { hit, sets } = f;
@@ -565,7 +565,7 @@ function factorHow(B, C) {
     : '';
   return `<b>How to find the brackets:</b> look for two numbers that <b>multiply to ${C}</b> and <b>add to ${B}</b>.<br>${pairs}` +
     `So the numbers are ${hit[0]} and ${hit[1]}: ${hit[0]} × ${par(hit[1])} = ${C} and ${hit[0]} + ${par(hit[1])} = ${B}.<br>` +
-    `${M(`${poly(1, B, C)} = (${lin(hit[0])})(${lin(hit[1])})`)}<br>So the equation becomes ${M(`(${lin(hit[0])})(${lin(hit[1])}) = 0`)}.<br>`;
+    `${M(`${poly(1, B, C)} = (${lin(hit[0])})(${lin(hit[1])})`)}<br>${asEquation ? `So the equation becomes ${M(`(${lin(hit[0])})(${lin(hit[1])}) = 0`)}.<br>` : ''}`;
 }
 
 /* Show the quadratic formula being used, step by step. */
@@ -576,11 +576,225 @@ function formulaHow(A, B, C) {
     `${M(`x=\\dfrac{-${par(B)}\\pm\\sqrt{${par(B)}^2-4(${A})(${par(C)})}}{2(${A})}=\\dfrac{${fmt(-B)}\\pm\\sqrt{${D}}}{${2 * A}}`)}<br>`;
 }
 
+
+/* ======================================================================
+   Gaps A to D from the mock paper and the book's review exercise
+   ====================================================================== */
+
+/* ---- A tiny algebra reader (no eval), used to check typed factorised answers ---- */
+const polyTrim = (p) => { p = p.slice(); while (p.length > 1 && Math.abs(p[p.length - 1]) < 1e-9) p.pop(); return p; };
+const polyAdd = (a, b) => polyTrim(Array.from({ length: Math.max(a.length, b.length) }, (_, i) => (a[i] || 0) + (b[i] || 0)));
+const polyMul = (a, b) => { const r = Array(a.length + b.length - 1).fill(0); a.forEach((x, i) => b.forEach((y, j) => { r[i + j] += x * y; })); return polyTrim(r); };
+const polyScale = (a, k) => polyTrim(a.map((x) => x * k));
+const polyPow = (a, n) => { let r = [1]; for (let i = 0; i < n; i++) r = polyMul(r, a); return r; };
+const polyEq = (a, b) => { a = polyTrim(a); b = polyTrim(b); return a.length === b.length && a.every((x, i) => Math.abs(x - b[i]) < 1e-6); };
+const polyDeg = (a) => polyTrim(a).length - 1;
+
+function parseAlg(src) {
+  const s = String(src).replace(/\s+/g, '').replace(/[−–]/g, '-').replace(/[×·]/g, '*').replace(/²/g, '^2').replace(/X/g, 'x');
+  if (!s || !/^[0-9x+\-*/^().]+$/.test(s)) return null;
+  let i = 0; const fail = () => { throw new Error('parse'); };
+  const startsPrimary = () => /[0-9x(.]/.test(s[i] || '');
+  function primary() {
+    if (s[i] === '(') { i++; const e = expr(); if (s[i] !== ')') fail(); i++; return { t: 'group', e }; }
+    if (s[i] === 'x') { i++; return { t: 'x' }; }
+    const m = s.slice(i).match(/^\d*\.?\d+/); if (!m) fail(); i += m[0].length; return { t: 'num', v: parseFloat(m[0]) };
+  }
+  function power() {
+    const base = primary(); let n = 1;
+    if (s[i] === '^') { i++; const m = s.slice(i).match(/^\d+/); if (!m) fail(); i += m[0].length; n = parseInt(m[0], 10); if (n > 6) fail(); }
+    return { base, n, div: false };
+  }
+  function term(sign) {
+    const factors = [power()];
+    for (;;) {
+      if (s[i] === '*') { i++; if (s[i] === '-') { sign = -sign; i++; } factors.push(power()); }
+      else if (s[i] === '/') { i++; const f = power(); f.div = true; factors.push(f); }
+      else if (startsPrimary()) factors.push(power());
+      else break;
+    }
+    return { sign, factors };
+  }
+  function expr() {
+    const terms = []; let sign = 1;
+    if (s[i] === '-') { sign = -1; i++; } else if (s[i] === '+') i++;
+    terms.push(term(sign));
+    while (s[i] === '+' || s[i] === '-') { const sg = s[i] === '-' ? -1 : 1; i++; terms.push(term(sg)); }
+    return { terms };
+  }
+  try { const e = expr(); if (i !== s.length) return null; return e; } catch (e) { return null; }
+}
+function polyOfNode(b) { return b.t === 'num' ? [b.v] : b.t === 'x' ? [0, 1] : polyOfExpr(b.e); }
+function polyOfExpr(e) {
+  return e.terms.reduce((acc, t) => {
+    let p = [t.sign];
+    t.factors.forEach((f) => {
+      const base = polyOfNode(f.base), pw = polyPow(base, f.n);
+      if (f.div) { if (polyDeg(pw) !== 0 || Math.abs(pw[0]) < 1e-12) throw new Error('div'); p = polyScale(p, 1 / pw[0]); } else p = polyMul(p, pw);
+    });
+    return polyAdd(acc, p);
+  }, [0]);
+}
+/* "Fully factorised": one product, no + or - between factors, and every bracket is linear. */
+function isFullyFactored(e) {
+  if (e.terms.length !== 1) return false;
+  return e.terms[0].factors.every((f) => f.base.t !== 'group' || polyDeg(polyOfExpr(f.base.e)) <= 1);
+}
+
+/* ---- D: factorise an expression (monic with -x^2, a not 1, difference of squares, common factor) ---- */
+function crossHow(a, b, c) {
+  const divs = (n) => { const o = []; for (let i = 1; i <= n; i++) if (n % i === 0) o.push(i); return o; };
+  const cs = []; divs(Math.abs(c)).forEach((d) => { const e = Math.abs(c) / d; [[d, c > 0 ? e : -e], [-d, c > 0 ? -e : e]].forEach((p) => cs.push(p)); });
+  const tries = []; let hit = null;
+  divs(a).forEach((m) => { const p = a / m; if (p > m) return; cs.forEach(([n, q]) => { [[n, q], [q, n]].forEach(([n1, q1]) => { const mid = m * q1 + p * n1; tries.push({ m, p, n: n1, q: q1, mid }); if (!hit && mid === b) hit = tries[tries.length - 1]; }); }); });
+  if (!hit) return '';
+  const br = (t) => `(${t.m === 1 ? '' : t.m}x ${plus(t.n) || '+ 0'})(${t.p === 1 ? '' : t.p}x ${plus(t.q) || '+ 0'})`;
+  const seen = new Set(), uniq = [];
+  for (const t of tries) { const k = [`${t.m},${t.n}`, `${t.p},${t.q}`].sort().join('|'); if (seen.has(k)) continue; seen.add(k); uniq.push(t); if (t === hit) break; }
+  const hi = uniq.indexOf(hit), pick_ = hi <= 6 ? uniq : [...uniq.slice(0, 4), null, hit];
+  const list = pick_.map((t) => (t === null ? '… (keep trying pairs until the middle term matches)' : `${br(t)} gives middle term ${t.m}×${par(t.q)} + ${t.p}×${par(t.n)} = ${t.mid}${t === hit ? ' ✔' : ''}`));
+  return `<b>How to find the brackets (multiplication frame):</b> the brackets are ${M('(mx + n)(px + q)')}, where ${M('m \\times p = ' + a)} and ${M('n \\times q = ' + c)}. The middle term comes from ${M('m q + p n')}, and we need it to be ${b}.<br>` +
+    `Try factor pairs:<br>${list.join('<br>')}<br>So ${M(`${poly(a, b, c)} = ${br(hit).replace(/\(/g, '(').replace(/\)\(/g, ')(')}`)}.<br>`;
+}
+
+function gFactExp() {
+  const g_ = (x, y) => (y ? g_(y, x % y) : Math.abs(x));
+  const v = pick([1, 2, 2, 3, 4]); let target, display, answer, how, hint = 'Type the brackets like (x+1)(2x-3). Use ^ for powers. Factorise completely.';
+  if (v === 1) {
+    let r1, r2; do { r1 = nz(-7, 7); r2 = nz(-7, 7); } while (r1 === r2);
+    const b = r1 + r2, c = -r1 * r2;                       // -(x - r1)(x - r2) = -x^2 + (r1+r2)x - r1 r2
+    target = [c, b, -1]; display = poly(-1, b, c); answer = `-${fac(r1)}${fac(r2)}`;
+    how = `Take out ${M('-1')} first so the ${M('x^2')} has a plus sign: ${M(`${display} = -(${poly(1, -b, -c)})`)}<br>${factorHow(-b, -c, false)}So ${M(`${display} = -${fac(r1)}${fac(r2)}`)}.`;
+    hint = 'Take out -1 first, then find two numbers that multiply to the constant and add to the middle number. Type it like -(x+1)(x-6).';
+  } else if (v === 2) {
+    let m, p, n, q;
+    do { m = pick([1, 2, 3, 4, 5]); p = pick([1, 2, 3, 4, 5]); n = nz(-7, 7); q = nz(-7, 7); }
+    while ((m === 1 && p === 1) || m * q === p * n || (m < p) || (m * q + p * n === 0) || (Math.abs(n) === Math.abs(q) && m === p) || g_(m, n) !== 1 || g_(p, q) !== 1);
+    const a = m * p, b = m * q + p * n, c = n * q;
+    target = [c, b, a]; display = poly(a, b, c); answer = `(${m === 1 ? '' : m}x${n < 0 ? n : '+' + n})(${p === 1 ? '' : p}x${q < 0 ? q : '+' + q})`;
+    how = crossHow(a, b, c);
+  } else if (v === 3) {
+    let k, j; do { k = pick([2, 3, 4, 5, 6]); j = R(2, 9); } while (g_(k, j) !== 1);
+    target = [-j * j, 0, k * k]; display = `${k * k}x^2 - ${j * j}`; answer = `(${k}x-${j})(${k}x+${j})`;
+    how = `This is a difference of two squares: ${M(`${k * k}x^2 = (${k}x)^2`)} and ${M(`${j * j} = ${j}^2`)}.<br>The pattern is ${M('A^2 - B^2 = (A - B)(A + B)')}, so ${M(`${display} = (${k}x - ${j})(${k}x + ${j})`)}.`;
+    hint = 'Is each term a perfect square? Then use A² − B² = (A − B)(A + B).';
+  } else {
+    const k = pick([2, 3, 4, 5]); let r1, r2; do { r1 = nz(-6, 6); r2 = nz(-6, 6); } while (r1 === r2);
+    const inner = [r1 * r2, -(r1 + r2), 1];
+    target = polyScale(inner, k); display = poly(k, -k * (r1 + r2), k * r1 * r2); answer = `${k}${fac(r1)}${fac(r2)}`.replace(/ /g, '');
+    how = `Look for a common factor first. Every term divides by ${k}: ${M(`${display} = ${k}(${poly(1, -(r1 + r2), r1 * r2)})`)}<br>${factorHow(-(r1 + r2), r1 * r2, false)}So ${M(`${display} = ${k}${fac(r1)}${fac(r2)}`)}.`;
+    hint = 'Take out any common factor first, then factorise what is left in the bracket.';
+  }
+  const q = mk({
+    topic: 'factexp', kind: 'factor', tol: 0, target, placeholder: 'e.g. (x+1)(2x-3)',
+    prompt: `Factorise completely ${M(display)}.`,
+    fields: ['answer ='], answer: [], answerText: answer.replace(/\*/g, ''),
+    hint, solution: how,
+  });
+  return q;
+}
+
+/* ---- A: fractional equations whose denominators factorise (book Review 1 Q6 g, h; mock paper Q1) ---- */
+function gFrac3() {
+  for (;;) {
+    const t = R(1, 3); let A, B, C, tex, f, bad, how, hint;
+    if (t === 1) {                                         // difference of squares denominator
+      const a = R(1, 5), p = nz(-4, 4), w = nz(-8, 8), r = pick([1, 2, 3, -1, -2]);
+      A = r; B = -p; C = -r * a * a - p * a - w; bad = [a, -a];
+      tex = `\\dfrac{${p}}{${lin(-a)}} ${pm(w)} \\dfrac{${Math.abs(w)}}{x^2-${a * a}} = ${r}`; f = (x) => p / (x - a) + w / (x * x - a * a) - r;
+      how = `Factorise the denominator: ${M(`x^2-${a * a} = (${lin(-a)})(${lin(a)})`)}. The common denominator is ${M(`(${lin(-a)})(${lin(a)})`)}.`;
+      hint = `Factorise ${M(`x^2-${a * a}`)} first. Then multiply every term by the common denominator.`;
+    } else if (t === 2) {                                  // sign flip: a^2 - x^2 = (a - x)(a + x)
+      const a = R(1, 4), p = nz(-5, 5), u = nz(-6, 6), v = nz(-9, 9), r = pick([1, 2, 3, -1, -2]); if (r === u) continue;
+      A = r - u; B = -p; C = p * a - v - r * a * a; bad = [a, -a];
+      tex = `\\dfrac{${p}}{${lin(a)}} - \\dfrac{${poly(u, 0, v)}}{${a * a} - x^2} = ${r}`; f = (x) => p / (x + a) - (u * x * x + v) / (a * a - x * x) - r;
+      how = `Factorise the second denominator: ${M(`${a * a} - x^2 = (${a} - x)(${a} + x)`)}. Note that ${M(`${a} - x`)} is the <b>opposite</b> of ${M(`x - ${a}`)}, so use ${M(`(${a} - x)(${a} + x)`)} as the common denominator.`;
+      hint = `Factorise ${M(`${a * a} - x^2`)} as ${M(`(${a} - x)(${a} + x)`)}. Multiply every term by that, and take care with the minus sign in front of the fraction.`;
+    } else {                                               // quadratic denominator that factorises
+      const m = pick([1, 1, 2, 3]), a = nz(-4, 4), b = nz(-4, 4), p = nz(-4, 4), u = nz(-4, 4), v = nz(-8, 8), r = pick([1, 2, 3]);
+      if (m * b === a) continue;
+      A = r * m; B = r * (m * b + a) - p - u; C = r * a * b - p * b - v; bad = [-a / m, -b];
+      tex = `\\dfrac{${p}}{${poly(0, m, a)}} + \\dfrac{${poly(0, u, v)}}{${poly(m, m * b + a, a * b)}} = ${r}`; f = (x) => p / (m * x + a) + (u * x + v) / (m * x * x + (m * b + a) * x + a * b) - r;
+      how = `Factorise the quadratic denominator: ${M(`${poly(m, m * b + a, a * b)} = (${poly(0, m, a)})(${lin(b)})`)}. It contains the other denominator, so the common denominator is ${M(`(${poly(0, m, a)})(${lin(b)})`)}.`;
+      hint = `Factorise the quadratic denominator first (use the multiplication frame). Then multiply every term by the common denominator.`;
+    }
+    const ans = quad(A, B, C); if (!ans || ans.some((x) => bad.some((z) => Math.abs(x - z) < 1e-7)) || Math.abs(A) > 14) continue;
+    const q = mk({
+      topic: 'frac3', kind: 'set',
+      prompt: `Solve ${M(tex)}. Give answers to 2 decimal places.`,
+      fields: [M('x =')], answer: ans, hint,
+      solution: `${how}<br>x cannot be ${bad.map((z) => M(fmt(z))).join(' or ')}.<br>After clearing the fractions: ${M(poly(A, B, C) + '=0')}<br>${formulaHow(A, B, C)}${M('x=' + orList(ans))} (2 d.p.). Neither answer is an excluded value, so both are valid.`,
+    });
+    return withRes(q, f);
+  }
+}
+
+/* ---- B: build a quadratic from information ---- */
+function gFromRoots() {
+  const gcd = (a, b) => (b === 0 ? Math.abs(a) : gcd(b, a % b));
+  const one = () => { const d = pick([1, 1, 2, 3, 4, 5, 6, 7]), n = nz(-8, 8); const g = gcd(n, d); return [n / g, d / g]; };
+  let r1, r2; do { r1 = one(); r2 = one(); } while (r1[0] / r1[1] === r2[0] / r2[1] || (r1[1] === 1 && r2[1] === 1 && Math.random() < 0.6));
+  const [p1, q1] = r1, [p2, q2] = r2;                       // (q1 x - p1)(q2 x - p2)
+  let a = q1 * q2, b = -(q1 * p2 + q2 * p1), c = p1 * p2; const g = gcd(gcd(a, b), c); a /= g; b /= g; c /= g;
+  const show = ([n, d]) => (d === 1 ? `${n}` : `${n < 0 ? '-' : ''}\\dfrac{${Math.abs(n)}}{${d}}`);
+  const brk = ([n, d]) => (d === 1 ? `(${lin(-n)})` : `(${poly(0, d, -n)})`);
+  return mk({
+    topic: 'fromroots', tol: 1e-6,
+    prompt: `A quadratic equation has solutions ${M(`x = ${show(r1)}`)} and ${M(`x = ${show(r2)}`)}. Write it in the form ${M('ax^2+bx+c=0')}, where ${M('a')}, ${M('b')} and ${M('c')} are whole numbers and ${M('a')} is as small as possible and positive. Find ${M('a')}, ${M('b')} and ${M('c')}.`,
+    fields: [M('a ='), M('b ='), M('c =')], answer: [a, b, c],
+    hint: `If ${M('x=2')} then ${M('x-2=0')}. If ${M('x=\\tfrac{6}{7}')} then ${M('7x-6=0')}, so there is a factor ${M('(7x-6)')}. Multiply the two brackets, then check that ${M('a')}, ${M('b')}, ${M('c')} have no common factor.`,
+    solution: `Each solution gives a bracket that equals zero: ${M(brk(r1) + ' = 0')} and ${M(brk(r2) + ' = 0')}.<br>The equation is ${M(brk(r1) + brk(r2) + ' = 0')}.<br>Expand: ${M(poly(a, b, c) + ' = 0')}.`,
+  });
+}
+
+function gPQ() {
+  if (Math.random() < 0.6) {
+    let m, n; do { m = nz(-6, 6); n = nz(-6, 6); } while (m === n);
+    const pv = -(m + n), qv = m * n, mid = (m + n) / 2, minv = qv - mid * mid;
+    return mk({
+      topic: 'pq', tol: 0.011,
+      prompt: `The curve ${M('y = x^2 + px + q')} cuts the x-axis at ${M('x=' + m)} and ${M('x=' + n)}. Find ${M('p')} and ${M('q')}, and the minimum value of ${M('y')}.`,
+      fields: [M('p ='), M('q ='), 'minimum value of y ='], answer: [pv, qv, minv],
+      hint: `The curve is ${M(`y = (x ${plus(-m)})(x ${plus(-n)})`)}. Expand it to find p and q. The minimum is at the x-value halfway between the two intercepts.`,
+      solution: `${M(`y = (x ${plus(-m)})(x ${plus(-n)}) = ${poly(1, pv, qv)}`)}<br>So ${M('p=' + pv)} and ${M('q=' + qv)}.<br>Turning point at ${M(`x = \\dfrac{${m}+${par(n)}}{2} = ${fmt(mid)}`)}, where ${M('y = ' + fmt(minv))}.`,
+    });
+  }
+  const h = nz(-5, 5), k = nz(-9, 9);
+  return mk({
+    topic: 'pq', tol: 1e-6,
+    prompt: `The curve ${M('y = x^2 + px + q')} has its minimum point at ${M(`(${h}, ${k})`)}. Find ${M('p')} and ${M('q')}.`,
+    fields: [M('p ='), M('q =')], answer: [-2 * h, h * h + k],
+    hint: `A curve with minimum point ${M('(h, k)')} can be written ${M('y = (x-h)^2 + k')}. Expand it and compare with ${M('x^2+px+q')}.`,
+    solution: `${M(`y = (x ${plus(-h)})^2 ${plus(k)} = ${poly(1, -2 * h, h * h + k)}`)}<br>So ${M('p=' + -2 * h)} and ${M('q=' + (h * h + k))}.`,
+  });
+}
+
+/* ---- C: horizontal lines and a parabola (mock paper: sketching Q1, Q2, Q3) ---- */
+function gHLine() {
+  const v = R(1, 3), s = pick([1, -1]); let expr, py;
+  if (v === 1) { const p = nz(-5, 5), q = nz(-8, 8); expr = `${s < 0 ? '-' : ''}(${lin(-p)})^2 ${plus(q)}`; py = q; }
+  else if (v === 2) { let h, k; do { h = nz(-6, 6); k = nz(-6, 6); } while (h === k); expr = `${s < 0 ? '-' : ''}${fac(h)}${fac(k)}`; const mid = (h + k) / 2; py = s * (mid - h) * (mid - k); }
+  else { const b = pick([-6, -4, -2, 2, 4, 6, 3, 5, -3, -5]), c = R(-6, 8); expr = poly(s, b, c); py = s === 1 ? c - (b * b) / 4 : c + (b * b) / 4; }
+  let k; const pick3 = Math.random();
+  if (pick3 < 0.2) k = py; else { const d = pick([1, 2, 3, 4, 5, 0.5, 1.5]); k = py + (Math.random() < 0.5 ? d : -d); }
+  const above = k > py + 1e-9, onIt = Math.abs(k - py) < 1e-9;
+  const count = onIt ? 1 : (s === 1 ? (above ? 2 : 0) : (above ? 0 : 2));
+  return mk({
+    topic: 'hline', tol: 0.011,
+    prompt: `The curve ${M('y = ' + expr)} ${s > 0 ? 'has a lowest point' : 'has a highest point'}. (a) How many points do the curve and the line ${M('y = ' + fmt(k))} have in common (0, 1 or 2)? (b) Write down the equation of the horizontal line ${M('y = k')} that touches the curve at exactly one point. Give ${M('k')}.`,
+    fields: ['(a) number of common points =', M('(b)\\ k =')], answer: [count, py],
+    hint: `A horizontal line meets the curve once only at the turning point. Find the ${s > 0 ? 'minimum' : 'maximum'} value of y. The line ${M('y=' + fmt(k))} is ${onIt ? 'exactly level with it' : above ? 'above it' : 'below it'}, and the curve opens ${s > 0 ? 'upwards' : 'downwards'}.`,
+    solution: `The ${s > 0 ? 'lowest' : 'highest'} point of the curve has ${M('y=' + fmt(py))}.<br>Because the curve opens ${s > 0 ? 'upwards' : 'downwards'}, every value of y on the curve is ${s > 0 ? 'at least' : 'at most'} ${fmt(py)}.<br>` +
+      `The line ${M('y=' + fmt(k))} ${onIt ? 'touches the curve once, at the turning point' : (count === 2 ? `is ${s > 0 ? 'above' : 'below'} the turning point, so it cuts the curve twice` : `is ${s > 0 ? 'below' : 'above'} the turning point, so it never meets the curve`)}: ${count} common point${count === 1 ? '' : 's'}.<br>(b) ${M('k=' + fmt(py))}.`,
+  });
+}
+
 /* ---------- registry ---------- */
 const TOPICS = {
   factor:  { name: 'Solve by factorising',                gen: gFactor,    day: 1 },
   sqrt:    { name: 'Solve (x + r)² = s',                  gen: gSqrt,      day: 1 },
   ctsx:    { name: 'Complete the square (rewrite)',       gen: gCtsExpr,   day: 1 },
+  factexp: { name: 'Factorise an expression',             gen: gFactExp,   day: 1 },
   ctsd:    { name: 'Complete the square: fractions and decimals', gen: gCtsDec, day: 1 },
   ctss:    { name: 'Solve by completing the square',      gen: gCtsSolve,  day: 2 },
   ctsa:    { name: 'Complete the square when a is not 1', gen: gCtsA,      day: 2 },
@@ -589,8 +803,10 @@ const TOPICS = {
   rearr:   { name: 'Tidy up first, then solve',           gen: gRearr,     day: 2 },
   disc:    { name: 'Discriminant and number of roots',    gen: gDisc,      day: 2 },
   kval:    { name: 'Find an unknown using the discriminant', gen: gKval,   day: 2 },
+  fromroots: { name: 'Form an equation from its solutions', gen: gFromRoots, day: 2 },
   frac:    { name: 'Fractional equations',                gen: gFrac,      day: 3 },
   frac2:   { name: 'Harder fractional equations',         gen: gFrac2,     day: 3 },
+  frac3:   { name: 'Fractions with factorisable denominators', gen: gFrac3, day: 3 },
   extra:   { name: 'Rejecting invalid roots',             gen: gExtra,     day: 3 },
   table:   { name: 'Table of values for a graph',         gen: gTable,     day: 4 },
   gfact:   { name: 'Graphs: factorised form',             gen: gGraphFact, day: 4 },
@@ -598,6 +814,8 @@ const TOPICS = {
   ctsn:    { name: 'Complete the square with −x²',        gen: gCtsNeg,    day: 4 },
   ggen:    { name: 'Graphs from the general form',        gen: gGGen,      day: 4 },
   gline:   { name: 'Which line solves another equation',  gen: gGLine,     day: 4 },
+  hline:   { name: 'Horizontal lines and a curve',        gen: gHLine,     day: 4 },
+  pq:      { name: 'Find p and q from a graph',           gen: gPQ,        day: 4 },
   gcsa:    { name: 'Graphs when a is not 1 (stretch)',    gen: gGCsA,      day: 4 },
   rect:    { name: 'Word problems: area',                 gen: gRect,      day: 5 },
   speed:   { name: 'Word problems: speed and time',       gen: gSpeed,     day: 5 },
@@ -621,6 +839,14 @@ function parseNum(s) {
 }
 
 function checkAnswer(q, vals) {
+  if (q.kind === 'factor') {
+    const bad = { bad: true, msg: 'I could not read that. Type it like (x+1)(2x-3), using x, brackets, and ^ for powers.' };
+    const ast = parseAlg(vals[0]); if (!ast) return bad;
+    let poly_; try { poly_ = polyOfExpr(ast); } catch (e) { return bad; }
+    if (!polyEq(poly_, q.target)) return { ok: false, note: 'When I expand your answer it does not match the original expression. Expand your brackets to check.' };
+    if (!isFullyFactored(ast)) return { ok: false, note: 'It has the right value, but it is not fully factorised yet. The answer should be a product of brackets.' };
+    return { ok: true };
+  }
   if (q.kind === 'set') {
     const nums = vals[0].split(/,|;|\bor\b|\band\b/i).map((s) => s.trim()).filter(Boolean).map(parseNum);
     if (!nums.length || nums.some(Number.isNaN)) return { bad: true };
@@ -634,4 +860,4 @@ function checkAnswer(q, vals) {
   return { ok: !wrong.some(Boolean), wrong };
 }
 
-if (typeof module !== 'undefined') module.exports = { TOPICS, generate, checkAnswer, parseNum, fmt, poly };
+if (typeof module !== 'undefined') module.exports = { TOPICS, generate, checkAnswer, parseNum, fmt, poly, parseAlg, polyOfExpr, polyEq, isFullyFactored };

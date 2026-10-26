@@ -278,3 +278,5 @@ body.locked .top nav { visibility: hidden; }
 .fields.grid .field { flex-direction: column; align-items: flex-start; gap: .25rem; background: #0a0820; border: 2px solid var(--line); border-radius: 12px; padding: .5rem .7rem; }
 .fields.grid .field > span { min-width: 0; }
 .fields.grid .field input { width: 100%; }
+
+.field input.wide { width: min(28ch, 100%); }
