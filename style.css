@@ -98,7 +98,7 @@ details summary { cursor: pointer; }
 .prompt { font-size: 1.12rem; }
 .fields { display: grid; gap: .6rem; margin-top: .9rem; }
 .field { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
-.field span { min-width: 12ch; color: var(--muted); }
+.field > span { min-width: 12ch; color: var(--muted); }
 .field input {
   font: inherit; font-weight: 600; padding: .5rem .7rem; border-radius: 12px; border: 2px solid var(--line);
   background: #0a0820; color: var(--ink); width: 15ch;
@@ -190,7 +190,7 @@ table.prog td, table.prog th { padding: .55rem .4rem; border-bottom: 1px solid v
   body { font-size: 17px; }
   h1 { font-size: 1.8rem; }
   .derive-grid { grid-template-columns: 1fr; }
-  .field span { min-width: 0; }
+  .field > span { min-width: 0; }
   #hud .xpbar { display: none; }
 }
 
