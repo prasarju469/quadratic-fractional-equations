@@ -280,3 +280,12 @@ body.locked .top nav { visibility: hidden; }
 .fields.grid .field input { width: 100%; }
 
 .field input.wide { width: min(28ch, 100%); }
+
+/* mock paper */
+.mockbar { position: sticky; top: var(--hh, 56px); z-index: 8; background: #0d0b21f2; border: 2px solid var(--line); border-radius: 14px; padding: .4rem .8rem; }
+.psec { margin: 1.6rem 0 .6rem; padding-bottom: .3rem; border-bottom: 2px solid var(--line); }
+.mockq { border: 2px solid var(--line); border-radius: 14px; padding: .9rem 1rem; margin: .8rem 0; background: #120f33; }
+.mockq .qno { font-weight: 800; color: var(--yellow); margin-bottom: .3rem; }
+.mockq .marks { color: var(--cyan); font-weight: 700; }
+.mockq.full { border-color: var(--good); } .mockq.part { border-color: var(--yellow); } .mockq.none { border-color: var(--bad); }
+.rgsvg { background: #0a0820; border: 2px solid var(--line); border-radius: 12px; max-width: 100%; height: auto; display: block; margin: .6rem 0; }

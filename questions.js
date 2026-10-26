@@ -573,7 +573,7 @@ function formulaHow(A, B, C) {
   const D = B * B - 4 * A * C, ans = quad(A, B, C);
   if (!ans) return '';
   return `Use the formula with ${M(`a=${A},\\; b=${B},\\; c=${C}`)}:<br>` +
-    `${M(`x=\\dfrac{-${par(B)}\\pm\\sqrt{${par(B)}^2-4(${A})(${par(C)})}}{2(${A})}=\\dfrac{${fmt(-B)}\\pm\\sqrt{${D}}}{${2 * A}}`)}<br>`;
+    `${M(`x=\\dfrac{-${par(B)}\\pm\\sqrt{${par(B)}^2-4(${A})(${par(C)})}}{2(${A})}=\\dfrac{${fmt(-B)}\\pm\\sqrt{${fmt(D)}}}{${2 * A}}`)}<br>`;
 }
 
 
@@ -789,6 +789,249 @@ function gHLine() {
   });
 }
 
+
+/* ======================================================================
+   Gaps E to H: "hence", substitution, more story types, challenge questions, reading graphs
+   ====================================================================== */
+const r2 = (n) => Math.round(n * 100) / 100;
+const cf = (n) => (n === 1 ? '' : n === -1 ? '-' : String(n));
+const hm = (h) => { const t = Math.round(h * 60), H = Math.floor(t / 60), m = t % 60; return `${H ? `${H} hour${H === 1 ? '' : 's'}` : ''}${H && m ? ' ' : ''}${m ? `${m} minutes` : ''}`; };
+const tryFind = (make, ok, fallback) => { for (let i = 0; i < 4000; i++) { const p = make(); if (ok(p)) return p; } return fallback; };
+
+/* ---- E: "hence" questions (mock paper: express then solve; Review 1 Q4: substitution) ---- */
+function gHence() {
+  let b, c, D; do { b = nz(-9, 9); c = R(-12, 8); D = b * b - 4 * c; } while (D <= 0 || isSquare(D));
+  const a = b / 2, k = c - a * a, r = quad(1, b, c);
+  return mk({
+    topic: 'hence', tol: [0.006, 0.006, 0.011, 0.011],
+    prompt: `(a) Express ${M(poly(1, b, c))} in the form ${M('(x+a)^2+k')}. (b) <b>Hence</b> solve ${M(poly(1, b, c) + ' = 0')}, giving your answers correct to 2 decimal places.`,
+    fields: [M('a ='), M('k ='), 'larger solution, x =', 'smaller solution, x ='], answer: [a, k, r[0], r[1]],
+    hint: `"Hence" means <b>use your answer to part (a)</b>. Once ${M(poly(1, b, c))} is written as ${M('(x+a)^2+k')}, set it equal to 0, move ${M('k')} across and take square roots. a and k can be fractions (like 3/2) or decimals.`,
+    solution: `(a) ${M(`${poly(1, b, 0)} = (x ${plus(a)})^2 - ${par(a)}^2`)}, so ${M(`${poly(1, b, c)} = (x ${plus(a)})^2 ${plus(k)}`)}. Here ${M('a=' + fmt(a))} and ${M('k=' + fmt(k))}.<br>` +
+      `(b) ${M(`(x ${plus(a)})^2 ${plus(k)} = 0`)}<br>${M(`(x ${plus(a)})^2 = ${fmt(-k)}`)}<br>${M(`x ${plus(a)} = \\pm\\sqrt{${fmt(-k)}}`)}<br>${M('x=' + orList(r))} (2 d.p.)`,
+  });
+}
+
+function gSubst() {
+  let a, b, c, r; do { a = pick([1, 2, 3, -2, -3]); b = nz(-9, 9); c = nz(-9, 9); r = quad(a, b, c); } while (!r || isSquare(b * b - 4 * a * c));
+  r = r.slice().sort((u, v) => v - u);
+  const s = nz(-4, 4), t = (n) => `${n < 0 ? '- ' : '+ '}${Math.abs(n) === 1 ? '' : Math.abs(n)}`;
+  const eq2 = `${cf(a)}(y ${plus(-s)})^2 ${t(b)}(y ${plus(-s)}) ${plus(c)} = 0`;
+  const q = mk({
+    topic: 'subst', tol: 0.011,
+    prompt: `(i) Solve ${M(poly(a, b, c) + ' = 0')}, giving your answers correct to 2 decimal places. (ii) <b>Hence</b> find the values of ${M('y')} that satisfy ${M(eq2)}.`,
+    fields: ['(i) larger solution, x =', '(i) smaller solution, x =', '(ii) larger y =', '(ii) smaller y ='], answer: [r[0], r[1], r[0] + s, r[1] + s],
+    hint: `Look at ${M(`(y ${plus(-s)})`)} in part (ii). It plays the part of ${M('x')} in part (i). So ${M(`y ${plus(-s)} = x`)}. Use your two answers from (i) and solve for y.`,
+    solution: `(i) ${M('x=' + orList(r))} (2 d.p.)<br>(ii) The equation is the same as (i) with ${M(`x`)} replaced by ${M(`(y ${plus(-s)})`)}. So ${M(`y ${plus(-s)} = ${fmt(r[0])}`)} or ${M(`y ${plus(-s)} = ${fmt(r[1])}`)}.<br>${M(`y = ${fmt(r[0] + s)}`)} or ${M(`y = ${fmt(r[1] + s)}`)}.`,
+  });
+  return withRes(q, (y) => a * (y - s) ** 2 + b * (y - s) + c);
+}
+
+/* ---- H: read values from a graph (book Exercise 1E Q11, Review 1 Q13) ---- */
+function plotSvg(f, xmin, xmax, ymin, ymax, xs, ys) {
+  const W = 480, H = 300, mx = 38, my = 18, X = (x) => mx + ((x - xmin) / (xmax - xmin)) * (W - 2 * mx), Y = (y) => H - my - ((y - ymin) / (ymax - ymin)) * (H - 2 * my);
+  let g = '';
+  for (let x = Math.ceil(xmin); x <= xmax; x++) g += `<line x1="${X(x)}" y1="${my}" x2="${X(x)}" y2="${H - my}" class="gl"/>` + (x % xs === 0 ? `<text x="${X(x)}" y="${H - 3}" class="gt" text-anchor="middle">${x}</text>` : '');
+  for (let y = Math.ceil(ymin); y <= ymax; y++) g += `<line x1="${mx}" y1="${Y(y)}" x2="${W - mx}" y2="${Y(y)}" class="gl"/>` + (y % ys === 0 ? `<text x="${mx - 5}" y="${Y(y) + 4}" class="gt" text-anchor="end">${y}</text>` : '');
+  g += `<line x1="${mx}" y1="${Y(0)}" x2="${W - mx}" y2="${Y(0)}" class="ga"/><line x1="${X(0)}" y1="${my}" x2="${X(0)}" y2="${H - my}" class="ga"/>`;
+  let d = ''; for (let x = xmin; x <= xmax + 1e-9; x += 0.05) { const y = f(x); if (y >= ymin - 1) d += (d ? 'L' : 'M') + X(x).toFixed(1) + ',' + Y(y).toFixed(1); }
+  g += `<path d="${d}" class="gc"/>`;
+  return `<svg class="rgsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Graph">${g}</svg>`;
+}
+
+function gReadGraph() {
+  const bb = pick([4, 6, 8, 10]), c = R(2, 9), ymax = c + (bb * bb) / 4, f = (x) => c + bb * x - x * x;
+  const land = (bb + Math.sqrt(bb * bb + 4 * c)) / 2;
+  const Y0 = R(Math.ceil(c) + 1, Math.floor(ymax) - 1), xY0 = (bb + Math.sqrt(bb * bb - 4 * (Y0 - c))) / 2;
+  const svg = plotSvg(f, 0, Math.ceil(land) + 1, 0, Math.ceil(ymax) + 1, 1, Math.ceil(ymax + 1) > 14 ? 4 : 2);
+  return mk({
+    topic: 'readgraph', tol: [0.6, 0.5, 0.5],
+    prompt: `A ball is thrown from a platform. Its height ${M('y')} metres above the ground, at a horizontal distance ${M('x')} metres from the platform, is ${M(`y = ${c} ${plus(bb)}x - x^2`)}. The graph is drawn below.<br>${svg}<br>Use the graph to find: (a) the greatest height, (b) the horizontal distance at which the ball is ${Y0} m high on its way down, (c) the horizontal distance at which the ball hits the ground. Read to the nearest 0.5 (answers within 0.5 are accepted).`,
+    fields: ['(a) greatest height (m) =', `(b) x when y = ${Y0} (the later one) =`, '(c) x when it lands ='], answer: [ymax, xY0, land],
+    hint: `The highest point is the top of the curve. For (b), go across at height ${Y0} until you hit the curve on the right-hand side, then read down. For (c) read where the curve meets the x-axis on the right.`,
+    solution: `(a) The turning point is at ${M(`x=${bb / 2}`)}, so the greatest height is ${M(`y = ${c} + ${bb / 2}\\times${bb} - ${(bb / 2) ** 2} = ${fmt(ymax)}`)} m.<br>(b) Solve ${M(`${Y0} = ${c} ${plus(bb)}x - x^2`)}: ${M(`x \\approx ${fmt(xY0)}`)} (later of the two).<br>(c) Solve ${M(`0 = ${c} ${plus(bb)}x - x^2`)}: ${M(`x \\approx ${fmt(land)}`)} m (reject the negative solution).`,
+  });
+}
+
+/* ---- F: more story types (book Exercise 1E and Review 1) ---- */
+function formulaHow2(A, B, C) { return formulaHow(r2(A), r2(B), r2(C)); }
+
+function gPrice() {
+  const P = tryFind(() => ({ x0: pick([1.5, 2, 2.5, 3, 3.5, 4, 5]), d: pick([0.2, 0.4, 0.5]), q: pick([10, 15, 20, 25, 30, 40, 45, 50]) }),
+    (p) => { const S = (p.q * p.x0 * (p.x0 - p.d)) / p.d; return Math.abs(S - Math.round(S)) < 1e-9 && S >= 100 && S <= 2000 && p.x0 > p.d; }, { x0: 2.5, d: 0.5, q: 20 });
+  const { x0, d, q } = P, S = Math.round((q * x0 * (x0 - d)) / d);
+  const a = q, b = r2(-q * d), c = r2(-S * d);
+  const out = mk({
+    topic: 'price', tol: 0.011,
+    prompt: `In January a food company spent $${S} on rice from Brand A, which costs $${M('x')} per kilogram. In February it spent $${S} on rice from Brand B, which costs $${fmt(d)} less per kilogram than Brand A. It bought ${q} kg more rice in February than in January. Form an equation in ${M('x')}, solve it, and find the price per kilogram of Brand B.`,
+    fields: [M('x \\text{ (Brand A, \\$ per kg)} ='), 'Brand B ($ per kg) ='], answer: [x0, x0 - d],
+    hint: `Kilograms bought = money spent ÷ price per kg. January: ${M(`\\dfrac{${S}}{x}`)}. February: ${M(`\\dfrac{${S}}{x-${fmt(d)}}`)}. February is ${q} kg more than January. Multiply through by the common denominator.`,
+    solution: `${M(`\\dfrac{${S}}{x-${fmt(d)}} - \\dfrac{${S}}{x} = ${q}`)}<br>${M(`${S}x - ${S}(x-${fmt(d)}) = ${q}x(x-${fmt(d)})`)}<br>${M(`${q}x^2 - ${fmt(q * d)}x - ${fmt(S * d)} = 0`)}<br>${formulaHow2(a, b, c)}${M('x = ' + fmt(x0))} (reject the negative root, since a price cannot be negative).<br>Brand B costs ${M(`\\$${fmt(x0 - d)}`)} per kg.`,
+  });
+  return withRes(out, (x) => S / (x - d) - S / x - q);
+}
+
+function gExch() {
+  const [x0, x1] = pick([[2, 2.5], [2, 4], [4, 5], [2.5, 5], [1.25, 2.5], [0.8, 1]]), d = r2(x1 - x0);
+  const m = R(2, 9) * 100, n = R(2, 9) * 100, A = r2(x0 * m), B = r2(x1 * n), T = m + n;
+  const a = T, b = r2(T * d - A - B), c = r2(-A * d);
+  const out = mk({
+    topic: 'exch', tol: 0.011,
+    prompt: `Two weeks before her trip, Mei exchanged S$${fmt(A)} into US dollars at a rate of US$1 = S$${M('x')}. One week before her trip she exchanged another S$${fmt(B)} at a different shop, at a rate of US$1 = S$${M(`(x + ${fmt(d)})`)}. Altogether she received US$${T}. Form an equation in ${M('x')}, solve it, and find the exchange rate at the second shop.`,
+    fields: [M('x =') + ' (S$ for US$1, first shop)', 'second shop, S$ for US$1 ='], answer: [x0, x1],
+    hint: `US dollars received = S dollars exchanged ÷ rate. First shop: ${M(`\\dfrac{${fmt(A)}}{x}`)}. Second shop: ${M(`\\dfrac{${fmt(B)}}{x+${fmt(d)}}`)}. Together they make US$${T}.`,
+    solution: `${M(`\\dfrac{${fmt(A)}}{x} + \\dfrac{${fmt(B)}}{x+${fmt(d)}} = ${T}`)}<br>${M(`${fmt(A)}(x+${fmt(d)}) + ${fmt(B)}x = ${T}x(x+${fmt(d)})`)}<br>${M(`${T}x^2 ${plus(b)}x ${plus(c)} = 0`)}<br>${formulaHow2(a, b, c)}${M('x = ' + fmt(x0))} (reject the negative root). The second shop's rate is ${M(`x + ${fmt(d)} = ${fmt(x1)}`)}.`,
+  });
+  return withRes(out, (x) => A / x + B / (x + d) - T);
+}
+
+function gRate() {
+  const P = tryFind(() => ({ V: pick([1200, 1500, 1800, 2000, 2400, 3000]), x0: pick([20, 25, 30, 40, 50, 60, 75, 100]), d: pick([10, 20, 25, 50]) }),
+    (p) => { const s = (60 * p.V * p.d) / (p.x0 * (p.x0 + p.d)); return Math.abs(s - Math.round(s)) < 1e-9 && s >= 6 && s <= 300; }, { V: 1500, x0: 100, d: 50 });
+  const { V, x0, d } = P, s = Math.round((60 * V * d) / (x0 * (x0 + d))), a = s, b = s * d, c = -60 * V * d;
+  const out = mk({
+    topic: 'rate', tol: 0.011,
+    prompt: `A tank holds ${V} litres when full. Pump A fills it at ${M('x')} litres per minute. Pump B fills it at ${M(`(x+${d})`)} litres per minute. Pump A takes ${s} seconds longer than Pump B to fill the tank completely. Form an equation in ${M('x')}, solve it, and find the time Pump B takes to fill the tank, in seconds.`,
+    fields: [M('x =') + ' (litres per minute)', 'Pump B takes (seconds) ='], answer: [x0, (60 * V) / (x0 + d)],
+    hint: `Time in minutes = litres ÷ rate. Pump A: ${M(`\\dfrac{${V}}{x}`)}. Pump B: ${M(`\\dfrac{${V}}{x+${d}}`)}. The difference is ${s} seconds, which is ${M(`\\dfrac{${s}}{60}`)} minutes. Convert units before you form the equation.`,
+    solution: `${M(`\\dfrac{${V}}{x} - \\dfrac{${V}}{x+${d}} = \\dfrac{${s}}{60}`)}<br>${M(`60\\times${V}(x+${d}) - 60\\times${V}x = ${s}x(x+${d})`)}<br>${M(`${s}x^2 + ${s * d}x - ${60 * V * d} = 0`)}<br>${formulaHow2(a, b, c)}${M('x = ' + x0)} (reject the negative root).<br>Pump B: ${M(`\\dfrac{${V}}{${x0 + d}}`)} minutes = ${fmt((60 * V) / (x0 + d))} seconds.`,
+  });
+  return withRes(out, (x) => V / x - V / (x + d) - s / 60);
+}
+
+function gStream() {
+  const P = tryFind(() => ({ x0: R(8, 30), c: R(2, 6), D: pick([6, 8, 10, 12, 15, 18, 24]) }),
+    (p) => { const H = (2 * p.D * p.x0) / (p.x0 * p.x0 - p.c * p.c); return p.x0 > p.c + 1 && Math.abs(H * 4 - Math.round(H * 4)) < 1e-9 && H >= 1 && H <= 6; }, { x0: 10, c: 2, D: 12 });
+  const { x0, c, D } = P, H = r2((2 * D * x0) / (x0 * x0 - c * c)), a = H, b = -2 * D, cc = r2(-H * c * c);
+  const out = mk({
+    topic: 'stream', tol: 0.011,
+    prompt: `A boat travels ${D} km upstream and then ${D} km back downstream in ${hm(H)}. The speed of the current is ${c} km/h. Let the speed of the boat in still water be ${M('x')} km/h. Form an equation in ${M('x')}, solve it, and find the time taken for the upstream journey, in minutes.`,
+    fields: [M('x =') + ' (km/h)', 'upstream time (minutes) ='], answer: [x0, (60 * D) / (x0 - c)],
+    hint: `Upstream the boat goes at ${M(`(x-${c})`)} km/h and downstream at ${M(`(x+${c})`)} km/h. Time = distance ÷ speed. The two times add up to ${fmt(H)} hours.`,
+    solution: `${M(`\\dfrac{${D}}{x-${c}} + \\dfrac{${D}}{x+${c}} = ${fmt(H)}`)}<br>${M(`${D}(x+${c}) + ${D}(x-${c}) = ${fmt(H)}(x-${c})(x+${c})`)}<br>${M(`${fmt(H)}x^2 - ${2 * D}x - ${fmt(H * c * c)} = 0`)}<br>${formulaHow2(a, b, cc)}${M('x = ' + x0)} (reject the negative root).<br>Upstream time: ${M(`\\dfrac{${D}}{${x0 - c}}`)} hours = ${fmt((60 * D) / (x0 - c))} minutes.`,
+  });
+  return withRes(out, (x) => D / (x - c) + D / (x + c) - H);
+}
+
+function gJourney() {
+  const P = tryFind(() => ({ x0: pick([3, 4, 5, 6, 8]), d: pick([1, 2]), Dr: pick([6, 8, 10, 12, 15]), a0: pick([2, 3, 4]) }),
+    (p) => { const m = (60 * p.Dr * p.d) / (p.x0 * (p.x0 + p.d)); return Math.abs(m - Math.round(m)) < 1e-9 && m >= 5 && m <= 60; }, { x0: 4, d: 1, Dr: 8, a0: 2 });
+  const { x0, d, Dr, a0 } = P, m = Math.round((60 * Dr * d) / (x0 * (x0 + d))), Dt = Dr + a0;
+  const out = mk({
+    topic: 'journey', tol: 0.011,
+    prompt: `Mei and Raj start a ${Dt} km hike together, both walking at ${M('x')} km/h. After ${a0} km, Mei speeds up to ${M(`(x+${d})`)} km/h for the rest. Raj keeps walking at ${M('x')} km/h throughout. Mei finishes ${m} minutes before Raj. Form an equation in ${M('x')}, solve it, and find how long Mei takes for the whole hike, in hours to 2 decimal places.`,
+    fields: [M('x =') + ' (km/h)', 'Mei\'s total time (hours) ='], answer: [x0, a0 / x0 + Dr / (x0 + d)],
+    hint: `Raj's time is ${M(`\\dfrac{${Dt}}{x}`)}. Mei's time is ${M(`\\dfrac{${a0}}{x}`)} for the first part plus ${M(`\\dfrac{${Dr}}{x+${d}}`)} for the rest. Raj takes ${m} minutes (that is ${M(`\\dfrac{${m}}{60}`)} hour) longer.`,
+    solution: `${M(`\\dfrac{${Dt}}{x} - \\left(\\dfrac{${a0}}{x} + \\dfrac{${Dr}}{x+${d}}\\right) = \\dfrac{${m}}{60}`)}<br>The first parts cancel: ${M(`\\dfrac{${Dr}}{x} - \\dfrac{${Dr}}{x+${d}} = \\dfrac{${m}}{60}`)}<br>${M(`${m}x^2 + ${m * d}x - ${60 * Dr * d} = 0`)}<br>${formulaHow2(m, m * d, -60 * Dr * d)}${M('x = ' + x0)} (reject the negative root).<br>Mei: ${M(`\\dfrac{${a0}}{${x0}} + \\dfrac{${Dr}}{${x0 + d}} = ${fmt(a0 / x0 + Dr / (x0 + d))}`)} hours.`,
+  });
+  return withRes(out, (x) => Dt / x - (a0 / x + Dr / (x + d)) - m / 60);
+}
+
+function gBorder() {
+  let L, W, x0; do { L = R(14, 40); W = R(10, 30); x0 = R(1, 5); } while (L <= W || 2 * x0 >= W - 2);
+  const A = (L - 2 * x0) * (W - 2 * x0), a = 4, b = -2 * (L + W), c = L * W - A;
+  const out = mk({
+    topic: 'border', tol: 1e-6,
+    prompt: `A rectangular room is ${L} m by ${W} m. A uniform border ${M('x')} m wide is left bare all around the edge, and the rest of the floor is covered with tiles. The tiled area is ${A} m². Form an equation in ${M('x')} and solve it to find the width of the border.`,
+    fields: [M('x \\text{ (m)} =')], answer: [x0],
+    hint: `The tiled rectangle is ${M(`(${L} - 2x)`)} m by ${M(`(${W} - 2x)`)} m. Its area is ${A}. Expand, collect, solve, then decide which solution is sensible: a border cannot be wider than half the room.`,
+    solution: `${M(`(${L}-2x)(${W}-2x) = ${A}`)}<br>${M(`4x^2 - ${2 * (L + W)}x + ${c} = 0`)}<br>${formulaHow2(a, b, c)}${M('x = ' + x0)} or ${M('x = ' + fmt((L + W) / 2 - x0))}.<br>The second solution is bigger than half the width of the room (${W / 2} m), so the floor would have no room left. Reject it. The border is ${x0} m wide.`,
+  });
+  return withRes(out, (x) => (L - 2 * x) * (W - 2 * x) - A);
+}
+
+function gPerim() {
+  const P = tryFind(() => { const per = pick([72, 80, 90, 96, 100, 104, 112, 120]), h = per / 2, A = R(Math.floor(h * h / 4) - 60, Math.floor(h * h / 4) - 2); return { per, h, A }; },
+    (p) => { const D = p.h * p.h - 4 * p.A; return D > 4 && !isSquare(D) && p.A > 100; }, { per: 112, h: 56, A: 597 });
+  const { per, h, A } = P, roots = quad(1, -h, A), D = h * h - 4 * A;
+  const out = mk({
+    topic: 'perim', tol: [1e-6, 1e-6, 0.011, 0.011],
+    prompt: `The perimeter of a rectangular poster is ${per} cm and its area is ${A} cm². Let its breadth be ${M('x')} cm. Form the equation ${M('x^2 + bx + c = 0')} and find ${M('b')} and ${M('c')}. Then solve it, giving both answers to 2 decimal places. These are the breadth and the length.`,
+    fields: [M('b ='), M('c ='), 'smaller side (cm) =', 'larger side (cm) ='], answer: [-h, A, roots[1], roots[0]],
+    hint: `Length + breadth = half the perimeter = ${h}. So the length is ${M(`(${h} - x)`)}. Area = breadth × length = ${A}. Expand and move everything to one side.`,
+    solution: `${M(`x(${h}-x) = ${A}`)}<br>${M(`x^2 - ${h}x + ${A} = 0`)}, so ${M(`b = -${h}`)} and ${M(`c = ${A}`)}.<br>${formulaHow2(1, -h, A)}${M('x = ' + orList(roots))} (2 d.p.). The two solutions are the two side lengths: ${fmt(roots[1])} cm and ${fmt(roots[0])} cm.`,
+  });
+  return withRes(out, (x) => x * (h - x) - A);
+}
+
+function gCakes() {
+  const P = tryFind(() => ({ M0: pick([3, 4, 5, 6, 8]), x0: pick([50, 100, 125, 150, 200, 250]), d: pick([10, 20, 25, 50]) }),
+    (p) => { const k = (1000 * p.M0 * p.d) / (p.x0 * (p.x0 + p.d)); return Math.abs(k - Math.round(k)) < 1e-9 && k >= 2 && k <= 40; }, { M0: 6, x0: 100, d: 20 });
+  const { M0, x0, d } = P, k = Math.round((1000 * M0 * d) / (x0 * (x0 + d))), G = 1000 * M0;
+  const out = mk({
+    topic: 'cakes', tol: 1e-6,
+    prompt: `Jon uses ${M('x')} grams of sugar to bake one cake. Ria changes the recipe and uses ${d} g more sugar per cake. Jon bakes ${k} more cakes than Ria when each uses exactly ${M0} kg of sugar in total. Form an equation in ${M('x')}, solve it, and find the number of cakes Jon bakes. (1 kg = 1000 g)`,
+    fields: [M('x =') + ' (grams)', 'cakes baked by Jon ='], answer: [x0, G / x0],
+    hint: `Change ${M0} kg into grams first. Jon bakes ${M(`\\dfrac{${G}}{x}`)} cakes. Ria bakes ${M(`\\dfrac{${G}}{x+${d}}`)}. Jon's number minus Ria's number is ${k}.`,
+    solution: `${M0} kg = ${G} g.<br>${M(`\\dfrac{${G}}{x} - \\dfrac{${G}}{x+${d}} = ${k}`)}<br>${M(`${G}(x+${d}) - ${G}x = ${k}x(x+${d})`)}<br>${M(`${k}x^2 + ${k * d}x - ${G * d} = 0`)}<br>${formulaHow2(k, k * d, -G * d)}${M('x = ' + x0)} (reject the negative root).<br>Jon bakes ${M(`\\dfrac{${G}}{${x0}} = ${G / x0}`)} cakes.`,
+  });
+  return withRes(out, (x) => G / x - G / (x + d) - k);
+}
+
+/* ---- G: Challenge Yourself (stretch): simultaneous equations, one x-intercept, sum and product of roots ---- */
+function gSimult() {
+  const v = R(1, 3); let q;
+  if (v === 1) {
+    let a, b; do { a = nz(-7, 7); b = nz(-7, 7); } while (a >= b);
+    q = mk({ topic: 'simult', tol: 1e-6, prompt: `<span class="tag">Stretch</span> Solve the simultaneous equations ${M(`x + y = ${a + b}`)} and ${M(`xy = ${a * b}`)}. Give the solution with the smaller x first.`,
+      fields: [M('x_1 ='), M('y_1 ='), M('x_2 ='), M('y_2 =')], answer: [a, b, b, a],
+      hint: `From the first equation, ${M(`y = ${a + b} - x`)}. Put that into the second equation and solve the quadratic in x.`,
+      solution: `${M(`y = ${a + b} - x`)}<br>${M(`x(${a + b} - x) = ${a * b}`)}<br>${M(`x^2 - ${a + b}x + ${a * b} = 0`)}<br>${factorHow(-(a + b), a * b)}${M(`x = ${a}`)} gives ${M(`y = ${b}`)}; ${M(`x = ${b}`)} gives ${M(`y = ${a}`)}.` });
+    return withRes(q, () => 0);
+  }
+  if (v === 2) {
+    let r1, r2; do { r1 = nz(-5, 5); r2 = nz(-5, 5); } while (r1 >= r2);
+    const m = nz(-3, 3), n = nz(-6, 6), b = m - (r1 + r2), c = n + r1 * r2;
+    q = mk({ topic: 'simult', tol: 1e-6, prompt: `<span class="tag">Stretch</span> The line ${M('y = ' + poly(0, m, n))} meets the curve ${M('y = ' + poly(1, b, c))} at two points. Find their coordinates. Give the point with the smaller x first.`,
+      fields: [M('x_1 ='), M('y_1 ='), M('x_2 ='), M('y_2 =')], answer: [r1, m * r1 + n, r2, m * r2 + n],
+      hint: `Where they meet, the two y-values are equal. Set ${M(poly(0, m, n))} equal to ${M(poly(1, b, c))}, collect to ${M('ax^2+bx+c=0')} and solve for x. Then put each x into the line to get y.`,
+      solution: `${M(`${poly(1, b, c)} = ${poly(0, m, n)}`)}<br>${M(`${poly(1, b - m, c - n)} = 0`)}<br>${factorHow(b - m, c - n)}x = ${r1} or ${r2}. Then ${M(`y = ${poly(0, m, n).replace(/x/g, `(${r1})`)} = ${m * r1 + n}`)} and ${M(`y = ${poly(0, m, n).replace(/x/g, `(${r2})`)} = ${m * r2 + n}`)}.` });
+    return q;
+  }
+  for (;;) {
+    const s = R(2, 6), p = pick([-4, -3, -2, 2, 3, 4]), qq = pick([-2, -1, 1, 2, 3]), A = 1 - p + qq, B = s * (p - 2 * qq), C = qq * s * s;
+    if (A === 0) continue;
+    const ans = quad(A, B, C); if (!ans || ans.some((v) => !Number.isFinite(v)) || ans.some((v) => Math.abs(v) > 40)) continue; const xs = ans.slice().sort((x, y) => x - y);
+    q = mk({ topic: 'simult', tol: 0.011, prompt: `<span class="tag">Stretch</span> Solve ${M(`x + y = ${s}`)} and ${M(`x^2 ${p < 0 ? '-' : '+'} ${Math.abs(p)}xy ${qq < 0 ? '-' : '+'} ${Math.abs(qq) === 1 ? '' : Math.abs(qq)}y^2 = 0`)}. Give answers to 2 decimal places, smaller x first.`,
+      fields: [M('x_1 ='), M('y_1 ='), M('x_2 ='), M('y_2 =')], answer: [xs[0], s - xs[0], xs[1], s - xs[1]],
+      hint: `From the first equation, ${M(`y = ${s} - x`)}. Replace every y in the second equation by ${M(`(${s} - x)`)}, expand and collect.`,
+      solution: `${M(`y = ${s} - x`)}<br>After substituting and collecting: ${M(poly(A, B, C) + '=0')}<br>${formulaHow2(A, B, C)}${M('x=' + orList(xs))}. Then ${M('y = ' + s + ' - x')} for each.` });
+    return withRes(q, () => 0);
+  }
+}
+
+function gOneInt() {
+  const a = pick([1, 2, 3, 4, 5]), t = nz(-4, 4), b = 2 * a * t, c = a * t * t;
+  return mk({
+    topic: 'oneint', tol: 1e-6,
+    prompt: `<span class="tag">Stretch</span> The graph of ${M(`y = ${poly(a, b, 0)} + c`)} cuts the x-axis at exactly one point ${M('P')}. Find ${M('c')} and the x-coordinate of ${M('P')}.`,
+    fields: [M('c ='), M('x\\text{-coordinate of } P =')], answer: [c, -t],
+    hint: `One point on the x-axis means the equation ${M(`${poly(a, b, 0)} + c = 0`)} has exactly one solution, so ${M('b^2-4ac=0')}. Solve for c, then solve the equation.`,
+    solution: `${M(`${b}^2 - 4(${a})c = 0`)}<br>${M(`c = ${c}`)}<br>${M(`${poly(a, b, c)} = 0`)} gives ${M(`${a === 1 ? '' : a}(x ${plus(t)})^2 = 0`)}, so ${M('x = ' + -t)}.`,
+  });
+}
+
+function gSumProd() {
+  if (Math.random() < 0.55) {
+    const a = pick([1, 2, 3, 4, 5]), b = nz(-9, 9), c = nz(-9, 9);
+    return mk({
+      topic: 'sumprod', tol: 0.006,
+      prompt: `<span class="tag">Stretch</span> The equation ${M(poly(a, b, c) + ' = 0')} has solutions ${M('x=h')} and ${M('x=k')}. Without solving it, find ${M('h+k')} and ${M('hk')}. Give fractions like 7/2 or decimals to 2 d.p.`,
+      fields: [M('h + k ='), M('hk =')], answer: [-b / a, c / a],
+      hint: `If ${M('h')} and ${M('k')} are the solutions, then ${M('a(x-h)(x-k) = ax^2 - a(h+k)x + ahk')}. Compare it with ${M(poly(a, b, c))}.`,
+      solution: `${M('a(x-h)(x-k) = ax^2 - a(h+k)x + a\\,hk')}. Comparing: ${M(`-a(h+k) = ${b}`)} and ${M(`a\\,hk = ${c}`)}.<br>${M(`h+k = \\dfrac{-${par(b)}}{${a}} = ${fmt(-b / a)}`)} and ${M(`hk = \\dfrac{${c}}{${a}} = ${fmt(c / a)}`)}.`,
+    });
+  }
+  const r = nz(-6, 6), s = nz(-6, 6), b = r + s, c = r * s;
+  return mk({
+    topic: 'sumprod', tol: 1e-6,
+    prompt: `<span class="tag">Stretch</span> One solution of ${M(`${poly(1, -b, 0)} + c = 0`)} is ${M('x=' + r)}. Find ${M('c')} and the other solution.`,
+    fields: [M('c ='), 'other solution, x ='], answer: [c, s],
+    hint: `Put ${M('x=' + r)} into the equation to find c. Then solve the equation, or use that the two solutions add up to ${b}.`,
+    solution: `${M(`(${r})^2 ${plus(-b)}(${r}) + c = 0`)}, so ${M('c=' + c)}.<br>${M(`${poly(1, -b, c)} = 0`)}<br>${factorHow(-b, c)}The other solution is ${M('x = ' + s)}.`,
+  });
+}
+
 /* ---------- registry ---------- */
 const TOPICS = {
   factor:  { name: 'Solve by factorising',                gen: gFactor,    day: 1 },
@@ -797,12 +1040,14 @@ const TOPICS = {
   factexp: { name: 'Factorise an expression',             gen: gFactExp,   day: 1 },
   ctsd:    { name: 'Complete the square: fractions and decimals', gen: gCtsDec, day: 1 },
   ctss:    { name: 'Solve by completing the square',      gen: gCtsSolve,  day: 2 },
-  ctsa:    { name: 'Complete the square when a is not 1', gen: gCtsA,      day: 2 },
-  ctssa:   { name: 'Solve by completing the square, a not 1', gen: gCtsSolveA, day: 2 },
+  hence:   { name: 'Express, then hence solve',             gen: gHence,     day: 2 },
+  ctsa:    { name: 'Stretch: complete the square, a not 1', gen: gCtsA,      day: 2, stretch: true },
+  ctssa:   { name: 'Stretch: solve by completing the square, a not 1', gen: gCtsSolveA, day: 2, stretch: true },
   formula: { name: 'Quadratic formula',                   gen: gFormula,   day: 2 },
   rearr:   { name: 'Tidy up first, then solve',           gen: gRearr,     day: 2 },
+  subst:   { name: 'Hence: substitution',                  gen: gSubst,     day: 2 },
   disc:    { name: 'Discriminant and number of roots',    gen: gDisc,      day: 2 },
-  kval:    { name: 'Find an unknown using the discriminant', gen: gKval,   day: 2 },
+  kval:    { name: 'Stretch: find an unknown using the discriminant', gen: gKval,   day: 2, stretch: true },
   fromroots: { name: 'Form an equation from its solutions', gen: gFromRoots, day: 2 },
   frac:    { name: 'Fractional equations',                gen: gFrac,      day: 3 },
   frac2:   { name: 'Harder fractional equations',         gen: gFrac2,     day: 3 },
@@ -816,7 +1061,10 @@ const TOPICS = {
   gline:   { name: 'Which line solves another equation',  gen: gGLine,     day: 4 },
   hline:   { name: 'Horizontal lines and a curve',        gen: gHLine,     day: 4 },
   pq:      { name: 'Find p and q from a graph',           gen: gPQ,        day: 4 },
-  gcsa:    { name: 'Graphs when a is not 1 (stretch)',    gen: gGCsA,      day: 4 },
+  readgraph: { name: 'Read values from a graph',            gen: gReadGraph, day: 4 },
+  simult:  { name: 'Stretch: a line and a curve, simultaneous', gen: gSimult, day: 4, stretch: true },
+  oneint:  { name: 'Stretch: exactly one x-intercept',     gen: gOneInt,    day: 4, stretch: true },
+  gcsa:    { name: 'Stretch: graphs when a is not 1',    gen: gGCsA,      day: 4, stretch: true },
   rect:    { name: 'Word problems: area',                 gen: gRect,      day: 5 },
   speed:   { name: 'Word problems: speed and time',       gen: gSpeed,     day: 5 },
   proj:    { name: 'Word problems: maximum height',       gen: gProj,      day: 5 },
@@ -825,6 +1073,15 @@ const TOPICS = {
   work:    { name: 'Word problems: working together',     gen: gWork,      day: 5 },
   profit:  { name: 'Word problems: profit model',         gen: gProfit,    day: 5 },
   path:    { name: 'Word problems: path around a garden', gen: gPath,      day: 5 },
+  price:   { name: 'Word problems: price per kilogram',   gen: gPrice,     day: 6 },
+  exch:    { name: 'Word problems: exchange rates',       gen: gExch,      day: 6 },
+  rate:    { name: 'Word problems: litres per minute',    gen: gRate,      day: 6 },
+  stream:  { name: 'Word problems: upstream and downstream', gen: gStream, day: 6 },
+  journey: { name: 'Word problems: a journey in two parts', gen: gJourney, day: 6 },
+  border:  { name: 'Word problems: border inside a room', gen: gBorder,    day: 6 },
+  perim:   { name: 'Word problems: perimeter and area',   gen: gPerim,     day: 6 },
+  cakes:   { name: 'Word problems: grams per cake',       gen: gCakes,     day: 6 },
+  sumprod: { name: 'Stretch: sum and product of solutions', gen: gSumProd, day: 2, stretch: true },
 };
 const generate = (topic) => TOPICS[topic].gen();
 

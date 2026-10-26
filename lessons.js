@@ -4,6 +4,19 @@ const SPINE = `Everything in this chapter grows from <b>one idea: completing the
 The quadratic formula is completing the square done once with letters. The turning point of a graph is what completing the square shows you.
 Fractional equations and word problems both <i>end</i> in a quadratic.`;
 
+/* The timed mock paper: 40 marks, laid out like a school paper. Each item picks one topic at random from its pool. */
+const MOCK_PAPER = {
+  title: 'Sec 3 E-Maths mock paper: Quadratic and Fractional Equations', minutes: 60,
+  intro: 'A calculator is allowed. Give non-exact answers to the accuracy asked in each question.',
+  sections: [
+    { name: 'Fractional equations', items: [{ pool: ['frac3', 'frac2'], marks: 4 }] },
+    { name: 'Completing the square', items: [{ pool: ['hence'], marks: 4 }] },
+    { name: 'Factorising and equations', items: [{ pool: ['factexp'], marks: 3 }, { pool: ['fromroots', 'rearr'], marks: 3 }] },
+    { name: 'Graphs', items: [{ pool: ['gcs', 'gfact'], marks: 3 }, { pool: ['hline'], marks: 3 }, { pool: ['pq'], marks: 3 }, { pool: ['ggen', 'readgraph'], marks: 3 }] },
+    { name: 'Word problems', items: [{ pool: ['speed', 'rect', 'path', 'border', 'proj', 'pyth', 'consec'], marks: 6 }, { pool: ['price', 'exch', 'rate', 'stream', 'journey', 'cakes', 'perim', 'work', 'profit'], marks: 8 }] },
+  ],
+};
+
 const DAYS = [
   /* ------------------------------------------------------------------ DAY 1 */
   {
@@ -141,6 +154,11 @@ const DAYS = [
           { text: 'Whatever we do to one side we must do to the other, so the equation stays balanced', ok: true, why: 'Adding 4 to the left makes it \\((x+2)^2\\). Adding 4 to the right keeps both sides equal, so the solutions do not change.' },
           { text: 'Because 2 is the answer', ok: false, why: '2 is half of the 4. It is not the answer.' } ],
         explain: 'Equations are a balance. Every move must be done to both sides.' },
+      { t: 'html', html: `<h3>\"Hence\": use what you just found</h3><p>Exam questions often come in two parts. First <b>express</b> the quadratic in the form \\((x+a)^2+k\\). Then \"<b>hence</b> solve\" it. Hence means <b>use your answer to the first part</b>, do not start again.</p><p>Example: \\(x^2-3x-2=\\left(x-\\tfrac32\\right)^2-\\tfrac{17}{4}\\). So \\(x^2-3x-2=0\\) means \\(\\left(x-\\tfrac32\\right)^2=\\tfrac{17}{4}\\), and \\(x=\\tfrac32\\pm\\tfrac{\\sqrt{17}}{2}\\).</p>` },
+
+      { t: 'practice', id: 'd2-hence', title: 'Practice: express, then hence solve', topics: ['hence'], need: 3,
+        intro: 'Part (a) gives a and k. Part (b) uses them. Fractions like 3/2 and decimals are both fine.' },
+
       { t: 'html', html: `<h3>What if there is a number in front of x²?</h3><p>Example: \\(2x^2+8x-6=0\\). Divide <b>every</b> term by 2 first to get \\(x^2+4x-3=0\\), and carry on as before. Dividing both sides by the same number keeps the solutions the same.</p><p>To <b>rewrite</b> an expression such as \\(2x^2+8x-6\\), take the 2 out of the first two terms only, complete the square inside, then multiply the correction by 2:</p>\\[2x^2+8x-6=2(x^2+4x)-6=2\\left[(x+2)^2-4\\right]-6=2(x+2)^2-14\\]` },
 
       { t: 'predict', id: 'd2-p4',
@@ -150,11 +168,11 @@ const DAYS = [
           { text: 'Add 36 to both sides', ok: false, why: '36 is \\((-12/2)^2\\), but that rule only works once the \\(x^2\\) has coefficient 1.' },
           { text: 'Move the 5 across and leave the 3', ok: false, why: 'You can move the 5, but you still cannot complete the square while the x² has a 3 in front.' } ],
         explain: 'Always make the coefficient of \\(x^2\\) equal to 1 first.' },
-      { t: 'practice', id: 'd2-ctsa', title: 'Practice: rewrite when a is not 1', topics: ['ctsa'], need: 3,
-        intro: 'Write it as a(x + r)² + u. Take a out of the first two terms.' },
+      { t: 'practice', id: 'd2-ctsa', title: 'Stretch: rewrite when a is not 1', topics: ['ctsa'], need: 3,
+        intro: 'Beyond what the exam asks, so treat this as a challenge. Write it as a(x + r)² + u.' },
 
-      { t: 'practice', id: 'd2-ctssa', title: 'Practice: solve when a is not 1', topics: ['ctssa'], need: 3,
-        intro: 'Divide by a first. Answers to 2 decimal places.' },
+      { t: 'practice', id: 'd2-ctssa', title: 'Stretch: solve when a is not 1', topics: ['ctssa'], need: 3,
+        intro: 'Beyond what the exam asks. Divide by a first. Answers to 2 decimal places.' },
 
       { t: 'html', html: `<h3>Now do it with letters</h3>
         <p>Completing the square on \\(x^2+4x-3=0\\) took 6 steps. If we do the <b>same 6 steps</b> on \\(ax^2+bx+c=0\\), we get a formula that solves <i>every</i> quadratic. Click through slowly.</p>` },
@@ -186,6 +204,11 @@ const DAYS = [
           { text: '\\(y=\\dfrac{a\\pm\\sqrt{a^2-24}}{2}\\)', ok: false, why: '\\(b^2-4ac=a^2-4(1)(-6)=a^2+24\\). A minus times a minus is a plus.' },
           { text: '\\(y=a\\pm\\sqrt{a^2+24}\\)', ok: false, why: 'You forgot to divide by 2a, the whole top is divided by 2.' } ],
         explain: 'The formula works even when b and c contain letters. Treat them like numbers and keep the signs careful.' },
+      { t: 'html', html: `<h3>Calculator tips for the formula</h3><ul><li>Put brackets round every negative number you substitute: \\((-4)^2=16\\), but \\(-4^2=-16\\) on most calculators.</li><li>Work out \\(b^2-4ac\\) <b>first</b> and write it down. Check its sign before you take the square root.</li><li>Use the calculator for the top and the bottom <b>separately</b>, or put the whole top in brackets before dividing by \\(2a\\).</li><li>Change the ± by hand: do it once with +, once with −.</li></ul>` },
+
+      { t: 'practice', id: 'd2-subst', title: 'Practice: hence, by substitution', topics: ['subst'], need: 3,
+        intro: 'The second equation is the first one in disguise. What plays the part of x?' },
+
       { t: 'predict', id: 'd2-p1',
         q: 'In the quadratic formula, what happens if \\(b^2-4ac\\) is negative?',
         options: [
@@ -211,8 +234,11 @@ const DAYS = [
 
       { t: 'html', html: `<h3>Finding an unknown constant</h3><p>The number of real solutions tells you the sign of \\(b^2-4ac\\): <b>zero</b> for one (equal) solution, <b>positive</b> for two, <b>negative</b> for none. Put the letter into \\(b^2-4ac\\) and solve.</p><p>Example: \\(x^2+kx+9=0\\) has equal roots, so \\(k^2-36=0\\), giving \\(k=6\\) or \\(k=-6\\).</p>` },
 
-      { t: 'practice', id: 'd2-kval', title: 'Practice: find the unknown', topics: ['kval'], need: 3,
+      { t: 'practice', id: 'd2-kval', title: 'Stretch: find the unknown', topics: ['kval'], need: 3,
         intro: 'Use b² − 4ac and the number of solutions.' },
+
+      { t: 'practice', id: 'd2-sumprod', title: 'Stretch: sum and product of solutions', topics: ['sumprod'], need: 2,
+        intro: 'A challenge question from the end of the chapter. Work without solving the equation if you can.' },
 
       { t: 'paper', title: 'The big test: derive it on blank paper',
         tasks: ['Start from \\(ax^2+bx+c=0\\) and derive the quadratic formula. No notes, no screen.', 'Next to every line, write what you did (for example "divided by a").'],
@@ -341,6 +367,8 @@ const DAYS = [
       { t: 'widget', name: 'graph' },
       { t: 'widget', name: 'rootHunt', id: 'd4-roothunt' },
 
+      { t: 'html', html: `<div class=\"callout key\"><b>SIT: a checklist for every sketch.</b><br><b>S</b>hape: does it open up (positive) or down (negative)?<br><b>I</b>ntercepts: where does it cross the y-axis (put x = 0) and the x-axis (put y = 0)?<br><b>T</b>urning point: the lowest or highest point, on the line of symmetry.</div>` },
+
       { t: 'predict', id: 'd4-p1',
         q: 'A U-shaped curve crosses the x-axis at x = 2 and x = 8. At which x is its lowest point? (Try the explorer above first.)',
         options: [
@@ -431,6 +459,22 @@ const DAYS = [
 
       { t: 'practice', id: 'd4-gcsa', title: 'Stretch: when a is not 1', topics: ['gcsa'], need: 3,
         intro: 'The same ideas, with a number in front of the bracket. Extra challenge, not in the book.' },
+
+      { t: 'practice', id: 'd4-readgraph', title: 'Practice: read values from a graph', topics: ['readgraph'], need: 3,
+        intro: 'Read across and down to the nearest 0.5. Answers within 0.5 are accepted.' },
+
+      { t: 'predict', id: 'd4-p7',
+        q: 'A stone is thrown from a tower. Its height is \\(y=45+12x-x^2\\), where \\(x\\) is the horizontal distance from the foot of the tower in metres. Solving \\(45+12x-x^2=0\\) gives \\(x=15\\) or \\(x=-3\\). What does the positive solution mean?',
+        options: [
+          { text: 'The stone hits the ground 15 m from the foot of the tower', ok: true, why: 'When y = 0 the stone is at ground level. Only the positive distance makes sense, so x = −3 is rejected.' },
+          { text: 'The stone reaches a greatest height of 15 m', ok: false, why: 'The greatest height is the turning point, not a solution of y = 0.' },
+          { text: 'The stone is in the air for 15 seconds', ok: false, why: 'x is a horizontal distance in metres, not a time.' } ],
+        explain: 'In context questions, say what the number means with units: "The stone lands 15 m from the foot of the tower."' },
+      { t: 'practice', id: 'd4-simult', title: 'Stretch: a line and a curve, simultaneous', topics: ['simult'], need: 2,
+        intro: 'A challenge from the end of the chapter. Substitute one equation into the other.' },
+
+      { t: 'practice', id: 'd4-oneint', title: 'Stretch: exactly one x-intercept', topics: ['oneint'], need: 2,
+        intro: 'One x-intercept means b² − 4ac = 0.' },
 
       { t: 'paper', title: 'Sketch on plain paper',
         tasks: ['Sketch \\(y=x^2-6x+5\\). Hint: it factorises.', 'Sketch \\(y=-x^2-6x-11\\). Hint: complete the square, and the curve does not reach the x-axis.', 'Sketch \\(y=(x-1)^2-4\\) and label the turning point, both intercepts and the line of symmetry.'],
@@ -540,24 +584,110 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 6 */
   {
-    n: 6, title: 'The mixed test', minutes: 40,
-    tagline: 'Everything, shuffled, no help',
+    n: 6, title: 'Money, rates and journeys', minutes: 130,
+    tagline: 'The same equation wearing different clothes',
     blocks: [
       { t: 'goal', items: [
-        'No hints. No topic labels. Questions in random order, like the real thing.',
-        'Score 12 out of 15 or higher in 30 minutes.' ] },
-      { t: 'html', html: `<span class="tag">🔥 Boss fight</span><h3>The guardian of the castle</h3><p>Fifteen questions stand between you and the castle. They come from every level, in random order, and the guardian gives <b>no hints</b>. Everything you built this week is your weapon.</p>` },
+        'Spot the pattern behind price, rate, speed and journey stories: <b>amount ÷ rate = quantity or time</b>.',
+        'Form the equation yourself, reject any answer that makes no sense, and answer in the right units.',
+        'Change units before you form the equation (kg to g, seconds to minutes, minutes to hours).' ] },
 
-      { t: 'html', html: `<div class="callout">Rules: no notes, no phone, a calculator is allowed (like in school). Write your working on paper, then type the answer. If the score is below 12, tomorrow's session fixes the weak spots.</div>` },
-      { t: 'drill', id: 'd6-test', title: 'Mixed test', maxDay: 5, n: 15, minutes: 30, test: true, pass: 12,
-        intro: '15 questions, 30 minutes. One try each. Pass mark: 12.' },
+      { t: 'html', html: `<span class="tag">🧾 The hook</span><h3>One story, eight disguises</h3><p>Rice and dollars. Pumps and litres. Boats and rivers. Cakes and sugar. They look different, but almost every one hides the same sentence: <b>"the same amount is shared out two ways, and the two answers differ by a fixed amount."</b></p><p>That gives a fraction equation, and a fraction equation gives a quadratic. Once you see the pattern, the stories stop being scary.</p>` },
+
+      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 6, minutes: 10,
+        intro: '6 questions, no hints, 10 minutes.' },
+
+      { t: 'html', html: `<h3>The one pattern</h3><table class="prog"><tr><th>Story</th><th>Amount</th><th>Rate</th><th>Result</th></tr>
+        <tr><td>Rice</td><td>$360</td><td>$x per kg</td><td>\\(\\dfrac{360}{x}\\) kg</td></tr>
+        <tr><td>Pump</td><td>1500 litres</td><td>x litres per minute</td><td>\\(\\dfrac{1500}{x}\\) minutes</td></tr>
+        <tr><td>Journey</td><td>12 km</td><td>x km/h</td><td>\\(\\dfrac{12}{x}\\) hours</td></tr>
+        <tr><td>Cake</td><td>6000 g sugar</td><td>x g per cake</td><td>\\(\\dfrac{6000}{x}\\) cakes</td></tr></table>
+        <p>Write the result for both versions, subtract (or add), set it equal to what the story gives, and multiply by the common denominator.</p>` },
+
+      { t: 'predict', id: 'd6-p1',
+        q: 'Rice costs \\(\\$x\\) per kilogram. How many kilograms does \\(\\$360\\) buy?',
+        options: [
+          { text: '\\(\\dfrac{360}{x}\\)', ok: true, why: 'Quantity = amount ÷ price per unit.' },
+          { text: '\\(360x\\)', ok: false, why: 'That multiplies. A bigger price per kg should buy <i>fewer</i> kg, so we must divide.' },
+          { text: '\\(\\dfrac{x}{360}\\)', ok: false, why: 'This is upside down. Check: if x = 1 dollar per kg, $360 buys 360 kg, not 1/360 kg.' } ],
+        explain: 'Always test your expression with an easy number, like x = 1.' },
+      { t: 'predict', id: 'd6-p2',
+        q: 'A pump fills 1500 litres at \\(x\\) litres per minute, and a second pump is 150 <b>seconds</b> slower. In an equation for the times in <b>minutes</b>, what goes on the right-hand side?',
+        options: [
+          { text: '\\(\\dfrac{150}{60}\\)', ok: true, why: '150 seconds ÷ 60 = 2.5 minutes. Match the units on both sides.' },
+          { text: '150', ok: false, why: 'That would be 150 minutes. The left-hand side is in minutes, so the 150 seconds must be converted first.' },
+          { text: '\\(150\\times 60\\)', ok: false, why: 'That converts the wrong way: it turns minutes into seconds.' } ],
+        explain: 'Before you write the equation, put every time in the same unit.' },
+      { t: 'predict', id: 'd6-p3',
+        q: 'A boat goes \\(x\\) km/h in still water. The river current is 5 km/h. How fast does it go <b>upstream</b>?',
+        options: [
+          { text: '\\((x-5)\\) km/h', ok: true, why: 'Going against the current slows you down by 5.' },
+          { text: '\\((x+5)\\) km/h', ok: false, why: 'That is the speed <i>downstream</i>, with the current helping.' },
+          { text: '\\((5-x)\\) km/h', ok: false, why: 'This would be negative for any real boat. The boat is faster than the current.' } ],
+        explain: 'Upstream: subtract the current. Downstream: add it.' },
+
+      { t: 'practice', id: 'd6-price', title: 'Practice: price per kilogram', topics: ['price'], need: 2,
+        intro: 'Money spent ÷ price per kg = kilograms bought.' },
+
+      { t: 'practice', id: 'd6-exch', title: 'Practice: exchange rates', topics: ['exch'], need: 2,
+        intro: 'Foreign money received = money exchanged ÷ rate.' },
+
+      { t: 'practice', id: 'd6-rate', title: 'Practice: litres per minute', topics: ['rate'], need: 2,
+        intro: 'Change seconds to minutes first.' },
+
+      { t: 'practice', id: 'd6-cakes', title: 'Practice: grams per cake', topics: ['cakes'], need: 2,
+        intro: 'Change kilograms to grams first.' },
+
+      { t: 'practice', id: 'd6-stream', title: 'Practice: upstream and downstream', topics: ['stream'], need: 2,
+        intro: 'Upstream is x minus the current. Downstream is x plus the current.' },
+
+      { t: 'practice', id: 'd6-journey', title: 'Practice: a journey in two parts', topics: ['journey'], need: 2,
+        intro: 'Part of the time is the same for both. Look for what cancels.' },
+
+      { t: 'practice', id: 'd6-border', title: 'Practice: a border inside a room', topics: ['border'], need: 3,
+        intro: 'Draw the room. The tiled rectangle loses x on every side.' },
+
+      { t: 'practice', id: 'd6-perim', title: 'Practice: perimeter and area', topics: ['perim'], need: 3,
+        intro: 'Half the perimeter is length + breadth.' },
+
+
+      { t: 'errors', id: 'd6-err', title: 'Spot the mistake', items: [
+        { title: 'A pump fills a 1500-litre tank at \\(x\\) litres per minute. A second pump, 20 litres per minute faster, fills it 150 seconds sooner.', lines: [
+          '\\dfrac{1500}{x}-\\dfrac{1500}{x+20}=150',
+          '1500(x+20)-1500x=150x(x+20)',
+          '30000=150x^2+3000x',
+          'x^2+20x-200=0'], wrong: 0,
+          why: 'The right-hand side should be in <b>minutes</b>, because the left-hand side is in minutes. 150 seconds is \\(\\dfrac{150}{60}=2.5\\) minutes. Then \\(2.5x(x+20)=30000\\), which simplifies to \\(x^2+20x-12000=0\\).' },
+      ] },
+
       { t: 'done' },
     ],
   },
 
   /* ------------------------------------------------------------------ DAY 7 */
   {
-    n: 7, title: 'Repair, then teach it back', minutes: 50,
+    n: 7, title: 'Mixed test and mock paper', minutes: 110,
+    tagline: 'Everything, shuffled, then a full timed paper',
+    blocks: [
+      { t: 'goal', items: [
+        'No hints. No topic labels. Questions in random order, like the real thing.',
+        'Score 12 out of 15 or higher in 30 minutes.',
+        'Then score 28 out of 40 or higher on the full mock paper in 60 minutes.' ] },
+      { t: 'html', html: `<span class="tag">🔥 Boss fight</span><h3>The guardian of the castle</h3><p>Fifteen questions stand between you and the castle. They come from every level, in random order, and the guardian gives <b>no hints</b>. Everything you built this week is your weapon.</p>` },
+
+      { t: 'html', html: `<div class="callout">Rules: no notes, no phone, a calculator is allowed (like in school). Write your working on paper, then type the answer. If the score is below 12, tomorrow's session fixes the weak spots.</div>` },
+      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 6, n: 15, minutes: 30, test: true, pass: 12,
+        intro: '15 questions, 30 minutes. One try each. Pass mark: 12.' },
+
+      { t: 'mock', id: 'd7-mock', pass: 28, ...MOCK_PAPER },
+
+      { t: 'done' },
+    ],
+  },
+
+  /* ------------------------------------------------------------------ DAY 7 */
+  {
+    n: 8, title: 'Repair, then teach it back', minutes: 50,
     tagline: 'Fix the weak spots, then teach the whole chapter',
     blocks: [
       { t: 'goal', items: [
@@ -567,7 +697,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏰 Final level</span><h3>Repair your armour</h3><p>The boss found the cracks in your armour. Now you repair them, then prove you can teach the whole chapter in one story, and take on the Wake-up test.</p>` },
 
-      { t: 'drill', id: 'd7-weak', title: 'Your weakest topics', topics: 'weak', n: 8, minutes: 12, pass: 6,
+      { t: 'drill', id: 'd8-weak', title: 'Your weakest topics', topics: 'weak', n: 8, minutes: 12, pass: 6,
         intro: 'These are picked from your own record in this app, lowest accuracy first.' },
 
       { t: 'teachback', title: 'Teach the whole chapter (5 minutes)',
@@ -602,10 +732,11 @@ const COVERAGE = [
   { sec: '1.6', book: 'Word problems: speed, distance, time with a fraction (WE 15, PN 15)', here: 'Level 5 (speed, work)' },
   { sec: '1.6', book: 'Modelling by a quadratic function (WE 16, PN 16)', here: 'Level 5 (proj, profit, Launch Lab)' },
   { sec: 'Beyond', book: 'Typical Sec 3 and O-Level extras not in the book', here: 'kval (find k), gline (which line solves another equation), gcsa (a not 1), consec, work, profit, path, harder frac2' },
-  { sec: 'Ex 1E', book: 'Q1-Q11 word problems: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Partly done: rect, speed, proj, pyth, path, work. Still to add: price per item and exchange rates, litres or pages per minute with unit changes, upstream and downstream, multi-stage journeys, plotting from a table' },
+  { sec: 'Ex 1E', book: 'Q1-Q11: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Levels 5 and 6 (rect, speed, proj, pyth, path, work, price, exch, rate, journey, stream, cakes, border, perim) plus plotting in Level 4. The pyramid-face geometry question is not generated.' },
   { sec: 'Summary', book: 'Chapter Summary: completing the square, the four methods, LCM method for fractions, graph facts', here: 'Covered across Levels 1 to 4' },
-  { sec: 'Review 1', book: 'Q1-Q3 solve; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 1 to 4 (ctsx/ctsd, rearr, fromroots, frac, frac2, frac3, sketching topics)' },
-  { sec: 'Review 1', book: 'Q4(ii) substitution, such as 2(y-1)² - 7(y-1) + 4 = 0; Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Still to add (gaps E and F)' },
-  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Not yet (stretch)' },
-  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q from intercepts, two word problems', here: 'Added: factexp (factorise expressions), frac3 (factorisable denominators), fromroots and pq (build from information), hline (horizontal-line reasoning)' },
+  { sec: 'Review 1', book: 'Q1-Q3 solve; Q4 substitution; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 1 to 4 (ctsx, ctsd, rearr, subst, fromroots, frac, frac2, frac3, sketching topics)' },
+  { sec: 'Review 1', book: 'Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Level 6 (exch, journey, cakes, border, stream, work) and Level 4 (readgraph, stone-in-context predict)' },
+  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Stretch practice: simult and oneint (Level 4), sumprod (Level 2)' },
+  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q, two word problems', here: 'factexp, frac3, fromroots, pq, hline, hence, plus a 40-mark timed mock paper (Level 7 and the Mock paper button)' },
+  { sec: 'Syllabus', book: 'MOE G3 Mathematics: completing the square is limited to x² + px + q; the word discriminant is not used', here: 'Topics beyond that (a not 1, find k, sum and product, simultaneous, one-intercept) are labelled Stretch and kept out of the tests, mock paper and Wake-up mode' },
 ];

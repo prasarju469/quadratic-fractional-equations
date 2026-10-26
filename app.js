@@ -44,9 +44,9 @@
   };
 
   /* ---------- XP, ranks and level progress ---------- */
-  const RANKS = ['Rookie', 'Apprentice', 'Equation Solver', 'Square Master', 'Root Hunter', 'Parabola Pro', 'Boss Slayer', 'Legend'];
+  const RANKS = ['Rookie', 'Apprentice', 'Equation Solver', 'Square Master', 'Root Hunter', 'Parabola Pro', 'Story Solver', 'Boss Slayer', 'Legend'];
   const AVATARS = ['🦊', '🐲', '🤖', '🐱', '🦉', '🐺', '🚀', '🦖'];
-  const SHORT = ['Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Mixed test', 'Repair', 'Castle'];
+  const SHORT = ['Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Rates', 'Mock exam', 'Repair', 'Castle'];
   const doneCount = () => DAYS.filter((d) => Store.d.done[d.n]).length;
   function xp() {
     const clean = Object.values(Store.d.stats).reduce((a, s) => a + s.c, 0);
@@ -57,9 +57,9 @@
     const n = doneCount();
     box.innerHTML = `<span class="av">${Store.d.avatar || '🦊'}</span><span class="lv">★ ${n}/${DAYS.length}</span><span>${RANKS[n]}</span><span class="xpbar"><i style="width:${(n / DAYS.length) * 100}%"></i></span><span>🪙 ${xp()}</span>`;
   }
-  function trackable(d) { return d.blocks.filter((b) => ['practice', 'predict', 'errors', 'fixed', 'think', 'drill'].includes(b.t) || (b.t === 'widget' && b.id)); }
+  function trackable(d) { return d.blocks.filter((b) => ['practice', 'predict', 'errors', 'fixed', 'think', 'drill', 'mock'].includes(b.t) || (b.t === 'widget' && b.id)); }
   function isCleared(b) {
-    if (b.t === 'drill') return Store.d.drills.some((x) => x.id === b.id && (!b.pass || x.score >= b.pass));
+    if (b.t === 'drill' || b.t === 'mock') return Store.d.drills.some((x) => x.id === b.id && (!b.pass || x.score >= b.pass));
     if (b.t === 'think') return (Store.d.notes[b.id] || '').trim().length >= 15;
     return !!Store.d.cleared[b.id];
   }
@@ -78,12 +78,12 @@
   }
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  const allTopics = (maxDay) => Object.keys(TOPICS).filter((t) => TOPICS[t].day <= maxDay);
+  const allTopics = (maxDay) => Object.keys(TOPICS).filter((t) => TOPICS[t].day <= maxDay && !TOPICS[t].stretch);
   function weakTopics() {
     const rows = Object.keys(TOPICS).filter((t) => (Store.d.stats[t] || {}).t >= 2)
       .map((t) => ({ t, acc: Store.d.stats[t].c / Store.d.stats[t].t })).sort((a, b) => a.acc - b.acc);
     const weak = rows.filter((r) => r.acc < 0.85).slice(0, 4).map((r) => r.t);
-    return weak.length ? weak : allTopics(5);
+    return weak.length ? weak : allTopics(6);
   }
   const answerText = (q) => q.answerText || q.answer.map((v) => fmt(v)).join(q.kind === 'set' ? ' or ' : ',  ');
 
@@ -254,6 +254,7 @@
     teachback(b) { return checklistBlock('🎤 Teach it back', b.title, null, b.checks, null, 'tb-' + b.title, b.prompt); },
 
     drill(b) { return drillBlock(b); },
+    mock(b) { return mockBlock(b); },
 
     done(b, day) {
       const d = DAYS.find((x) => x.n === day), w = el('section', 'block finish');
@@ -417,6 +418,73 @@
     return w;
   }
 
+  /* ---------- timed mock paper ---------- */
+  function markItem(q, vals, marks) {
+    if (q.kind === 'tuple') {
+      const ok = q.answer.map((a, i) => { const n = parseNum(vals[i] || ''); const t = Array.isArray(q.tol) ? q.tol[i] : q.tol; return !Number.isNaN(n) && Math.abs(n - a) <= t; });
+      const k = ok.filter(Boolean).length;
+      return { earned: Math.round(((marks * k) / ok.length) * 2) / 2, full: k === ok.length };
+    }
+    const r = checkAnswer(q, vals);
+    return r.ok ? { earned: marks, full: true } : { earned: 0, full: false };
+  }
+
+  function mockBlock(b) {
+    const w = el('section', 'block mock');
+    const secMarks = (sec) => sec.items.reduce((a, i) => a + i.marks, 0), total = b.sections.reduce((a, sec) => a + secMarks(sec), 0);
+    function intro() {
+      w.innerHTML = `<span class="tag">📄 Mock paper</span><h3>${b.title}</h3><p class="muted">${b.intro || ''}</p>
+        <ul>${b.sections.map((sec) => `<li>${sec.name} <span class="muted">[${secMarks(sec)} marks]</span></li>`).join('')}</ul>
+        <p><b>${total} marks · ${b.minutes} minutes</b>${b.pass ? ` · pass mark ${b.pass}` : ''}. Work on paper, then type your final answers. Nothing is marked until you hand in.</p>
+        <button class="btn primary big">Start the paper</button>`;
+      w.querySelector('button').onclick = start;
+    }
+    function start() {
+      let no = 0, left = b.minutes * 60, tick = null, done = false, armed = false;
+      const paper = b.sections.map((sec) => ({ name: sec.name, items: sec.items.map((it) => ({ q: generate(it.pool[Math.floor(Math.random() * it.pool.length)]), marks: it.marks })) }));
+      w.innerHTML = `<div class="drillbar mockbar"><span class="tag">📄 ${b.title}</span><span class="timer" id="mtm">${mmss(left)}</span></div><div class="paper"></div>
+        <div class="actions"><button class="btn primary big" id="handin">Hand in the paper</button></div>`;
+      const host = w.querySelector('.paper');
+      paper.forEach((sec) => {
+        host.appendChild(el('h3', 'psec', `${sec.name} <span class="muted">[${secMarks({ items: sec.items })}]</span>`));
+        sec.items.forEach((it) => {
+          it.no = ++no;
+          it.card = el('div', 'mockq', `<div class="qno">Question ${it.no} <span class="marks">[${it.marks} marks]</span></div><div class="prompt">${it.q.prompt}</div>
+            <div class="fields${it.q.fields.length >= 5 ? ' grid' : ''}">${it.q.fields.map((f, i) => `<label class="field"><span>${f}</span><input type="text" class="${it.q.kind === 'factor' ? 'wide' : ''}" autocomplete="off" spellcheck="false" data-i="${i}" ${it.q.kind === 'set' ? 'placeholder="e.g. 2, -5"' : it.q.placeholder ? `placeholder="${it.q.placeholder}"` : ''}></label>`).join('')}</div>`);
+          host.appendChild(it.card);
+        });
+      });
+      math(host);
+      function finish(timeUp) {
+        if (done) return; done = true; clearInterval(tick);
+        let earned = 0; const missed = new Set();
+        const rows = paper.map((sec) => `<h3 class="psec">${sec.name}</h3>` + sec.items.map((it) => {
+          const vals = [...it.card.querySelectorAll('input')].map((i) => i.value), m = markItem(it.q, vals, it.marks);
+          earned += m.earned; Store.record(it.q.topic, m.full); if (!m.full) missed.add(TOPICS[it.q.topic].name);
+          return `<div class="mockq ${m.full ? 'full' : m.earned > 0 ? 'part' : 'none'}"><div class="qno">Question ${it.no} <span class="marks">${m.earned} / ${it.marks}</span></div><div class="prompt">${it.q.prompt}</div>
+            <p><b>Your answer:</b> ${vals.map((v) => v || '(blank)').join(' | ')}</p><p><b>Correct answer:</b> ${answerText(it.q)}</p>
+            <details class="sol"><summary>Worked solution</summary>${it.q.solution}</details></div>`;
+        }).join('')).join('');
+        Store.d.drills.push({ id: b.id, score: earned, n: total, when: Date.now() }); Store.save(); bump();
+        const passed = b.pass ? earned >= b.pass : null;
+        w.innerHTML = `<span class="tag">Result</span><h3>${b.title}</h3>${timeUp ? '<p class="muted">Time is up.</p>' : ''}
+          <div class="score">${earned} / ${total}</div>
+          ${b.pass ? (passed ? `<p style="color:var(--good);font-weight:800">✔ Passed (pass mark ${b.pass})</p>` : `<p style="color:var(--bad);font-weight:700">Pass mark is ${b.pass}. Review the worked solutions below and try a new paper.</p>`) : ''}
+          ${missed.size ? `<p>Topics to revisit:</p><ul class="breakdown">${[...missed].map((m) => `<li>${m}</li>`).join('')}</ul>` : '<p><b>Full marks. Nothing to revisit.</b></p>'}
+          <div class="actions"><button class="btn primary" id="again">Try a new paper</button></div>${rows}`;
+        w.querySelector('#again').onclick = start; math(w);
+      }
+      tick = setInterval(() => { left--; const t = w.querySelector('#mtm'); if (t) t.textContent = mmss(Math.max(left, 0)); if (left <= 0) finish(true); }, 1000);
+      timers.push(tick);
+      const hb = w.querySelector('#handin');
+      hb.onclick = () => {
+        if (!armed) { armed = true; hb.textContent = 'Click again to hand in (no changes after this)'; setTimeout(() => { armed = false; if (!done) hb.textContent = 'Hand in the paper'; }, 5000); return; }
+        finish(false);
+      };
+    }
+    intro(); return w;
+  }
+
   /* ---------- pages ---------- */
   function cardHtml(d) {
     return `<a class="daycard ${Store.d.done[d.n] ? 'done' : ''}" href="#/day/${d.n}">
@@ -435,7 +503,7 @@
         ? `<a class="btn primary big" href="#/day/${next.n}">▶ Play Level ${next.n}: ${next.title}</a>`
         : `<a class="btn primary big" href="#/wake">🏰 Enter the castle</a>`}</div>
       <div class="hero-pick"><span class="muted">Your hero:</span> ${AVATARS.map((a) => `<button class="av-btn ${a === Store.d.avatar ? 'on' : ''}" data-a="${a}">${a}</button>`).join('')}</div>
-      <div class="actions"><a class="btn big" href="#/wake">⏰ Wake-up mode</a><a class="btn big" href="#/progress">Stats</a></div>`;
+      <div class="actions"><a class="btn big" href="#/wake">⏰ Wake-up mode</a>${doneCount() >= 6 ? '<a class="btn big" href="#/mock">📄 Mock paper</a>' : ''}<a class="btn big" href="#/progress">Stats</a></div>`;
     root.querySelectorAll('.av-btn').forEach((b) => { b.onclick = () => { Store.d.avatar = b.dataset.a; Store.save(); hud(); home(); }; });
     const from = Math.min(Store.d.pos || 0, cur);
     walkHero(root.querySelector('.mapsvg'), from, cur);
@@ -448,7 +516,7 @@
       <section class="hero">
         <h1>Quadratic and Fractional Equations</h1>
         <p class="muted">🧑‍🏫 Teacher view. The student does not see this page, the teach-back checklists, or the paper-task checks.</p>
-        <p class="sub">7 missions. Learn it, rebuild it from scratch, and own it. Earn XP for every answer you get right first time.</p>
+        <p class="sub">${DAYS.length} missions. Learn it, rebuild it from scratch, and own it. Earn XP for every answer you get right first time.</p>
         <div class="block key"><span class="tag">💡 The one big idea</span><p>${SPINE}</p></div>
         <details class="block"><summary><b>How to use this with a student</b></summary>
           <ul>
@@ -491,7 +559,7 @@
   function wake() {
     root.innerHTML = `<div class="wake"><h1>⏰ Wake-up mode</h1>
       <p>Ten random questions from the whole chapter, ten minutes, no hints, no topic labels. Wake up, sit down, solve.</p></div>`;
-    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 5, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
+    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 6, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
   }
 
   function progress() {
@@ -542,6 +610,25 @@
     root.innerHTML = html; math(root);
   }
 
+  function mockPage() {
+    if (!(isTeacher() || doneCount() >= 6)) return home();
+    root.innerHTML = '<p><a href="#/">← Back to the map</a></p><h1>📄 Mock paper</h1><p class="muted">A fresh paper every time, with new questions in the same layout.</p>';
+    root.appendChild(mockBlock(Object.assign({}, MOCK_PAPER, { id: 'mock-free' })));
+  }
+
+  function coverage() {
+    if (!isTeacher()) return home();
+    const rows = COVERAGE.map((r) => `<tr><td><b>${r.sec}</b></td><td>${r.book}</td><td>${r.here}</td></tr>`).join('');
+    const per = DAYS.map((d) => {
+      const t = d.blocks.filter((b) => b.t === 'practice').flatMap((b) => b.topics);
+      return `<li><b>Level ${d.n}</b> (${d.minutes} min): ${[...new Set(t)].map((x) => TOPICS[x].name).join(', ') || 'tests and repair'}</li>`;
+    }).join('');
+    root.innerHTML = `<h1>Coverage map</h1><p class="muted">Teacher view. Where each part of the book, and the extra Sec 3 material, is taught.</p>
+      <div class="block"><table class="prog"><tr><th>Book</th><th>What</th><th>Where here</th></tr>${rows}</table></div>
+      <h2>Practice topics by level</h2><ul>${per}</ul>
+      <p class="muted">${Object.keys(TOPICS).length} auto-checked topics (${Object.values(TOPICS).filter((t) => t.stretch).length} marked Stretch, which are kept out of the tests and Wake-up mode), each generating unlimited fresh questions.</p>`;
+  }
+
   function setupNav() {
     const nav = document.querySelector('.top nav');
     if (!Cloud.enabled) return;
@@ -563,6 +650,8 @@
     else if (h === '/wake') wake();
     else if (h === '/progress') progress();
     else if (h === '/review') review();
+    else if (h === '/coverage') coverage();
+    else if (h === '/mock') mockPage();
     else if (h === '/coverage') coverage();
     else home();
     window.scrollTo(0, 0); math(root); hud(); document.documentElement.style.setProperty('--hh', document.querySelector('.top').offsetHeight + 'px');
