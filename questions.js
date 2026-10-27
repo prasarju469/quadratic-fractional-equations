@@ -1147,7 +1147,7 @@ const generate = (topic) => TOPICS[topic].gen();
 
 /* ---------- answer checking ---------- */
 function parseNum(s) {
-  s = String(s).trim().replace(/[−–]/g, '-').replace(/\s+/g, '');
+  s = String(s).trim().replace(/[−–]/g, '-').replace(/\s+/g, '').replace(/^\+(?![+-])/, '');
   if (!s) return NaN;
   let m = s.match(/^(-?\d*\.?\d+)\/(-?\d*\.?\d+)$/);
   if (m) return parseFloat(m[1]) / parseFloat(m[2]);
