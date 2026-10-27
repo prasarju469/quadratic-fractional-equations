@@ -46,6 +46,7 @@ Open the site. You should see **Sign in with Google**.
 - Any other Google account sees "Not set up yet".
 
 ## Notes
+- Saves use Firestore merge writes so this maths course preserves the separate `physics` progress field used by Quantum Quest. Refresh tabs left open before this change so they load the updated save code.
 - If the student's account is a school or Family Link account, Google may block signing in to outside
   sites. A personal Gmail works.
 - Pop-up blockers can stop the sign-in window. Allow pop-ups for the site.

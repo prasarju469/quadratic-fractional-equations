@@ -71,7 +71,7 @@ const Cloud = (() => {
   C.push = (d, now) => {
     if (!C.enabled || !C.email || !db) return Promise.resolve();
     clearTimeout(timer);
-    const go = () => { pending = null; return db.collection('users').doc(C.email).set({ data: JSON.stringify(d), updated: d.updated || Date.now(), name: C.name, role: C.role }).catch((e) => console.warn('Cloud save failed', e)); };
+    const go = () => { pending = null; return db.collection('users').doc(C.email).set({ data: JSON.stringify(d), updated: d.updated || Date.now(), name: C.name, role: C.role }, { merge: true }).catch((e) => console.warn('Cloud save failed', e)); };
     if (now) return go();
     pending = go; timer = setTimeout(go, 1500); return Promise.resolve();
   };
