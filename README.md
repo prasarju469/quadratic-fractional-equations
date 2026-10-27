@@ -1,6 +1,6 @@
 # Quadratic and Fractional Equations
 
-A 7-day interactive course on Quadratic and Fractional Equations (Sec 3 E-Maths, Chapter 1).
+A 10-level interactive course on Quadratic and Fractional Equations (Sec 3 E-Maths, Chapter 1), including a calculator-skills level for the Casio fx-97SG X.
 Plain HTML, CSS and JavaScript. No build step.
 
 ## Run it on a computer

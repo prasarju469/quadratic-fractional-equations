@@ -1084,64 +1084,195 @@ function gSumProd() {
   });
 }
 
+/* ---------- Level 2: calculator skills (Casio fx-97SG X, or any scientific calculator with an equation mode) ---------- */
+const fracTxt = (n, d) => { const g = gcdi(n, d); n /= g; d /= g; if (d < 0) { n = -n; d = -d; } return d === 1 ? String(n) : `${n}/${d}`; };
+const fracTex = (n, d) => { const t = fracTxt(n, d); if (!t.includes('/')) return t; const [x, y] = t.split('/').map(Number); return x < 0 ? `-\\dfrac{${-x}}{${y}}` : `\\dfrac{${x}}{${y}}`; };
+const lcmi = (x, y) => (x / gcdi(x, y)) * y;
+const bracketed = (k, first) => (k === 1 ? '' : k) + 'x' + (first < 0 ? first : '+' + first);
+
+function gCalcNeg() {
+  let a, b, c; do { a = nz(-6, 6); b = nz(-12, -2); c = nz(-9, 9); } while (b * b - 4 * a * c === 0);
+  const D = b * b - 4 * a * c, slip = -(b * b) - 4 * a * c;
+  return mk({
+    topic: 'calcneg', tol: 1e-6,
+    prompt: `Use your calculator to work out ${M('b^2-4ac')} when ${M(`a=${a},\\; b=${b},\\; c=${c}`)}.`,
+    fields: [M('b^2-4ac =')], answer: [D],
+    hint: `Put the negative number in brackets before you square it: type (${b}) then the square key. Without brackets the calculator squares ${-b} first and then makes the answer negative.`,
+    solution: `${M(`b^2-4ac=(${b})^2-4(${a})(${c})`)}<br>${M(`(${b})^2=${b * b}`)} and ${M(`4ac=4(${a})(${c})=${4 * a * c}`)}<br>${M(`${b * b}-(${4 * a * c})=${D}`)}<br><span class="muted">Without the brackets around ${b} you would get ${slip}. That is the slip to avoid.</span>`,
+  });
+}
+
+function gCalcSub() {
+  const a = nz(-5, 5), b = nz(-8, 8), c = nz(-9, 9), x = pick([-3.5, -2.4, -1.6, -0.8, -4.2, -2.5, -1.5, 1.5, 2.5, 3.2]);
+  const y = Math.round((a * x * x + b * x + c) * 100) / 100;
+  return mk({
+    topic: 'calcsub', tol: 0.005,
+    prompt: `Use your calculator to find the value of ${M(poly(a, b, c))} when ${M(`x=${x}`)}.`,
+    fields: [M('\\text{value} =')], answer: [y],
+    hint: `Put x in brackets every time: ${M(`${a}(${x})^2 ${b < 0 ? '-' : '+'} ${Math.abs(b)}(${x}) ${c < 0 ? '-' : '+'} ${Math.abs(c)}`)}. Type exactly that.`,
+    solution: `${M(`${a}(${x})^2 ${b < 0 ? '-' : '+'} ${Math.abs(b)}(${x}) ${c < 0 ? '-' : '+'} ${Math.abs(c)}`)}<br>${M(`= ${fmt(y)}`)}`,
+  });
+}
+
+function gCalcFr() {
+  const ds = [2, 3, 4, 5, 6, 8, 9, 10, 12];
+  for (;;) {
+    const d = [pick(ds), pick(ds), pick(ds)], n = d.map((x) => R(1, x - 1)), s = [1, pick([1, -1]), pick([1, -1])];
+    if (n.some((v, i) => gcdi(v, d[i]) !== 1)) continue;
+    const den = d[0] * d[1] * d[2], num = s[0] * n[0] * d[1] * d[2] + s[1] * n[1] * d[0] * d[2] + s[2] * n[2] * d[0] * d[1], g = gcdi(num, den);
+    if (num === 0 || den / g === 1 || den / g > 72) continue;
+    const t = (i) => `\\dfrac{${n[i]}}{${d[i]}}`, expr = `${t(0)} ${s[1] < 0 ? '-' : '+'} ${t(1)} ${s[2] < 0 ? '-' : '+'} ${t(2)}`;
+    return mk({
+      topic: 'calcfr', tol: 1e-6,
+      prompt: `Use the fraction key to work out ${M(expr)}. Give your answer as a fraction in its simplest form, typed like 7/12.`,
+      fields: ['answer ='], answer: [num / den],
+      hint: 'Use the fraction template key for each fraction. Press the S⇔D key to switch the answer between a fraction and a decimal.',
+      solution: `${M(expr + ' = ' + fracTex(num, den))}<br><span class="muted">As a decimal this is ${fmt(num / den)}, but the question asks for a fraction.</span>`,
+    });
+  }
+}
+
+function gCalcSf() {
+  const m = R(10000, 99999), e = pick([-4, -3, -2, -1, 0, 1, 2, 3]), x = Number((m * Math.pow(10, e - 4)).toPrecision(5)), ans = Number(x.toPrecision(3));
+  const ds = String(m), up = Number(ds[3]) >= 5;
+  return mk({
+    topic: 'calcsf', tol: Math.abs(ans) * 1e-9,
+    prompt: `Your calculator shows ${M(String(x))}. Write it correct to 3 significant figures.`,
+    fields: [M('\\text{answer} =')], answer: [ans],
+    hint: 'The first significant figure is the first digit that is not zero. Count 3 figures from there, then look at the next digit: 5 or more rounds up.',
+    solution: `The first significant figure is ${ds[0]}. The first 3 are ${ds.slice(0, 3)}. The next digit is ${ds[3]}, so ${up ? 'round up' : 'leave it as it is'}.<br>${M(String(x) + '\\approx ' + ans)}`,
+  });
+}
+
+function gCalcEqn() {
+  let m, p, n, q, a, b, c;
+  do { m = pick([1, 1, 2, 3]); p = pick([1, 2, 3, 4]); n = nz(-7, 7); q = nz(-7, 7); a = m * p; b = m * q + p * n; c = n * q; }
+  while (m * q === p * n || b === 0 || gcdi(m, n) !== 1 || gcdi(p, q) !== 1);
+  const r1 = -n / m, r2 = -q / p, rearr = Math.random() < 0.35, eq = rearr ? `${poly(a, b, 0)} = ${fmt(-c)}` : `${poly(a, b, c)} = 0`;
+  return mk({
+    topic: 'calceqn', kind: 'set', tol: 1e-6,
+    prompt: `Use your calculator's equation mode to solve ${M(eq)}. Fractions like -1/2 are fine.`,
+    fields: [M('x =')], answer: [r1, r2],
+    hint: rearr ? `The equation mode needs ${M('ax^2+bx+c=0')}. Move everything to the left first, then type a, b, c with their signs.` : `Type a = ${a}, b = ${b}, c = ${c}, each with its sign. Read x1 and x2.`,
+    solution: `${rearr ? `Move ${fmt(-c)} to the left: ${M(poly(a, b, c) + '=0')}<br>` : ''}${M(`a=${a},\\; b=${b},\\; c=${c}`)}<br>${M(`x_1=${fracTex(-n, m)},\\; x_2=${fracTex(-q, p)}`)}<br>` +
+      `<span class="muted">Check by factorising: ${M(`(${bracketed(m, n)})(${bracketed(p, q)}) = 0`)}. Each solution is the opposite of the number in its bracket, divided by the number in front of x.</span>`,
+  });
+}
+
+function gCalcEqnD() {
+  let a, b, c, D; do { a = pick([1, 2, 3, 4, 5, -1, -2, -3]); b = nz(-9, 9); c = nz(-9, 9); D = b * b - 4 * a * c; } while (D <= 0 || isSquare(D));
+  const x1 = (-b + Math.sqrt(D)) / (2 * a), x2 = (-b - Math.sqrt(D)) / (2 * a);
+  return mk({
+    topic: 'calceqnd', kind: 'set', tol: 0.0051,
+    prompt: `Use your calculator's equation mode to solve ${M(poly(a, b, c) + '=0')}. Give both answers correct to 2 decimal places.`,
+    fields: [M('x =')], answer: [x1, x2],
+    hint: 'The calculator may show the answers with a square root. Press the S⇔D key to get decimals. Do not round until the very end.',
+    solution: `${M(`a=${a},\\; b=${b},\\; c=${c}`)}<br>${M(`x_1=${fmt(x1)},\\; x_2=${fmt(x2)}`)}<br><span class="muted">This one does not factorise with whole numbers, so the calculator is the quick way. If a question says <b>by formula</b>, you must still show the formula line.</span>`,
+  });
+}
+
+function gCalcFac() {
+  const q = gFactExp(2, 'calcfac'), [c, b, a] = q.target, mm = q.answerText.match(/^\((\d*)x([+-]\d+)\)\((\d*)x([+-]\d+)\)$/);
+  const m = mm[1] === '' ? 1 : Number(mm[1]), n = Number(mm[2]), p = mm[3] === '' ? 1 : Number(mm[3]), r = Number(mm[4]);
+  q.prompt += '<br><span class="muted">Plan: use equation mode to get the two roots, then turn each root into a bracket.</span>';
+  q.hint = 'Equation mode gives the two roots as fractions. A root x = r/s becomes the bracket (sx − r). Multiply the two brackets and check you get a, b and c back.';
+  q.solution = `${M(`a=${a},\\; b=${b},\\; c=${c}`)}<br>The calculator gives ${M(`x=${fracTex(-n, m)}`)} and ${M(`x=${fracTex(-r, p)}`)}.<br>` +
+    `A root ${M(`x=${fracTex(-n, m)}`)} means ${M(`${m}x=${-n}`)}, so ${M(`${m}x${n < 0 ? '-' : '+'}${Math.abs(n)}=0`)}: the bracket is ${M(`(${bracketed(m, n)})`)}.<br>` +
+    `In the same way the other root gives ${M(`(${bracketed(p, r)})`)}.<br>${M(`${poly(a, b, c)} = (${bracketed(m, n)})(${bracketed(p, r)})`)}`;
+  return q;
+}
+
+function gCalcTab() {
+  const a = pick([0.5, 1.5, 2.5, -0.5, -1.5, 2, -2]), b = pick([-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 3, -3]), c = pick([-4.5, -3, -2, 1, 2, 3.5, 4]), x0 = pick([-3, -2]);
+  const xs = Array.from({ length: 5 }, (_, i) => x0 + i), ys = xs.map((x) => Math.round((a * x * x + b * x + c) * 100) / 100);
+  return mk({
+    topic: 'calctab', tol: 0.005,
+    prompt: `Use the TABLE function on your calculator to complete the table of values for ${M('y = ' + poly(a, b, c))}.`,
+    fields: xs.map((x) => M(`x=${x}:\\ y =`)), answer: ys,
+    hint: `Type the function once, using the X key. Then Start = ${x0}, End = ${x0 + 4}, Step = 1. Read down the column.`,
+    solution: xs.map((x, i) => M(`x=${x}:\\ y=${fmt(ys[i])}`)).join('<br>'),
+  });
+}
+
+function gCalcForm() {
+  let a, b, c, D; do { a = pick([1, 2, 3, 4, 5, -2, -3]); b = nz(-9, 9); c = nz(-9, 9); D = b * b - 4 * a * c; } while (D <= 0 || isSquare(D));
+  const x1 = (-b + Math.sqrt(D)) / (2 * a), x2 = (-b - Math.sqrt(D)) / (2 * a);
+  return mk({
+    topic: 'calcform', tol: 0.0051,
+    prompt: `Work out both values of ${M(`x=\\dfrac{-${par(b)}\\pm\\sqrt{${par(b)}^2-4(${a})(${par(c)})}}{2(${a})}`)} correct to 2 decimal places.<br><span class="muted">Use the fraction template, or put the whole top line in one pair of brackets and the bottom line in another.</span>`,
+    fields: [M('\\text{using } + :\\ x ='), M('\\text{using } - :\\ x =')], answer: [x1, x2],
+    hint: 'Do the + version, then use the left arrow to go back and change the + to a −. Do not retype everything.',
+    solution: `${M(`=\\dfrac{${-b}\\pm\\sqrt{${D}}}{${2 * a}}`)}<br>${M(`x=${fmt(x1)}`)} and ${M(`x=${fmt(x2)}`)}`,
+  });
+}
+
 /* ---------- registry ---------- */
 const TOPICS = {
   fstep:   { name: 'Guided: solve by factorising, 5 steps', gen: gFstep,   day: 1 },
   fpp:     { name: 'Factorising: P and S both positive',  gen: gFactorPP,  day: 1 },
   fpn:     { name: 'Factorising: P positive, S negative', gen: gFactorPN,  day: 1 },
   factor:  { name: 'Solve by factorising',                gen: gFactor,    day: 1 },
-  sqrt:    { name: 'Solve (x + r)² = s',                  gen: gSqrt,      day: 2 },
-  ctsx:    { name: 'Complete the square (rewrite)',       gen: gCtsExpr,   day: 2 },
+  sqrt:    { name: 'Solve (x + r)² = s',                  gen: gSqrt,      day: 3 },
+  ctsx:    { name: 'Complete the square (rewrite)',       gen: gCtsExpr,   day: 3 },
   femon:   { name: 'Factorise: x² + bx + c',              gen: () => gFactExp(0, 'femon'), day: 1 },
   fecom:   { name: 'Factorise: common factor',            gen: () => gFactExp(4, 'fecom'), day: 1 },
   fesq:    { name: 'Factorise: difference of two squares', gen: () => gFactExp(3, 'fesq'), day: 1 },
   feneg:   { name: 'Factorise: negative x²',              gen: () => gFactExp(1, 'feneg'), day: 1 },
   feac:    { name: 'Factorise: a number in front of x²',  gen: () => gFactExp(2, 'feac'), day: 1 },
   factexp: { name: 'Factorise an expression (mixed)',     gen: () => gFactExp(),   day: 1 },
-  ctsd:    { name: 'Complete the square: fractions and decimals', gen: gCtsDec, day: 2 },
-  ctss:    { name: 'Solve by completing the square',      gen: gCtsSolve,  day: 3 },
-  hence:   { name: 'Express, then hence solve',             gen: gHence,     day: 3 },
-  ctsa:    { name: 'Stretch: complete the square, a not 1', gen: gCtsA,      day: 3, stretch: true },
-  ctssa:   { name: 'Stretch: solve by completing the square, a not 1', gen: gCtsSolveA, day: 3, stretch: true },
-  formula: { name: 'Quadratic formula',                   gen: gFormula,   day: 3 },
-  rearr:   { name: 'Tidy up first, then solve',           gen: gRearr,     day: 3 },
-  subst:   { name: 'Hence: substitution',                  gen: gSubst,     day: 3 },
-  disc:    { name: 'Discriminant and number of roots',    gen: gDisc,      day: 3 },
-  kval:    { name: 'Stretch: find an unknown using the discriminant', gen: gKval,   day: 3, stretch: true },
-  fromroots: { name: 'Form an equation from its solutions', gen: gFromRoots, day: 3 },
-  frac:    { name: 'Fractional equations',                gen: gFrac,      day: 4 },
-  frac2:   { name: 'Harder fractional equations',         gen: gFrac2,     day: 4 },
-  frac3:   { name: 'Fractions with factorisable denominators', gen: gFrac3, day: 4 },
-  extra:   { name: 'Rejecting invalid roots',             gen: gExtra,     day: 4 },
-  table:   { name: 'Table of values for a graph',         gen: gTable,     day: 5 },
-  gfact:   { name: 'Graphs: factorised form',             gen: gGraphFact, day: 5 },
-  gcs:     { name: 'Graphs: completed-square form',       gen: gGraphCS,   day: 5 },
-  ctsn:    { name: 'Complete the square with −x²',        gen: gCtsNeg,    day: 5 },
-  ggen:    { name: 'Graphs from the general form',        gen: gGGen,      day: 5 },
-  gline:   { name: 'Which line solves another equation',  gen: gGLine,     day: 5 },
-  hline:   { name: 'Horizontal lines and a curve',        gen: gHLine,     day: 5 },
-  pq:      { name: 'Find p and q from a graph',           gen: gPQ,        day: 5 },
-  readgraph: { name: 'Read values from a graph',            gen: gReadGraph, day: 5 },
-  simult:  { name: 'Stretch: a line and a curve, simultaneous', gen: gSimult, day: 5, stretch: true },
-  oneint:  { name: 'Stretch: exactly one x-intercept',     gen: gOneInt,    day: 5, stretch: true },
-  gcsa:    { name: 'Stretch: graphs when a is not 1',    gen: gGCsA,      day: 5, stretch: true },
-  rect:    { name: 'Word problems: area',                 gen: gRect,      day: 6 },
-  speed:   { name: 'Word problems: speed and time',       gen: gSpeed,     day: 6 },
-  proj:    { name: 'Word problems: maximum height',       gen: gProj,      day: 6 },
-  pyth:    { name: 'Word problems: Pythagoras',           gen: gPyth,      day: 6 },
-  consec:  { name: 'Word problems: consecutive numbers',  gen: gConsec,    day: 6 },
-  work:    { name: 'Word problems: working together',     gen: gWork,      day: 6 },
-  profit:  { name: 'Word problems: profit model',         gen: gProfit,    day: 6 },
-  path:    { name: 'Word problems: path around a garden', gen: gPath,      day: 6 },
-  price:   { name: 'Word problems: price per kilogram',   gen: gPrice,     day: 7 },
-  exch:    { name: 'Word problems: exchange rates',       gen: gExch,      day: 7 },
-  rate:    { name: 'Word problems: litres per minute',    gen: gRate,      day: 7 },
-  stream:  { name: 'Word problems: upstream and downstream', gen: gStream, day: 7 },
-  journey: { name: 'Word problems: a journey in two parts', gen: gJourney, day: 7 },
-  border:  { name: 'Word problems: border inside a room', gen: gBorder,    day: 7 },
-  perim:   { name: 'Word problems: perimeter and area',   gen: gPerim,     day: 7 },
-  cakes:   { name: 'Word problems: grams per cake',       gen: gCakes,     day: 7 },
-  sumprod: { name: 'Stretch: sum and product of solutions', gen: gSumProd, day: 3, stretch: true },
+  ctsd:    { name: 'Complete the square: fractions and decimals', gen: gCtsDec, day: 3 },
+  ctss:    { name: 'Solve by completing the square',      gen: gCtsSolve,  day: 4 },
+  hence:   { name: 'Express, then hence solve',             gen: gHence,     day: 4 },
+  ctsa:    { name: 'Stretch: complete the square, a not 1', gen: gCtsA,      day: 4, stretch: true },
+  ctssa:   { name: 'Stretch: solve by completing the square, a not 1', gen: gCtsSolveA, day: 4, stretch: true },
+  formula: { name: 'Quadratic formula',                   gen: gFormula,   day: 4 },
+  rearr:   { name: 'Tidy up first, then solve',           gen: gRearr,     day: 4 },
+  subst:   { name: 'Hence: substitution',                  gen: gSubst,     day: 4 },
+  disc:    { name: 'Discriminant and number of roots',    gen: gDisc,      day: 4 },
+  kval:    { name: 'Stretch: find an unknown using the discriminant', gen: gKval,   day: 4, stretch: true },
+  fromroots: { name: 'Form an equation from its solutions', gen: gFromRoots, day: 4 },
+  frac:    { name: 'Fractional equations',                gen: gFrac,      day: 5 },
+  frac2:   { name: 'Harder fractional equations',         gen: gFrac2,     day: 5 },
+  frac3:   { name: 'Fractions with factorisable denominators', gen: gFrac3, day: 5 },
+  extra:   { name: 'Rejecting invalid roots',             gen: gExtra,     day: 5 },
+  table:   { name: 'Table of values for a graph',         gen: gTable,     day: 6 },
+  gfact:   { name: 'Graphs: factorised form',             gen: gGraphFact, day: 6 },
+  gcs:     { name: 'Graphs: completed-square form',       gen: gGraphCS,   day: 6 },
+  ctsn:    { name: 'Complete the square with −x²',        gen: gCtsNeg,    day: 6 },
+  ggen:    { name: 'Graphs from the general form',        gen: gGGen,      day: 6 },
+  gline:   { name: 'Which line solves another equation',  gen: gGLine,     day: 6 },
+  hline:   { name: 'Horizontal lines and a curve',        gen: gHLine,     day: 6 },
+  pq:      { name: 'Find p and q from a graph',           gen: gPQ,        day: 6 },
+  readgraph: { name: 'Read values from a graph',            gen: gReadGraph, day: 6 },
+  simult:  { name: 'Stretch: a line and a curve, simultaneous', gen: gSimult, day: 6, stretch: true },
+  oneint:  { name: 'Stretch: exactly one x-intercept',     gen: gOneInt,    day: 6, stretch: true },
+  gcsa:    { name: 'Stretch: graphs when a is not 1',    gen: gGCsA,      day: 6, stretch: true },
+  rect:    { name: 'Word problems: area',                 gen: gRect,      day: 7 },
+  speed:   { name: 'Word problems: speed and time',       gen: gSpeed,     day: 7 },
+  proj:    { name: 'Word problems: maximum height',       gen: gProj,      day: 7 },
+  pyth:    { name: 'Word problems: Pythagoras',           gen: gPyth,      day: 7 },
+  consec:  { name: 'Word problems: consecutive numbers',  gen: gConsec,    day: 7 },
+  work:    { name: 'Word problems: working together',     gen: gWork,      day: 7 },
+  profit:  { name: 'Word problems: profit model',         gen: gProfit,    day: 7 },
+  path:    { name: 'Word problems: path around a garden', gen: gPath,      day: 7 },
+  price:   { name: 'Word problems: price per kilogram',   gen: gPrice,     day: 8 },
+  exch:    { name: 'Word problems: exchange rates',       gen: gExch,      day: 8 },
+  rate:    { name: 'Word problems: litres per minute',    gen: gRate,      day: 8 },
+  stream:  { name: 'Word problems: upstream and downstream', gen: gStream, day: 8 },
+  journey: { name: 'Word problems: a journey in two parts', gen: gJourney, day: 8 },
+  border:  { name: 'Word problems: border inside a room', gen: gBorder,    day: 8 },
+  perim:   { name: 'Word problems: perimeter and area',   gen: gPerim,     day: 8 },
+  cakes:   { name: 'Word problems: grams per cake',       gen: gCakes,     day: 8 },
+  calcneg: { name: 'Calculator: b² − 4ac with negative numbers', gen: gCalcNeg, day: 2, calc: true },
+  calcsub: { name: 'Calculator: substitute a negative decimal', gen: gCalcSub, day: 2, calc: true },
+  calcfr:  { name: 'Calculator: fractions', gen: gCalcFr, day: 2, calc: true },
+  calcsf:  { name: 'Calculator: significant figures', gen: gCalcSf, day: 2, calc: true },
+  calceqn: { name: 'Calculator: equation mode (exact roots)', gen: gCalcEqn, day: 2, calc: true },
+  calceqnd: { name: 'Calculator: equation mode (decimal roots)', gen: gCalcEqnD, day: 2, calc: true },
+  calcfac: { name: 'Calculator: roots to brackets', gen: gCalcFac, day: 2, calc: true },
+  calctab: { name: 'Calculator: table mode', gen: gCalcTab, day: 2, calc: true },
+  calcform: { name: 'Calculator: type the formula', gen: gCalcForm, day: 2, calc: true },
+  sumprod: { name: 'Stretch: sum and product of solutions', gen: gSumProd, day: 4, stretch: true },
 };
 const generate = (topic) => TOPICS[topic].gen();
 

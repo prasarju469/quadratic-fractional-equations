@@ -6,13 +6,20 @@
 
   /* ---------- storage ---------- */
   const Store = {
-    d: { stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: '🦊', pos: 0 },
+    d: { v: 2, stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: '🦊', pos: 0 },
     key: 'kq_v1',
-    load() { try { const s = localStorage.getItem(this.key); if (s) Object.assign(this.d, JSON.parse(s)); } catch (e) { /* private mode */ } },
+    /* v2: Level 2 (Calculator skills) was added, so old level numbers 2 and up moved up by one. Only the level-complete flags are keyed by level number; every task, drill, note and stat is keyed by its own id and is untouched. */
+    migrate(d) {
+      if (!d || d.v >= 2) return d;
+      const old = d.done || {}, nd = {};
+      Object.keys(old).forEach((k) => { const n = Number(k); nd[n >= 2 ? n + 1 : n] = old[k]; });
+      d.done = nd; d.v = 2; return d;
+    },
+    load() { try { const s = localStorage.getItem(this.key); if (s) Object.assign(this.d, this.migrate(JSON.parse(s))); } catch (e) { /* private mode */ } },
     saveLocal() { try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (e) { /* ignore */ } },
     save() { this.d.updated = Date.now(); this.saveLocal(); Cloud.push(this.d); },
     reset() {
-      this.d = { stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: this.d.avatar, pos: 0, updated: Date.now() };
+      this.d = { v: 2, stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: this.d.avatar, pos: 0, updated: Date.now() };
       this.saveLocal(); return Cloud.push(this.d, true);
     },
     record(topic, ok) {
@@ -44,9 +51,9 @@
   };
 
   /* ---------- XP, ranks and level progress ---------- */
-  const RANKS = ['Rookie', 'Code Breaker', 'Equation Solver', 'Square Master', 'Formula Wizard', 'Root Hunter', 'Parabola Pro', 'Story Solver', 'Boss Slayer', 'Legend'];
+  const RANKS = ['Rookie', 'Code Breaker', 'Calc Ninja', 'Equation Solver', 'Square Master', 'Formula Wizard', 'Root Hunter', 'Parabola Pro', 'Story Solver', 'Boss Slayer', 'Legend'];
   const AVATARS = ['🦊', '🐲', '🤖', '🐱', '🦉', '🐺', '🚀', '🦖'];
-  const SHORT = ['Factors', 'Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Rates', 'Mock exam', 'Repair', 'Castle'];
+  const SHORT = ['Factors', 'Calculator', 'Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Rates', 'Mock exam', 'Repair', 'Castle'];
   const doneCount = () => DAYS.filter((d) => Store.d.done[d.n]).length;
   function xp() {
     const clean = Object.values(Store.d.stats).reduce((a, s) => a + s.c, 0);
@@ -78,12 +85,12 @@
   }
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  const allTopics = (maxDay) => Object.keys(TOPICS).filter((t) => TOPICS[t].day <= maxDay && !TOPICS[t].stretch);
+  const allTopics = (maxDay) => Object.keys(TOPICS).filter((t) => TOPICS[t].day <= maxDay && !TOPICS[t].stretch && !TOPICS[t].calc);
   function weakTopics() {
     const rows = Object.keys(TOPICS).filter((t) => (Store.d.stats[t] || {}).t >= 2)
       .map((t) => ({ t, acc: Store.d.stats[t].c / Store.d.stats[t].t })).sort((a, b) => a.acc - b.acc);
     const weak = rows.filter((r) => r.acc < 0.85).slice(0, 4).map((r) => r.t);
-    return weak.length ? weak : allTopics(7);
+    return weak.length ? weak : allTopics(8);
   }
   const answerText = (q) => q.answerText || q.answer.map((v) => fmt(v)).join(q.kind === 'set' ? ' or ' : ',  ');
 
@@ -518,7 +525,7 @@
         ? `<a class="btn primary big" href="#/day/${next.n}">▶ Play Level ${next.n}: ${next.title}</a>`
         : `<a class="btn primary big" href="#/wake">🏰 Enter the castle</a>`}</div>
       <div class="hero-pick"><span class="muted">Your hero:</span> ${AVATARS.map((a) => `<button class="av-btn ${a === Store.d.avatar ? 'on' : ''}" data-a="${a}">${a}</button>`).join('')}</div>
-      <div class="actions"><a class="btn big" href="#/wake">⏰ Wake-up mode</a>${doneCount() >= 7 ? '<a class="btn big" href="#/mock">📄 Mock paper</a>' : ''}<a class="btn big" href="#/progress">Stats</a></div>`;
+      <div class="actions"><a class="btn big" href="#/wake">⏰ Wake-up mode</a>${doneCount() >= 8 ? '<a class="btn big" href="#/mock">📄 Mock paper</a>' : ''}<a class="btn big" href="#/progress">Stats</a></div>`;
     root.querySelectorAll('.av-btn').forEach((b) => { b.onclick = () => { Store.d.avatar = b.dataset.a; Store.save(); hud(); home(); }; });
     const from = Math.min(Store.d.pos || 0, cur);
     walkHero(root.querySelector('.mapsvg'), from, cur);
@@ -563,6 +570,7 @@
   }
 
   function snapshotHtml(d) {
+    Store.migrate(d);
     const done = DAYS.filter((x) => (d.done || {})[x.n]).length, cleared = Object.keys(d.cleared || {}).length;
     const weak = Object.keys(TOPICS).filter((t) => ((d.stats || {})[t] || {}).t >= 2).map((t) => ({ t, acc: d.stats[t].c / d.stats[t].t })).sort((a, b) => a.acc - b.acc).slice(0, 3);
     const answered = Object.values(d.stats || {}).reduce((a, x) => a + x.t, 0);
@@ -590,7 +598,7 @@
   function wake() {
     root.innerHTML = `<div class="wake"><h1>⏰ Wake-up mode</h1>
       <p>Ten random questions from the whole chapter, ten minutes, no hints, no topic labels. Wake up, sit down, solve.</p></div>`;
-    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 7, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
+    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 8, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
   }
 
   function progress() {
@@ -614,6 +622,7 @@
   /* ---------- teacher report on a student's saved progress ---------- */
   function studentReport(email, d) {
     if (!d) return `<div class="block"><h3>${email}</h3><p class="muted">Has not signed in or saved anything yet.</p></div>`;
+    Store.migrate(d);
     const done = DAYS.filter((x) => (d.done || {})[x.n]).length;
     const rows = Object.keys(TOPICS).map((t) => {
       const st = (d.stats || {})[t] || { c: 0, t: 0 }, acc = st.t ? Math.round((100 * st.c) / st.t) : null;
@@ -642,7 +651,7 @@
   }
 
   function mockPage() {
-    if (!(isTeacher() || doneCount() >= 7)) return home();
+    if (!(isTeacher() || doneCount() >= 8)) return home();
     root.innerHTML = '<p><a href="#/">← Back to the map</a></p><h1>📄 Mock paper</h1><p class="muted">A fresh paper every time, with new questions in the same layout.</p>';
     root.appendChild(mockBlock(Object.assign({}, MOCK_PAPER, { id: 'mock-free' })));
   }

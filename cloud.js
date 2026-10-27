@@ -62,6 +62,7 @@ const Cloud = (() => {
       const snap = await db.collection('users').doc(C.email).get();
       if (snap.exists) {
         const cloud = JSON.parse(snap.data().data || '{}');
+        if (Store.migrate) Store.migrate(cloud);
         if ((cloud.updated || 0) > (Store.d.updated || 0)) { Object.assign(Store.d, cloud); Store.saveLocal(); return; }
       }
       await C.push(Store.d, true);

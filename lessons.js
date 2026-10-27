@@ -60,6 +60,71 @@ const RECIPES = [
     tip: `"Give your answer correct to 2 decimal places" is a big hint that factorising will not work.`,
     topics: [] },
 
+  { id: 'calc-setup', title: 'Set up your calculator (Casio fx-97SG X)', when: 'Do this once, then know where every key is without hunting.',
+    steps: [
+      `Check it is in <b>natural display</b>, so fractions and square roots look the way they do on paper. If not: SHIFT, then SETUP, then Input/Output, then the MathI/MathO choice.`,
+      `Find these keys and say each name out loud: <b>(−)</b> for a negative number (it is not the subtract key), <b>x²</b>, the <b>power</b> key, <b>√</b>, the <b>fraction template</b>, <b>S⇔D</b>, <b>Ans</b>, <b>STO</b>, the <b>brackets</b>, and the <b>arrow keys</b> for editing.`,
+      `Find the <b>MENU</b> key. You will use two of its modes: <b>Equation/Func</b> (to solve equations) and <b>Table</b> (to make a table of values).`,
+      `Write your own <b>key log</b>: the exact keys you press for each job. Your screen may word a menu slightly differently, so write what <b>your</b> screen says.` ],
+    tip: `A calculator gives a confident answer even when you pressed the wrong key. Always read the screen against the question before you copy the answer.`,
+    topics: [] },
+
+  { id: 'calc-brackets', title: 'Typing rules: brackets and negatives', when: 'Every time you type a formula or substitute a number.',
+    steps: [
+      `<b>Square a negative number? Use brackets.</b> Type \\((-5)^2\\), not \\(-5^2\\). Without brackets the calculator squares 5 first and then makes it negative.`,
+      `<b>Substituting a number into a formula?</b> Put every substituted number in brackets, especially the negative ones.`,
+      `<b>A fraction bar is a pair of brackets.</b> Use the fraction template, or type (top) ÷ (bottom). Never type a ÷ b + c when you mean (a) ÷ (b + c).`,
+      `<b>A square root covers a whole line.</b> After the last number under the root, press the right arrow to step out of the root before you carry on.`,
+      `<b>Read before you press =.</b> In natural display the screen shows what you typed, as it would be written on paper. Check it against the question.`,
+      `<b>Do not round in the middle.</b> Use Ans or STO to carry the full value forward. Round once, at the very end.` ],
+    example: `Work out \\(b^2-4ac\\) when \\(a=2,\\ b=-7,\\ c=-3\\).<br>Type: <b>(−7)² − 4 × 2 × (−3)</b>. The screen shows 73.<br>Without brackets around −7 you would get −25.`,
+    tip: `The calculator follows BODMAS exactly. It does what you typed, not what you meant.`,
+    topics: ['calcneg', 'calcsub', 'calcfr', 'calcsf'] },
+
+  { id: 'calc-eqn', title: 'Solve a quadratic in equation mode', when: 'For any equation you can write as ax² + bx + c = 0, when the question lets you use a calculator.',
+    steps: [
+      `<b>Rearrange</b> so everything is on the left and the right side is 0: \\(ax^2+bx+c=0\\).`,
+      `<b>Open equation mode.</b> On the fx-97SG X: MENU, then Equation/Func, then Polynomial, then degree 2.`,
+      `<b>Type a, b and c</b> with their signs, pressing = after each. If x² has no number in front, a is 1. If a term is missing, type 0 for it.`,
+      `<b>Press =</b> to see x₁ and x₂. Press S⇔D to switch between the exact answer (fraction or square root) and the decimal.`,
+      `<b>Write each answer</b> the way the question asks: exact, or correct to 2 decimal places or 3 significant figures. Round only at the end.`,
+      `<b>Check one answer</b> by putting it back into the original equation.` ],
+    example: `Solve \\(x^2=5x-6\\).<br>1. Move everything left: \\(x^2-5x+6=0\\).<br>3. a = 1, b = −5, c = 6.<br>4. The screen shows x₁ = 3 and x₂ = 2.<br>6. Check x = 2: \\(4-10+6=0\\). ✔`,
+    tip: `If the question says <b>by factorising</b>, <b>by completing the square</b> or <b>by formula</b>, the marks are for that method. Show it, and use the calculator to check your answer.`,
+    topics: ['calceqn', 'calceqnd'] },
+
+  { id: 'calc-factor', title: 'Roots to brackets: factorise with the calculator', when: 'When an expression will not factorise quickly, such as 6x² + x − 12.',
+    steps: [
+      `Use equation mode to get the two roots of \\(ax^2+bx+c=0\\), shown as fractions.`,
+      `Write each root as a fraction \\(\\dfrac{r}{s}\\).`,
+      `A root \\(x=\\dfrac{r}{s}\\) gives the bracket \\((sx-r)\\). Multiply both sides by s, then move r across.`,
+      `Multiply the two brackets in your head. If the x² number is smaller than a, put the missing common factor in front.`,
+      `Expand to check you get a, b and c back.` ],
+    example: `Factorise \\(6x^2+x-12\\).<br>Equation mode gives \\(x=\\dfrac{4}{3}\\) and \\(x=-\\dfrac{3}{2}\\).<br>\\(x=\\dfrac{4}{3}\\) gives \\((3x-4)\\). \\(x=-\\dfrac{3}{2}\\) gives \\((2x+3)\\).<br>Check: \\(3\\times2=6\\) ✔ and \\(-4\\times3=-12\\) ✔.`,
+    tip: `Watch the sign. A root of \\(-\\dfrac{3}{2}\\) gives \\((2x+3)\\), with a plus. The bracket always has the opposite sign to the root.`,
+    topics: ['calcfac'] },
+
+  { id: 'calc-table', title: 'Make a table of values in table mode', when: 'When you need y for several values of x, for plotting a graph.',
+    steps: [
+      `Press MENU and choose <b>Table</b>.`,
+      `Type the function using the <b>X</b> key, for example \\(0.5X^2-1.5X-2\\), and press =. If it asks for g(x), press = again to skip it.`,
+      `Enter <b>Start</b>, <b>End</b> and <b>Step</b>, pressing = after each. For x from −2 to 2 in steps of 1: Start −2, End 2, Step 1.`,
+      `Read down the y column and copy each value next to its x.`,
+      `Check one row by hand.` ],
+    tip: `Table mode is for speed. In the exam the table is only worth marks if you copy it into the table in the question correctly.`,
+    topics: ['calctab'] },
+
+  { id: 'calc-when', title: 'Calculator or working? Know which one earns the marks', when: 'Before you decide how much to write down.',
+    steps: [
+      `If the question <b>names a method</b> (by factorising, completing the square, formula), show that method line by line. Use the calculator to check.`,
+      `If it only says <b>Solve</b> and is worth 1 or 2 marks, the calculator is fine. Write the equation and the answers.`,
+      `If it is worth <b>more marks</b>, always write the key line: the factorised form, or the formula with the numbers put in. A wrong key can then not cost you the method marks.`,
+      `Follow the rounding in the question. If none is given, give a non-exact answer to <b>3 significant figures</b>.`,
+      `The equation mode only solves \\(ax^2+bx+c=0\\). A <b>fractional equation</b> must first be turned into that form by hand.`,
+      `After solving a fractional equation, check that no answer makes a denominator 0.` ],
+    tip: `Doing Level 1 by hand is what makes this safe. If the calculator ever fails or a question bans it, you can still solve everything.`,
+    topics: [] },
+
   { id: 'cts-rewrite', title: 'Completing the square: rewrite x² + bx + c', when: 'To write an expression as (x + p)² + q, or to find a turning point.',
     steps: [
       `Look at the number in front of x. Call it b.`,
@@ -313,9 +378,140 @@ const DAYS = [
     ],
   },
 
+  /* ------------------------------------------------------------------ DAY 2: calculator skills */
+  {
+    n: 2, title: 'Calculator skills: fast and accurate', minutes: 75,
+    tagline: 'Same questions, half the time. Make the calculator your sidekick.',
+    blocks: [
+      { t: 'goal', items: [
+        'Set up your <b>Casio fx-97SG X</b> and find every key you need without hunting.',
+        'Type brackets and negative numbers so the calculator does <b>what you mean</b>.',
+        'Solve \\(ax^2+bx+c=0\\) in equation mode, and turn the roots into brackets.',
+        'Know when the calculator earns the marks and when you must show working.' ] },
+
+      { t: 'html', html: `<span class="tag">⚡ The hook</span><h3>Same problem, two speeds</h3>
+        <p>In Level 1 you solved everything by hand. That built your understanding, and it is your backup when the calculator cannot help.</p>
+        <p>But in the exam you may use a scientific calculator, and so does everyone else. A question that takes three minutes by hand can take thirty seconds in equation mode. The catch: a calculator gives a <b>confident wrong answer</b> if you press a wrong key.</p>
+        <p>This level makes you <b>fast and accurate</b>. The rule of the level: <b>the calculator does the arithmetic, you do the thinking.</b></p>` },
+
+      { t: 'recipe', id: 'calc-setup' },
+
+      { t: 'think', id: 'c2-keys',
+        prompt: 'Make your key log. Pick up your calculator and write, in your own words, the keys you press for: a negative number, squaring, the fraction template, switching between exact and decimal answers, and opening equation mode.',
+        model: 'On the fx-97SG X: the (−) key for a negative number, the x² key to square, the fraction template key with its boxes, S⇔D to switch between exact and decimal, and MENU then Equation/Func then Polynomial then degree 2. Your wording can differ. What matters is that you found each key yourself.' },
+
+      { t: 'recipe', id: 'calc-brackets' },
+
+      { t: 'predict', id: 'c2-p1',
+        q: 'You type <b>(−) 3 x²</b>, meaning negative three, squared. What does the screen show?',
+        options: [
+          { text: '−9', ok: true, why: 'The calculator squares the 3 first, then applies the minus. To square the negative number, type (−3) in brackets and then square it.' },
+          { text: '9', ok: false, why: 'You would only get 9 if you typed the brackets: (−3)². Without them the minus waits until the squaring is done.' },
+          { text: 'An error message', ok: false, why: 'It is a perfectly valid expression, so the calculator just answers it, and the answer is not what you meant.' } ],
+        explain: 'This is the most common calculator slip in this chapter, because b² and (−5)² appear in every discriminant and formula question.' },
+
+      { t: 'practice', id: 'c2-neg', title: 'Practice: b² − 4ac with negative numbers', topics: ['calcneg'], need: 4,
+        intro: 'Type it on your calculator with brackets around every negative number. The hint shows the wrong answer you get without brackets.' },
+
+      { t: 'practice', id: 'c2-sub', title: 'Practice: substitute a negative decimal', topics: ['calcsub'], need: 4,
+        intro: 'Put x in brackets every time you substitute. This is exactly what you do to fill a table of values.' },
+
+      { t: 'predict', id: 'c2-p2',
+        q: 'You mean \\(\\dfrac{12+6}{2\\times3}\\) but type <b>12 + 6 ÷ 2 × 3</b>. What does the calculator give?',
+        options: [
+          { text: '3, the answer you meant', ok: false, why: '3 is what \\(\\dfrac{18}{6}\\) equals, but you did not type that. The calculator cannot read your mind.' },
+          { text: '21', ok: true, why: 'BODMAS: divide and multiply first (6 ÷ 2 × 3 = 9), then add 12. To get 3 you need brackets, (12 + 6) ÷ (2 × 3), or the fraction template.' },
+          { text: '9', ok: false, why: '9 is the value of 6 ÷ 2 × 3 on its own. The 12 is still added at the end.' } ],
+        explain: 'A fraction bar is secretly a pair of brackets. Use the fraction template and the calculator does it for you.' },
+
+      { t: 'practice', id: 'c2-fr', title: 'Practice: fractions with the fraction key', topics: ['calcfr'], need: 3,
+        intro: 'Use the fraction template, then press S⇔D to switch between a fraction and a decimal. Type your answer as a fraction like 7/12.' },
+
+      { t: 'predict', id: 'c2-p3',
+        q: 'Your calculator shows 0.0045678. What is this correct to <b>3 significant figures</b>?',
+        options: [
+          { text: '0.00457', ok: true, why: 'The first significant figure is the 4 (zeros at the start do not count). Take 4, 5, 6. The next digit is 7, so round the 6 up to 7.' },
+          { text: '0.00456', ok: false, why: 'The digit after 456 is 7, which is 5 or more, so you must round up, not cut off.' },
+          { text: '0.0046', ok: false, why: 'This has only 2 significant figures (4 and 6). The question asks for 3.' } ],
+        explain: 'Leading zeros never count. Start counting from the first digit that is not zero.' },
+
+      { t: 'practice', id: 'c2-sf', title: 'Practice: significant figures', topics: ['calcsf'], need: 4,
+        intro: 'If a question gives no degree of accuracy, a non-exact answer is given to 3 significant figures.' },
+
+      { t: 'errors', id: 'c2-err', title: 'Spot the calculator slip', items: [
+        { title: 'A student works out \\(b^2-4ac\\) for \\(2x^2-5x+1=0\\).', lines: ['a=2,\\; b=-5,\\; c=1', '\\text{typed: } -5^2-4\\times2\\times1', '\\text{screen shows } -33', '\\text{so there are no real solutions}'], wrong: 1,
+          why: 'Typed without brackets, the calculator squares 5 first and then makes it negative (−25). The right line is \\((-5)^2-4\\times2\\times1=17\\), which is positive, so there are <b>2</b> solutions.' },
+        { title: 'A student uses equation mode on \\(x^2=5x-6\\).', lines: ['x^2=5x-6', '\\text{typed: } a=1,\\; b=5,\\; c=-6', 'x_1=1,\\; x_2=-6', '\\text{so } x=1 \\text{ or } x=-6'], wrong: 1,
+          why: 'Equation mode needs everything on one side and 0 on the other. \\(x^2=5x-6\\) becomes \\(x^2-5x+6=0\\), so b = −5 and c = +6. The calculator solved a different equation. The right answers are x = 2 or x = 3.' },
+        { title: 'A student rounds a calculator answer.', lines: ['\\text{screen shows } 0.0045678', '\\text{first significant figure is } 4', '\\text{to 3 s.f. } 0.0046'], wrong: 2,
+          why: '3 significant figures means the digits 4, 5 and 6, so the answer is 0.00457. The answer 0.0046 has only 2 significant figures.' },
+      ] },
+
+      { t: 'recipe', id: 'calc-eqn' },
+
+      { t: 'predict', id: 'c2-p4',
+        q: 'You want equation mode to solve \\(x^2=5x-6\\). What do you type for a, b and c?',
+        options: [
+          { text: 'a = 1, b = −5, c = 6', ok: true, why: 'Move everything to the left: \\(x^2-5x+6=0\\). Then read off the three numbers with their signs.' },
+          { text: 'a = 1, b = 5, c = −6', ok: false, why: 'These are the numbers from the right-hand side with their signs unchanged. When a term crosses the equals sign, its sign flips.' },
+          { text: 'a = 1, b = −5, c = −6', ok: false, why: 'The −5 is right, but 6 moves across too: \\(x^2-5x+6=0\\), so c is +6.' } ],
+        explain: 'Equation mode solves exactly what you type. So first make the equation look like \\(ax^2+bx+c=0\\).' },
+
+      { t: 'predict', id: 'c2-p5',
+        q: 'The equation is \\(2x^2-9=0\\). It has no x term. What do you type for b?',
+        options: [
+          { text: '0', ok: true, why: 'There is no x term, so b = 0. The calculator needs a number in all three boxes.' },
+          { text: 'Skip it', ok: false, why: 'The calculator will not move on until every box has a value. A missing term must be typed as 0.' },
+          { text: '−9', ok: false, why: '−9 is c, the constant. Here a = 2, b = 0 and c = −9.' } ],
+        explain: 'A missing term is not missing for the calculator. Type 0 for it.' },
+
+      { t: 'practice', id: 'c2-eqn', title: 'Practice: equation mode, exact answers', topics: ['calceqn'], need: 4,
+        intro: 'Use equation mode. Some equations need tidying first. Type fractions like −1/2. Then check one answer by hand.' },
+
+      { t: 'practice', id: 'c2-eqnd', title: 'Practice: equation mode, decimal answers', topics: ['calceqnd'], need: 4,
+        intro: 'These do not factorise with whole numbers. Press S⇔D for decimals and round at the end.' },
+
+      { t: 'recipe', id: 'calc-factor' },
+
+      { t: 'predict', id: 'c2-p6',
+        q: 'Equation mode gives the root \\(x=-\\dfrac{1}{2}\\). Which bracket does it give?',
+        options: [
+          { text: '\\((2x+1)\\)', ok: true, why: '\\(x=-\\dfrac{1}{2}\\) means \\(2x=-1\\), so \\(2x+1=0\\). The bracket has the opposite sign to the root, and the 2 from the denominator comes along.' },
+          { text: '\\((2x-1)\\)', ok: false, why: 'This is the bracket for a root of \\(+\\dfrac{1}{2}\\). Put \\(x=-\\dfrac{1}{2}\\) in: \\(2(-\\dfrac12)-1=-2\\), not 0.' },
+          { text: '\\((x+2)\\)', ok: false, why: 'This has a root of −2, not −1/2. The denominator goes with the x, not the number.' } ],
+        explain: 'Root \\(\\dfrac{r}{s}\\) gives bracket \\((sx-r)\\). Test it by putting the root into the bracket: you must get 0.' },
+
+      { t: 'practice', id: 'c2-fac', title: 'Practice: roots to brackets', topics: ['calcfac'], need: 3,
+        intro: 'Get the roots from equation mode, then turn each into a bracket. Type the brackets like (2x+1)(3x-4).' },
+
+      { t: 'recipe', id: 'calc-table' },
+
+      { t: 'practice', id: 'c2-tab', title: 'Practice: table mode', topics: ['calctab'], need: 3,
+        intro: 'Use table mode, then copy the five values. You will use this again when you plot graphs.' },
+
+      { t: 'practice', id: 'c2-form', title: 'Practice: type the formula without mistakes', topics: ['calcform'], need: 3,
+        intro: 'You will learn where this formula comes from in Level 4. For now, practise typing it so the brackets are right.' },
+
+      { t: 'recipe', id: 'calc-when' },
+
+      { t: 'think', id: 'c2-race',
+        prompt: 'Race yourself. Pick any equation from Level 1. Time yourself solving it by factorising, then time yourself in equation mode. Write both times. Then say which you would use for a 2-mark "solve" question, and which for a 5-mark "solve by factorising" question, and why.',
+        model: 'The calculator is usually much faster. For a 2-mark "solve" question, use the calculator and write the equation and answers. For a 5-mark question that says "by factorising", show the factorising line by line, because the marks are for the method, and use the calculator only to check your answers.' },
+
+      { t: 'drill', id: 'c2-speed', title: 'Calculator speed round', topics: ['calcneg', 'calcsub', 'calcfr', 'calceqn', 'calceqnd', 'calcfac', 'calcform'], n: 6, minutes: 6, pass: 5,
+        intro: 'Six questions in 6 minutes, no hints. Use your calculator for everything. Fast and accurate.' },
+
+      { t: 'teachback', title: 'Teach-back (3 minutes)',
+        prompt: 'Ask him to show you on <b>his own calculator</b>, without looking at the screen here: solve a quadratic in equation mode, and type \\(b^2-4ac\\) for a negative b.',
+        checks: ['He opened equation mode and solved a quadratic in under 30 seconds', 'He typed (−5)² with brackets and said why (−5)² = 25 but −5² = −25', 'He turned a root like −3/2 into the bracket (2x+3)', 'He said when he must show working even though the calculator can solve it', 'He has filled in his key log'] },
+
+      { t: 'done' },
+    ],
+  },
+
   /* ------------------------------------------------------------------ DAY 2 */
   {
-    n: 2, title: 'Completing the square', minutes: 90,
+    n: 3, title: 'Completing the square', minutes: 90,
     tagline: 'Why a missing corner makes everything work',
     blocks: [
       { t: 'goal', items: [
@@ -408,7 +604,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 2 */
   {
-    n: 3, title: 'Solve any quadratic, then build the formula', minutes: 100,
+    n: 4, title: 'Solve any quadratic, then build the formula', minutes: 100,
     tagline: 'The formula is not magic. You will build it.',
     blocks: [
       { t: 'goal', items: [
@@ -419,7 +615,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏺 The hook</span><h3>3,000 years to find one formula</h3><p>Babylonian scribes solved quadratics with squares about 4,000 years ago. But one formula that works on <i>every</i> quadratic took roughly 3,000 more years to appear. In 2019, a maths professor, Po-Shen Loh, found a clever new way to see the same idea. So even this old topic is still being explored.</p><p>Today you will not <b>memorise</b> that formula. You will <b>build</b> it, then rebuild it on paper from nothing.</p>` },
 
-      { t: 'drill', id: 'd2-cold', title: 'Cold start: Levels 1 and 2', maxDay: 2, n: 4, minutes: 5,
+      { t: 'drill', id: 'd2-cold', title: 'Cold start: Levels 1 to 3', maxDay: 3, n: 4, minutes: 5,
         intro: '4 questions, no hints, 5 minutes. This is how every day begins.' },
 
       { t: 'html', html: `
@@ -536,7 +732,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 3 */
   {
-    n: 4, title: 'Fractional equations', minutes: 90,
+    n: 5, title: 'Fractional equations', minutes: 90,
     tagline: 'Clear the fractions, solve, then check every answer',
     blocks: [
       { t: 'goal', items: [
@@ -554,7 +750,7 @@ const DAYS = [
           { text: 'Step 4: divide both sides by \\(a-b\\)', ok: true, why: 'Since \\(a=b\\), \\(a-b=0\\). You cannot divide by zero.' },
           { text: 'Step 6: divide by b', ok: false, why: 'This is fine as long as b is not 0.' } ],
         explain: 'The same trap sits inside fractional equations. If a denominator can be 0, some "solutions" are lies. That is why you will always check.' },
-      { t: 'drill', id: 'd3-cold', title: 'Cold start: Levels 1 to 3', maxDay: 3, n: 5, minutes: 7,
+      { t: 'drill', id: 'd3-cold', title: 'Cold start: Levels 1 to 4', maxDay: 4, n: 5, minutes: 7,
         intro: '5 questions, no hints, 7 minutes.' },
 
       { t: 'html', html: `<h3>The plan</h3>
@@ -631,7 +827,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 4 */
   {
-    n: 5, title: 'Graphs of quadratics', minutes: 125,
+    n: 6, title: 'Graphs of quadratics', minutes: 125,
     tagline: 'Where the curve meets the axis, and where it turns',
     blocks: [
       { t: 'goal', items: [
@@ -642,12 +838,12 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🌉 The hook</span><h3>The curve hiding everywhere</h3><p>A basketball shot, a bridge cable, a satellite dish, a fountain of water: all of them are <b>parabolas</b>, the graph of a quadratic. The turning point is the top of the arch, or the lowest point of the dish.</p><p>Today you will learn to find that point, and where the curve crosses the ground, <b>without plotting a single point</b>.</p>` },
 
-      { t: 'drill', id: 'd4-cold', title: 'Cold start: Levels 1 to 4', maxDay: 4, n: 5, minutes: 8,
+      { t: 'drill', id: 'd4-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 5, minutes: 8,
         intro: '5 questions, no hints, 8 minutes.' },
 
       { t: 'html', html: `<h3>Equation versus graph</h3>
         <p>Solving \\(2x^2-5x-6=0\\) means: <i>for which x does the height \\(y=2x^2-5x-6\\) equal 0?</i> The height is zero exactly where the curve crosses the x-axis. So <b>solutions are x-intercepts</b>.</p>
-        <p>One equation can have two solutions (curve crosses twice), one (curve just touches), or none (curve misses the axis). This matches the discriminant from Level 3.</p>` },
+        <p>One equation can have two solutions (curve crosses twice), one (curve just touches), or none (curve misses the axis). This matches the discriminant from Level 4.</p>` },
 
       { t: 'widget', name: 'graph' },
       { t: 'widget', name: 'rootHunt', id: 'd4-roothunt' },
@@ -681,7 +877,7 @@ const DAYS = [
           { text: '0 times', ok: false, why: 'The lowest point is <i>below</i> the axis, so the curve has to climb up to it on both sides.' },
           { text: '1 time', ok: false, why: 'It would only touch the axis once if the turning point were exactly on it.' },
           { text: '2 times', ok: true, why: 'The lowest point is below the axis and the curve opens upwards, so it must cross once on the way down and once on the way up.' } ],
-        explain: 'This is what the discriminant told you on Level 3, now seen as a picture.' },
+        explain: 'This is what the discriminant told you on Level 4, now seen as a picture.' },
       { t: 'html', html: `<h3>Plotting means a table first</h3><p>To <b>draw</b> a graph accurately, make a table of x and y for equally spaced x-values, plot the points, and join them with a smooth curve. To <b>solve</b> \\(ax^2+bx+c=0\\), read off where the curve crosses the x-axis, to the nearest 0.1.</p>` },
 
       { t: 'practice', id: 'd4-table', title: 'Practice: table of values', topics: ['table'], need: 3,
@@ -776,7 +972,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 5 */
   {
-    n: 6, title: 'Word problems', minutes: 110,
+    n: 7, title: 'Word problems', minutes: 110,
     tagline: 'Turn a story into an equation, then be sensible about the answer',
     blocks: [
       { t: 'goal', items: [
@@ -786,7 +982,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏀 The hook</span><h3>Every thrown ball is a quadratic</h3><p>Throw a ball, kick a football, shoot a basketball: the height over time follows a quadratic, always an upside-down U. The highest point is the turning point.</p><p>Engineers use this to aim fountains, and games programmers use it for jumps and cannons. Today you will build equations from stories, and then fire a few cannons yourself.</p>` },
 
-      { t: 'drill', id: 'd5-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 6, minutes: 10,
+      { t: 'drill', id: 'd5-cold', title: 'Cold start: Levels 1 to 6', maxDay: 6, n: 6, minutes: 10,
         intro: '6 questions, no hints, 10 minutes.' },
 
       { t: 'html', html: `<h3>Four steps for every word problem</h3>
@@ -869,7 +1065,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 6 */
   {
-    n: 7, title: 'Money, rates and journeys', minutes: 130,
+    n: 8, title: 'Money, rates and journeys', minutes: 130,
     tagline: 'The same equation wearing different clothes',
     blocks: [
       { t: 'goal', items: [
@@ -879,7 +1075,7 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🧾 The hook</span><h3>One story, eight disguises</h3><p>Rice and dollars. Pumps and litres. Boats and rivers. Cakes and sugar. They look different, but almost every one hides the same sentence: <b>"the same amount is shared out two ways, and the two answers differ by a fixed amount."</b></p><p>That gives a fraction equation, and a fraction equation gives a quadratic. Once you see the pattern, the stories stop being scary.</p>` },
 
-      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 6', maxDay: 6, n: 6, minutes: 10,
+      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 7', maxDay: 7, n: 6, minutes: 10,
         intro: '6 questions, no hints, 10 minutes.' },
 
       { t: 'html', html: `<h3>The one pattern</h3><table class="prog"><tr><th>Story</th><th>Amount</th><th>Rate</th><th>Result</th></tr>
@@ -951,7 +1147,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 7 */
   {
-    n: 8, title: 'Mixed test and mock paper', minutes: 110,
+    n: 9, title: 'Mixed test and mock paper', minutes: 110,
     tagline: 'Everything, shuffled, then a full timed paper',
     blocks: [
       { t: 'goal', items: [
@@ -961,7 +1157,7 @@ const DAYS = [
       { t: 'html', html: `<span class="tag">🔥 Boss fight</span><h3>The guardian of the castle</h3><p>Fifteen questions stand between you and the castle. They come from every level, in random order, and the guardian gives <b>no hints</b>. Everything you built this week is your weapon.</p>` },
 
       { t: 'html', html: `<div class="callout">Rules: no notes, no phone, a calculator is allowed (like in school). Write your working on paper, then type the answer. If the score is below 12, tomorrow's session fixes the weak spots.</div>` },
-      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 7, n: 15, minutes: 30, test: true, pass: 12,
+      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 8, n: 15, minutes: 30, test: true, pass: 12,
         intro: '15 questions, 30 minutes. One try each. Pass mark: 12.' },
 
       { t: 'mock', id: 'd7-mock', pass: 28, ...MOCK_PAPER },
@@ -972,7 +1168,7 @@ const DAYS = [
 
   /* ------------------------------------------------------------------ DAY 7 */
   {
-    n: 9, title: 'Repair, then teach it back', minutes: 50,
+    n: 10, title: 'Repair, then teach it back', minutes: 50,
     tagline: 'Fix the weak spots, then teach the whole chapter',
     blocks: [
       { t: 'goal', items: [
@@ -1000,29 +1196,30 @@ const DAYS = [
 const COVERAGE = [
   { sec: 'Method', book: 'Maths runs on fixed rules, joined together to solve bigger problems', here: 'A Rulebook page (📘 Rules in the top bar) with a numbered recipe for every kind of problem, plus a recipe toggle on every practice set. The factorising recipe is the P and S method.' },
   { sec: '1.1 A', book: 'Recap: solve by factorising (WE 1, Practice Now 1, Ex 1A Q1)', here: 'Level 1 (the whole foundation level): the five-step P and S method with sign rules, a guided step-by-step trainer, then a ladder of expression types (common factor, difference of squares, negative x², number in front of x² by the ac-method)' },
-  { sec: '1.1 B', book: 'Solve (x + r)² = s with ± (WE 2, PN 2, Ex 1A Q2)', here: 'Level 2 (square-root practice, error hunt)' },
-  { sec: '1.1 C-D', book: 'Perfect squares and the area picture; the (b/2)² investigation (WE 3, PN 3, Ex 1A Q3)', here: 'Level 2 (missing-corner slider, predict, think, ctsx, ctsd for fractions and decimals)' },
-  { sec: '1.1 D', book: 'x² + bx + c, and -x² + bx + c (WE 4, PN 4, Ex 1A Q4)', here: 'Level 2 (+c), Level 5 (-x² practice)' },
-  { sec: '1.1 E', book: 'Solve by completing the square, two methods (WE 5, PN 5, Ex 1A Q5-6)', here: 'Level 3 (ctss), plus a not 1 (ctsa, ctssa)' },
-  { sec: '1.1', book: 'Ex 1A Q7-8: equations to tidy first, and a letter constant (y² - ay - 6 = 0)', here: 'Level 3 (rearr practice, letter-constant predict)' },
-  { sec: '1.1', book: 'Reflection: 2x² + 8x - 6 = 0 when a is not 1', here: 'Level 3 (a not 1: predict, ctsa, ctssa)' },
-  { sec: '1.2', book: 'Derive the quadratic formula; use it (WE 6, PN 6, Ex 1B Q1-2, Q4)', here: 'Level 3 (step-by-step derivation, jigsaw, closed-book derivation, formula practice)' },
-  { sec: '1.2', book: 'Class Discussion: zero, one or two real solutions', here: 'Level 3 (disc, kval, predicts)' },
-  { sec: '1.3', book: 'Fractional equations reducible to quadratics (WE 7-8, PN 7-8, Ex 1B Q3, Q5-8)', here: 'Level 4 (frac, frac2: squared denominators, numbers in front of x, cross-multiplying)' },
-  { sec: '1.3', book: 'Thinking Time: Shufen\'s invalid solution x = 3', here: 'Level 4 (bug hunt, 1 = 2 hook, Rejection Court, extra)' },
-  { sec: '1.4', book: 'Solve graphically; one, two or no x-intercepts (WE 9-10, PN 9-10, Ex 1C)', here: 'Level 5 (table practice, graph paper task, Root Hunter, explorer, predicts)' },
-  { sec: '1.5', book: 'Sketch y = ±(x - h)(x - k) (WE 11, PN 11, Ex 1D Q1, Q3-6)', here: 'Level 5 (explorer, gfact, paper sketches)' },
-  { sec: '1.5', book: 'Sketch y = ±(x - p)² + q (WE 12-13, PN 12-13, Ex 1D Q2, Q7-10)', here: 'Level 5 (gcs, ctsn, ggen, paper sketches)' },
-  { sec: '1.5', book: 'Class Discussion: matching 12 graphs to equations', here: 'Level 5 (Match the Graph game)' },
-  { sec: '1.6', book: 'Word problems: Pythagoras and perimeter (WE 14, PN 14)', here: 'Level 6 (pyth, area, path)' },
-  { sec: '1.6', book: 'Word problems: speed, distance, time with a fraction (WE 15, PN 15)', here: 'Level 6 (speed, work)' },
-  { sec: '1.6', book: 'Modelling by a quadratic function (WE 16, PN 16)', here: 'Level 6 (proj, profit, Launch Lab)' },
+  { sec: '1.1 B', book: 'Solve (x + r)² = s with ± (WE 2, PN 2, Ex 1A Q2)', here: 'Level 3 (square-root practice, error hunt)' },
+  { sec: '1.1 C-D', book: 'Perfect squares and the area picture; the (b/2)² investigation (WE 3, PN 3, Ex 1A Q3)', here: 'Level 3 (missing-corner slider, predict, think, ctsx, ctsd for fractions and decimals)' },
+  { sec: '1.1 D', book: 'x² + bx + c, and -x² + bx + c (WE 4, PN 4, Ex 1A Q4)', here: 'Level 3 (+c), Level 6 (-x² practice)' },
+  { sec: '1.1 E', book: 'Solve by completing the square, two methods (WE 5, PN 5, Ex 1A Q5-6)', here: 'Level 4 (ctss), plus a not 1 (ctsa, ctssa)' },
+  { sec: '1.1', book: 'Ex 1A Q7-8: equations to tidy first, and a letter constant (y² - ay - 6 = 0)', here: 'Level 4 (rearr practice, letter-constant predict)' },
+  { sec: '1.1', book: 'Reflection: 2x² + 8x - 6 = 0 when a is not 1', here: 'Level 4 (a not 1: predict, ctsa, ctssa)' },
+  { sec: '1.2', book: 'Derive the quadratic formula; use it (WE 6, PN 6, Ex 1B Q1-2, Q4)', here: 'Level 4 (step-by-step derivation, jigsaw, closed-book derivation, formula practice)' },
+  { sec: '1.2', book: 'Class Discussion: zero, one or two real solutions', here: 'Level 4 (disc, kval, predicts)' },
+  { sec: '1.3', book: 'Fractional equations reducible to quadratics (WE 7-8, PN 7-8, Ex 1B Q3, Q5-8)', here: 'Level 5 (frac, frac2: squared denominators, numbers in front of x, cross-multiplying)' },
+  { sec: '1.3', book: 'Thinking Time: Shufen\'s invalid solution x = 3', here: 'Level 5 (bug hunt, 1 = 2 hook, Rejection Court, extra)' },
+  { sec: '1.4', book: 'Solve graphically; one, two or no x-intercepts (WE 9-10, PN 9-10, Ex 1C)', here: 'Level 6 (table practice, graph paper task, Root Hunter, explorer, predicts)' },
+  { sec: '1.5', book: 'Sketch y = ±(x - h)(x - k) (WE 11, PN 11, Ex 1D Q1, Q3-6)', here: 'Level 6 (explorer, gfact, paper sketches)' },
+  { sec: '1.5', book: 'Sketch y = ±(x - p)² + q (WE 12-13, PN 12-13, Ex 1D Q2, Q7-10)', here: 'Level 6 (gcs, ctsn, ggen, paper sketches)' },
+  { sec: '1.5', book: 'Class Discussion: matching 12 graphs to equations', here: 'Level 6 (Match the Graph game)' },
+  { sec: '1.6', book: 'Word problems: Pythagoras and perimeter (WE 14, PN 14)', here: 'Level 7 (pyth, area, path)' },
+  { sec: '1.6', book: 'Word problems: speed, distance, time with a fraction (WE 15, PN 15)', here: 'Level 7 (speed, work)' },
+  { sec: '1.6', book: 'Modelling by a quadratic function (WE 16, PN 16)', here: 'Level 7 (proj, profit, Launch Lab)' },
   { sec: 'Beyond', book: 'Typical Sec 3 and O-Level extras not in the book', here: 'kval (find k), gline (which line solves another equation), gcsa (a not 1), consec, work, profit, path, harder frac2' },
-  { sec: 'Ex 1E', book: 'Q1-Q11: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Levels 6 and 7 (rect, speed, proj, pyth, path, work, price, exch, rate, journey, stream, cakes, border, perim) plus plotting in Level 5. The pyramid-face geometry question is not generated.' },
-  { sec: 'Summary', book: 'Chapter Summary: completing the square, the four methods, LCM method for fractions, graph facts', here: 'Covered across Levels 2 to 5' },
-  { sec: 'Review 1', book: 'Q1-Q3 solve; Q4 substitution; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 2 to 5 (ctsx, ctsd, rearr, subst, fromroots, frac, frac2, frac3, sketching topics)' },
-  { sec: 'Review 1', book: 'Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Level 7 (exch, journey, cakes, border, stream, work) and Level 5 (readgraph, stone-in-context predict)' },
-  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Stretch practice: simult and oneint (Level 5), sumprod (Level 3)' },
-  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q, two word problems', here: 'factexp, frac3, fromroots, pq, hline, hence, plus a 40-mark timed mock paper (Level 8 and the Mock paper button)' },
+  { sec: 'Ex 1E', book: 'Q1-Q11: poster, printers, rice price, projectile, pyramid face, hike, coach, pumps, exchange rate, wind, plotting', here: 'Levels 7 and 8 (rect, speed, proj, pyth, path, work, price, exch, rate, journey, stream, cakes, border, perim) plus plotting in Level 6. The pyramid-face geometry question is not generated.' },
+  { sec: 'Summary', book: 'Chapter Summary: completing the square, the four methods, LCM method for fractions, graph facts', here: 'Covered across Levels 3 to 6' },
+  { sec: 'Review 1', book: 'Q1-Q3 solve; Q4 substitution; Q5 form an equation from solutions; Q6 fractional equations including factorisable denominators; Q7-Q8 sketch', here: 'Levels 3 to 6 (ctsx, ctsd, rearr, subst, fromroots, frac, frac2, frac3, sketching topics)' },
+  { sec: 'Review 1', book: 'Q9-Q15 exchange rate, speed, cakes, floor border, stone, two pipes, boat', here: 'Level 8 (exch, journey, cakes, border, stream, work) and Level 6 (readgraph, stone-in-context predict)' },
+  { sec: 'Challenge', book: 'Simultaneous equations with a quadratic; one x-intercept; sum and product of roots', here: 'Stretch practice: simult and oneint (Level 6), sumprod (Level 4)' },
+  { sec: 'School practice', book: 'Using the scientific calculator (Casio fx-97SG X): brackets and negatives, fractions, rounding, equation mode, table mode, roots to brackets', here: 'Level 2 (the whole calculator level, with a speed round)' },
+  { sec: 'Mock paper', book: 'School mock paper (Sec 3 WA1): fraction with 1 - x² denominator, express then hence, sketch with horizontal lines, find p and q, two word problems', here: 'factexp, frac3, fromroots, pq, hline, hence, plus a 40-mark timed mock paper (Level 9 and the Mock paper button)' },
   { sec: 'Syllabus', book: 'MOE G3 Mathematics: completing the square is limited to x² + px + q; the word discriminant is not used', here: 'Topics beyond that (a not 1, find k, sum and product, simultaneous, one-intercept) are labelled Stretch and kept out of the tests, mock paper and Wake-up mode' },
 ];
