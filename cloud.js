@@ -63,7 +63,8 @@ const Cloud = (() => {
       if (snap.exists) {
         const cloud = JSON.parse(snap.data().data || '{}');
         if (Store.migrate) Store.migrate(cloud);
-        if ((cloud.updated || 0) > (Store.d.updated || 0)) { Object.assign(Store.d, cloud); Store.saveLocal(); return; }
+        if ((cloud.updated || 0) > (Store.d.updated || 0)) { window.MathsRewards.merge(cloud,Store.d);Object.assign(Store.d, cloud);Store.saveLocal();return; }
+        window.MathsRewards.merge(Store.d,cloud);
       }
       await C.push(Store.d, true);
     } catch (e) { console.warn('Cloud sync failed', e); }
@@ -72,7 +73,7 @@ const Cloud = (() => {
   C.push = (d, now) => {
     if (!C.enabled || !C.email || !db) return Promise.resolve();
     clearTimeout(timer);
-    const go = () => { pending = null; return db.collection('users').doc(C.email).set({ data: JSON.stringify(d), updated: d.updated || Date.now(), name: C.name, role: C.role }, { merge: true }).catch((e) => console.warn('Cloud save failed', e)); };
+    const go = () => { pending = null;const snapshot=JSON.parse(JSON.stringify(d));return window.SharedRewards.saveSubject(db,db.collection('users').doc(C.email),null,snapshot,window.MathsRewards,{name:C.name,role:C.role}).then(()=>{window.MathsRewards.merge(d,snapshot);try{localStorage.setItem('kq_v1_'+C.email,JSON.stringify(d));}catch{}}).catch((e)=>{console.warn('Cloud save failed',e);pending=go;}); };
     if (now) return go();
     pending = go; timer = setTimeout(go, 1500); return Promise.resolve();
   };

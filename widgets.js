@@ -202,7 +202,7 @@ widgets.rootHunt = function (host) {
       const clean = tries === 0; if (clean) score++;
       if (window.kqRecord) window.kqRecord('roothunt', clean);
       const last = round + 1 >= TOTAL;
-      fb.innerHTML = `<span class="ok">✔ Yes! The solutions are \\(x=${want[0]}\\) and \\(x=${want[1]}\\).${clean ? ' <span class="xpgain">+10 XP</span>' : ''}</span>
+      fb.innerHTML = `<span class="ok">✔ Yes! The solutions are \\(x=${want[0]}\\) and \\(x=${want[1]}\\).${clean ? ' <span class="xpgain">Independent ✓</span>' : ''}</span>
         <p class="muted">Check with algebra: \\(${fac(cur.h)}${fac(cur.k)}=0\\) gives the same two numbers. Solutions of the equation <b>are</b> the x-intercepts.</p>
         <div class="actions"><button class="btn primary" id="rh-next">${last ? 'Finish' : 'Next round'}</button></div>`;
       mathIt(fb);
@@ -253,7 +253,7 @@ widgets.jigsaw = function (host) {
       if (next === steps.length) {
         if (window.kqClear) window.kqClear(host.dataset.id);
         if (window.kqRecord) window.kqRecord('jigsaw', mistakes === 0);
-        fb.innerHTML = `<span class="ok">✔ You rebuilt the quadratic formula!${mistakes === 0 ? ' <span class="xpgain">+10 XP</span>' : ` (${mistakes} wrong click${mistakes > 1 ? 's' : ''})`}</span>
+        fb.innerHTML = `<span class="ok">✔ You rebuilt the quadratic formula!${mistakes === 0 ? ' <span class="xpgain">Independent ✓</span>' : ` (${mistakes} wrong click${mistakes > 1 ? 's' : ''})`}</span>
           <div class="actions"><button class="btn" id="jg-again">Shuffle and play again</button></div>`;
         fb.querySelector('#jg-again').onclick = start;
       }
@@ -305,7 +305,7 @@ widgets.court = function (host) {
     if (window.kqRecord) window.kqRecord('court', ok);
     const bad = cur.cands.includes(cur.bad);
     const why = bad ? `\\(x=${cur.bad}\\) must be rejected: ${cur.why}. The other answer is valid.` : 'Both answers are valid: neither makes a denominator zero.';
-    fb.innerHTML = `<span class="${ok ? 'ok' : 'no'}">${ok ? '✔ Correct verdict!' + ' <span class="xpgain">+10 XP</span>' : '✘ Wrong verdict.'}</span><div class="reveal">${why}</div>
+    fb.innerHTML = `<span class="${ok ? 'ok' : 'no'}">${ok ? '✔ Correct verdict!' + ' <span class="xpgain">Independent ✓</span>' : '✘ Wrong verdict.'}</span><div class="reveal">${why}</div>
       <div class="actions"><button class="btn primary" id="ct-next">${round + 1 >= TOTAL ? 'Finish' : 'Next case'}</button></div>`;
     wMath(fb);
     fb.querySelector('#ct-next').onclick = () => {
@@ -355,7 +355,7 @@ widgets.launch = function (host) {
     if (Math.abs(pk - T) < 1e-9) {
       solved = true; fire.disabled = true; const clean = tries === 0; if (clean) score++;
       if (window.kqRecord) window.kqRecord('launch', clean);
-      fb.innerHTML = `<span class="ok">🎯 Direct hit!${clean ? ' <span class="xpgain">+10 XP</span>' : ''}</span>
+      fb.innerHTML = `<span class="ok">🎯 Direct hit!${clean ? ' <span class="xpgain">Independent ✓</span>' : ''}</span>
         <div class="reveal">Why it works: \\(h=-t^2+${B}t${plus(c) ? ' ' + plus(c) : ''} = -\\left(t-${B / 2}\\right)^2 + ${pk}\\). Completing the square shows the peak is \\(c+(b/2)^2\\) at \\(t=b/2\\). Here \\(${c}+${B / 2}^2=${pk}\\).</div>
         <div class="actions"><button class="btn primary" id="ll-next">${round + 1 >= TOTAL ? 'Finish' : 'Next target'}</button></div>`;
       wMath(fb);
@@ -435,7 +435,7 @@ widgets.match = function (host) {
     if (b.dataset.e === cur.answer) {
       solved = true; b.classList.add('right'); const clean = tries === 0; if (clean) score++;
       if (window.kqRecord) window.kqRecord('match', clean);
-      fb.innerHTML = `<div class="reveal"><b>Yes!${clean ? ' <span class="xpgain">+10 XP</span>' : ''}</b> ${cur.why}</div><div class="actions"><button class="btn primary" id="mt-next">${round + 1 >= TOTAL ? 'Finish' : 'Next graph'}</button></div>`;
+      fb.innerHTML = `<div class="reveal"><b>Yes!${clean ? ' <span class="xpgain">Independent ✓</span>' : ''}</b> ${cur.why}</div><div class="actions"><button class="btn primary" id="mt-next">${round + 1 >= TOTAL ? 'Finish' : 'Next graph'}</button></div>`;
       fb.querySelector('#mt-next').onclick = () => {
         round++;
         if (round >= TOTAL) { if (window.kqClear) window.kqClear(host.dataset.id); opts.innerHTML = ''; svg.innerHTML = ''; head.textContent = ''; fb.innerHTML = `<p><b>${score} of ${TOTAL} matched first time.</b></p><div class="actions"><button class="btn" id="mt-again">Play again</button></div>`; fb.querySelector('#mt-again').onclick = () => { round = 0; score = 0; newRound(); }; }

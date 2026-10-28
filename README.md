@@ -20,3 +20,7 @@ Then open http://localhost:8765. Progress is saved in that browser.
 
 Math is rendered with KaTeX loaded from cdnjs, so the page needs an internet connection.
 All questions are original and randomly generated; no textbook pages are included.
+
+## Shared XP policy — 28 October 2026
+
+1,000 XP = $2. Existing balances become a preserved opening credit. New completed assessments use the Editing score curve, scaled by question count; retries pay only improvements under a stable content ID. Hints and corrections do not deduct XP. Completion badges and guided training do not add cash bonuses. Cloud transactions merge XP ledgers so stale saves do not lower the balance. Arcade tokens remain separate. See XP-POLICY.md. Run `node check-xp.cjs` for reward and migration checks.
