@@ -34,3 +34,5 @@ The `gameTokens` field is separate from Physics’s existing `arcade` learning p
 ## Common Editing presentation
 
 All four subjects use `learning-shell.css` and `learning-shell.js`: Editing’s paper palette, local fonts, independent XP/completion/token cards, header account actions, navigation tabs, buttons, surfaces and responsive rules. The tower climb, physics realms, maths map and Coding runner remain subject-specific. Existing XP, token and completion records are unchanged. Canonical shell sources live in `../shared-learning/shell`; run its `sync.py` after changing the shared CSS or JS to keep the four checkouts aligned.
+
+All ten Maths lessons appear as numbered tabs for both parent and learner accounts, alongside Map, Wake-up, Rules, Stats and Games. Lessons can be read in any order; task completion and XP still require the existing assessment evidence. Opening a lesson never marks it complete or grants XP.

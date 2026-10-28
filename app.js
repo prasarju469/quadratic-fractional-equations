@@ -330,10 +330,10 @@
         nodes += `<a href="${open ? '#/wake' : '#'}" class="mnode ${open ? 'open' : 'lock'}"><text x="${p.x}" y="${p.y + 12}" text-anchor="middle" font-size="46">🏰</text><text x="${p.x}" y="${p.y + 40}" text-anchor="middle" class="mlabel">${open ? 'Wake-up test' : '🔒 Castle'}</text></a>`;
         return;
       }
-      const state = i < done ? 'done' : i === done ? 'cur' : 'lock';
-      nodes += `<a href="${state === 'lock' ? '#' : '#/day/' + (i + 1)}" class="mnode ${state}">
+      const state = Store.d.done[i+1] ? 'done' : i === done ? 'cur' : 'open';
+      nodes += `<a href="#/day/${i + 1}" class="mnode ${state}">
         ${state === 'cur' ? `<circle class="pulse" cx="${p.x}" cy="${p.y}" r="26"/>` : ''}<circle class="mc" cx="${p.x}" cy="${p.y}" r="22"/>
-        <text x="${p.x}" y="${p.y + 7}" text-anchor="middle" class="mnum">${state === 'lock' ? '🔒' : i + 1}</text>
+        <text x="${p.x}" y="${p.y + 7}" text-anchor="middle" class="mnum">${i + 1}</text>
         ${state === 'done' ? `<text x="${p.x + 15}" y="${p.y - 15}" font-size="18">⭐</text>` : ''}
         <text x="${p.x}" y="${p.y + 44}" text-anchor="middle" class="mlabel">${SHORT[i]}</text></a>`;
     });
@@ -585,10 +585,6 @@
   function day(n) {
     const d = DAYS.find((x) => x.n === n);
     if (!d) return home();
-    if (!isTeacher() && n > 1 && !Store.d.done[n - 1]) {
-      root.innerHTML = `<div class="block"><span class="tag">🔒 Locked</span><h3>Finish Level ${n - 1} first</h3><p>Clear every task in the level before it to unlock this one.</p><a class="btn primary" href="#/day/${n - 1}">Go to Level ${n - 1}</a></div>`;
-      return;
-    }
     root.innerHTML = `<p><a href="#/">← Back to the map</a></p><h1>Level ${d.n}: ${d.title}</h1><p class="muted">${d.tagline} · about ${d.minutes} minutes</p>`;
     root.appendChild(levelBar(d));
     d.blocks.forEach((b) => { if (!isTeacher() && b.t === 'teachback') return; root.appendChild(blocks[b.t](b, d.n)); });
@@ -674,8 +670,9 @@
 
   function setupNav() {
     const nav = document.querySelector('.top nav');
+    if (!nav.querySelector('[data-lesson-tab]')) nav.insertAdjacentHTML('afterbegin', '<a href="#/" data-course-map>Map</a>'+DAYS.map(d=>`<a href="#/day/${d.n}" data-lesson-tab="${d.n}" title="Level ${d.n}: ${d.title}">${String(d.n).padStart(2,'0')} ${SHORT[d.n-1]}</a>`).join(''));
     if (!Cloud.enabled) return;
-    if (Cloud.role === 'teacher') nav.insertAdjacentHTML('afterbegin', '<a href="#/coverage">📋 Coverage</a><a href="#/review">👀 Student</a>');
+    if (Cloud.role === 'teacher') nav.insertAdjacentHTML('beforeend', '<a href="#/coverage">📋 Coverage</a><a href="#/review">👀 Student</a>');
     nav.insertAdjacentHTML('beforeend', `<a href="#" id="signout" title="Signed in as ${Cloud.email}">Sign out</a>`);
     document.getElementById('signout').onclick = (e) => { e.preventDefault(); Cloud.signOut(); };
   }
@@ -685,6 +682,7 @@
     if (!booted) return;
     clearTimers();
     const h = location.hash.replace(/^#/, '') || '/';
+    document.querySelectorAll('[data-lesson-tab],[data-course-map]').forEach(a=>{const selected=a.getAttribute('href')==='#'+h;a.classList.toggle('active',selected);if(selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     if (h === '/teacher' || h === '/student') { setTeacher(h === '/teacher'); location.hash = '#/'; return; }
     let tb = document.getElementById('tbadge');
     if (!tb) { tb = document.createElement('a'); tb.id = 'tbadge'; tb.href = '#/student'; tb.textContent = '🧑‍🏫 Teacher mode · switch to student view'; document.querySelector('.top nav').appendChild(tb); }
