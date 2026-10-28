@@ -19,9 +19,9 @@
     saveLocal() { try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (e) { /* ignore */ } },
     save() { this.d.updated = Date.now(); this.saveLocal(); Cloud.push(this.d); },
     reset() {
-      MathsRewards.ensure(this.d);const rewardLedger=JSON.parse(JSON.stringify(this.d.rewardLedger));
+      MathsRewards.ensure(this.d);const rewardLedger=JSON.parse(JSON.stringify(this.d.rewardLedger)),gameTokens=JSON.parse(JSON.stringify(this.d.gameTokens));
       this.d = { v: 2, stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: this.d.avatar, pos: 0, updated: Date.now() };
-      this.d.rewardLedger=rewardLedger;MathsRewards.ensure(this.d);this.saveLocal(); return Cloud.push(this.d, true);
+      this.d.rewardLedger=rewardLedger;this.d.gameTokens=gameTokens;MathsRewards.ensure(this.d);this.saveLocal(); return Cloud.push(this.d, true);
     },
     record(topic, ok, tracked=false) {if(!tracked)window.LearningTracker?.event('answer',{topic,correct:ok});
       const s = this.d.stats[topic] || (this.d.stats[topic] = { c: 0, t: 0 });
@@ -704,4 +704,5 @@
   Cloud.ready()
     .then(() => { if (Cloud.enabled) Store.key = 'kq_v1_' + Cloud.email; Store.load(); return Cloud.merge(Store); })
     .then(() => { MathsRewards.ensure(Store.d);Store.saveLocal();booted = true; document.body.classList.remove('locked'); setupNav(); route(); });
+window.SubjectArcade={subject:'maths',getState:()=>Store.d,save:()=>{Store.save();hud();},identity:()=>Cloud.email||'local-preview',isReady:()=>booted,isTeacher:()=>Cloud.role==='teacher'};
 })();
