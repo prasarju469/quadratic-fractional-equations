@@ -60,7 +60,7 @@
   function hud() {
     const box = document.getElementById('hud'); if (!box) return;
     const n = doneCount();
-    box.innerHTML = `<span class="av">${Store.d.avatar || '🦊'}</span><span class="lv">★ ${n}/${DAYS.length}</span><span>${RANKS[n]}</span><span class="xpbar"><i style="width:${(n / DAYS.length) * 100}%"></i></span><span>🪙 ${xp()} XP · ${SharedRewards.cash(xp())}</span>`;
+    box.innerHTML = `<span class="av">${Store.d.avatar || '🦊'}</span><span class="lv">★ ${n}/${DAYS.length}</span><span>${RANKS[n]}</span><span class="xpbar"><i style="width:${(n / DAYS.length) * 100}%"></i></span><span>🪙 ${xp()} XP</span>`;
   }
   function trackable(d) { return d.blocks.filter((b) => ['practice', 'predict', 'errors', 'fixed', 'think', 'drill', 'mock'].includes(b.t) || (b.t === 'widget' && b.id)); }
   function isCleared(b) {
@@ -397,7 +397,7 @@
         const reward=Cloud.role==='teacher'?0:MathsRewards.award(Store.d,b.id,score,b.n);
         Store.d.drills.push({ id: b.id, score, n: b.n, when: Date.now() }); Store.save(); bump();
         w.innerHTML = `<span class="tag">Result</span><h3>${b.title}</h3>${timeUp ? '<p class="muted">Time is up.</p>' : ''}
-          <div class="score">${score} / ${b.n}</div><p>+${reward} XP · improvements only · 500 XP = $1</p>
+          <div class="score">${score} / ${b.n}</div><p>+${reward} XP · improvements only</p>
           ${b.pass ? (score >= b.pass ? `<p class="ok" style="color:var(--good);font-weight:800">✔ Passed! (pass mark ${b.pass})</p>` : `<p class="no" style="color:var(--bad);font-weight:700">Pass mark is ${b.pass}. Fix the topics below and try again.</p>`) : ''}
           ${missed.length ? `<p>Topics to revisit:</p><ul class="breakdown">${missed.map((m) => `<li>${m}</li>`).join('')}</ul>` : '<p><b>Perfect. No topics to revisit.</b></p>'}
           <div class="actions"><button class="btn primary">Try again with new questions</button></div>`;
