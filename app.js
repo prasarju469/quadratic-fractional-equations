@@ -22,7 +22,7 @@
       this.d = { v: 2, stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: this.d.avatar, pos: 0, updated: Date.now() };
       this.saveLocal(); return Cloud.push(this.d, true);
     },
-    record(topic, ok) {
+    record(topic, ok, tracked=false) {if(!tracked)window.LearningTracker?.event('answer',{topic,correct:ok});
       const s = this.d.stats[topic] || (this.d.stats[topic] = { c: 0, t: 0 });
       s.t++; if (ok) s.c++; this.save(); hud();
     },
@@ -110,7 +110,7 @@
       finished = true;
       inputs.forEach((i) => (i.disabled = true)); chk.disabled = true;
       const hb = card.querySelector('.hintbtn'); if (hb) hb.disabled = true;
-      Store.record(q.topic, clean);
+      Store.record(q.topic, clean, true);
       opts.onDone && opts.onDone(ok, clean);
     }
     function sol(open) {
@@ -120,7 +120,9 @@
       if (finished) return;
       const res = checkAnswer(q, inputs.map((i) => i.value));
       if (res.bad) { fb.innerHTML = `<span class="no">${res.msg || 'Type numbers only. Fractions like 3/2 and decimals are fine. Separate several answers with commas.'}</span>`; return; }
+      if(attempts===0)window.LearningTracker?.event('answer',{topic:q.topic,correct:res.ok,assisted:usedHint});
       if (res.ok) {
+        if(attempts>0)window.LearningTracker?.event('correction',{topic:q.topic});
         inputs.forEach((i) => i.classList.add('right'));
         const clean = attempts === 0 && !usedHint;
         fb.innerHTML = `<span class="ok">✔ Correct${clean ? ' <span class="xpgain">+10 XP</span>' : ' (with help, no XP)'}</span>${sol(false)}`;
@@ -142,7 +144,7 @@
     inputs.forEach((i) => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') check(); }));
     const hb = card.querySelector('.hintbtn');
     if (hb) hb.onclick = () => {
-      usedHint = true;
+      if(!usedHint)window.LearningTracker?.event('hint',{topic:q.topic});usedHint = true;
       const h = fb.querySelector('.hint') || fb.appendChild(el('div', 'hint'));
       h.innerHTML = '💡 ' + q.hint; math(h);
     };
@@ -172,10 +174,11 @@
         const btn = el('button', 'opt', o.text); opts.appendChild(btn);
         btn.onclick = () => {
           if (solved) return;
+          if(tries===0)window.LearningTracker?.event('answer',{topic:'predict',correct:o.ok});
           if (o.ok) {
             solved = true; btn.classList.add('right');
             const first = tries === 0;
-            Store.record('predict', first); Store.clear(b.id);
+            if(!first)window.LearningTracker?.event('correction',{topic:'predict'});Store.record('predict', first,true); Store.clear(b.id);
             fb.innerHTML = `<div class="reveal"><b>Yes!${first ? ' <span class="xpgain">+10 XP</span>' : ''}</b> ${o.why || ''}<br>${b.explain || ''}</div>`;
           } else {
             tries++; btn.classList.add('wrong'); btn.disabled = true;

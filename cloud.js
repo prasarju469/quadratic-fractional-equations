@@ -52,7 +52,7 @@ const Cloud = (() => {
         return never();
       }
     }
-    C.email = email; C.name = user.displayName || email;
+    C.email = email; C.name = user.displayName || email;window.LearningTracker?.start({subject:'maths',email,auth,db,role:C.role});
   };
 
   /* Keep whichever copy (this browser or the cloud) was saved most recently. */
@@ -83,6 +83,6 @@ const Cloud = (() => {
     return snap.docs.filter((x) => x.data().role !== 'teacher' && x.id !== C.email)
       .map((x) => Object.assign(JSON.parse(x.data().data || '{}'), { _name: x.data().name, _email: x.id }));
   };
-  C.signOut = () => (auth ? auth.signOut() : Promise.resolve()).then(() => location.reload());
+  C.signOut = async () => {await window.LearningTracker?.flush().catch(()=>{});window.LearningTracker?.stop();if(auth)await auth.signOut();location.reload();};
   return C;
 })();
