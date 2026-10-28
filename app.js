@@ -56,9 +56,23 @@
   const AVATARS = ['🦊', '🐲', '🤖', '🐱', '🦉', '🐺', '🚀', '🦖'];
   const SHORT = ['Factors', 'Calculator', 'Squares', 'Formula', 'Fractions', 'Graphs', 'Stories', 'Rates', 'Mock exam', 'Repair', 'Castle'];
   const doneCount = () => DAYS.filter((d) => Store.d.done[d.n]).length;
+  // Access depends on completion flags, never XP, task checks or visited pages.
+  const levelOpen = n => Number.isInteger(n) && n >= 1 && n <= DAYS.length &&
+    (isTeacher() || DAYS.filter(d => d.n < n).every(d => Store.d.done[d.n]));
+  function updateLessonNav() {
+    document.querySelectorAll('[data-lesson-tab]').forEach(a => {
+      const n = Number(a.dataset.lessonTab), open = levelOpen(n);
+      a.textContent = `${open ? '' : '🔒 '}${String(n).padStart(2,'0')} ${SHORT[n-1]}`;
+      a.classList.toggle('lesson-locked', !open);
+      a.setAttribute('aria-disabled', String(!open));
+      if (open) a.setAttribute('href', '#/day/' + n); else a.removeAttribute('href');
+      a.title = open ? `Level ${n}: ${DAYS[n-1].title}` : `Finish Level ${n-1} to unlock Level ${n}`;
+    });
+  }
   function xp() { return MathsRewards.total(Store.d); }
   function hud() {
     const box = document.getElementById('hud'); if (!box) return;
+    updateLessonNav();
     const n = doneCount();
     box.innerHTML = `<div class="xp-card" aria-label="XP" aria-live="polite"><strong>${xp()} XP</strong></div><div class="completion-card" aria-label="Level completion"><strong>${n} / ${DAYS.length}</strong></div>`;
   }
@@ -330,10 +344,10 @@
         nodes += `<a href="${open ? '#/wake' : '#'}" class="mnode ${open ? 'open' : 'lock'}"><text x="${p.x}" y="${p.y + 12}" text-anchor="middle" font-size="46">🏰</text><text x="${p.x}" y="${p.y + 40}" text-anchor="middle" class="mlabel">${open ? 'Wake-up test' : '🔒 Castle'}</text></a>`;
         return;
       }
-      const state = Store.d.done[i+1] ? 'done' : i === done ? 'cur' : 'open';
-      nodes += `<a href="#/day/${i + 1}" class="mnode ${state}">
+      const state = !levelOpen(i+1) ? 'lock' : Store.d.done[i+1] ? 'done' : i === done ? 'cur' : 'open';
+      nodes += `<a ${state === 'lock' ? 'aria-disabled="true"' : `href="#/day/${i + 1}"`} class="mnode ${state}">
         ${state === 'cur' ? `<circle class="pulse" cx="${p.x}" cy="${p.y}" r="26"/>` : ''}<circle class="mc" cx="${p.x}" cy="${p.y}" r="22"/>
-        <text x="${p.x}" y="${p.y + 7}" text-anchor="middle" class="mnum">${i + 1}</text>
+        <text x="${p.x}" y="${p.y + 7}" text-anchor="middle" class="mnum">${state === 'lock' ? '🔒' : i + 1}</text>
         ${state === 'done' ? `<text x="${p.x + 15}" y="${p.y - 15}" font-size="18">⭐</text>` : ''}
         <text x="${p.x}" y="${p.y + 44}" text-anchor="middle" class="mlabel">${SHORT[i]}</text></a>`;
     });
@@ -585,12 +599,17 @@
   function day(n) {
     const d = DAYS.find((x) => x.n === n);
     if (!d) return home();
+    if (!levelOpen(n)) {
+      const next = DAYS.find(x => !Store.d.done[x.n]);
+      root.innerHTML = `<div class="block"><h1>🔒 Level ${n} is locked</h1><p>Finish Level ${n-1} to unlock this lesson. Complete the levels in order.</p><a class="btn primary" href="#/day/${next.n}">Continue Level ${next.n}</a> <a class="btn" href="#/">Back to the map</a></div>`;
+      return;
+    }
     root.innerHTML = `<p><a href="#/">← Back to the map</a></p><h1>Level ${d.n}: ${d.title}</h1><p class="muted">${d.tagline} · about ${d.minutes} minutes</p>`;
     root.appendChild(levelBar(d));
     d.blocks.forEach((b) => { if (!isTeacher() && b.t === 'teachback') return; root.appendChild(blocks[b.t](b, d.n)); });
     const nav = el('div', 'actions');
     if (n > 1) nav.innerHTML += `<a class="btn" style="text-decoration:none" href="#/day/${n - 1}">← Level ${n - 1}</a>`;
-    if (n < DAYS.length) nav.innerHTML += `<a class="btn primary" style="text-decoration:none" href="#/day/${n + 1}">Level ${n + 1} →</a>`;
+    if (n < DAYS.length && levelOpen(n+1)) nav.innerHTML += `<a class="btn primary" style="text-decoration:none" href="#/day/${n + 1}">Level ${n + 1} →</a>`;
     root.appendChild(nav);
   }
 
@@ -687,6 +706,7 @@
     let tb = document.getElementById('tbadge');
     if (!tb) { tb = document.createElement('a'); tb.id = 'tbadge'; tb.href = '#/student'; tb.textContent = '🧑‍🏫 Teacher mode · switch to student view'; document.querySelector('.top nav').appendChild(tb); }
     tb.hidden = !isTeacher();
+    updateLessonNav();
     if (h.startsWith('/day/')) day(+h.split('/')[2]);
     else if (h === '/wake') wake();
     else if (h === '/progress') progress();

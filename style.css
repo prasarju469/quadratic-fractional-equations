@@ -300,3 +300,5 @@ details.recipe > summary { cursor: pointer; font-weight: 700; color: var(--cyan)
 table.signs { width: 100%; border-collapse: collapse; margin: .5rem 0; }
 table.signs th, table.signs td { border: 2px solid var(--line); padding: .4rem .6rem; text-align: left; }
 table.signs th { background: var(--card2); }
+
+.top nav a.lesson-locked{opacity:.55;cursor:not-allowed}.mapsvg .mnode.lock:hover .mc{filter:none}
