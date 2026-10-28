@@ -60,7 +60,7 @@
   function hud() {
     const box = document.getElementById('hud'); if (!box) return;
     const n = doneCount();
-    box.innerHTML = `<div class="xp-card" aria-label="XP" aria-live="polite"><strong>${xp()} XP</strong><small>earned</small></div><div class="completion-card" aria-label="Level completion"><strong>${n} / ${DAYS.length}</strong><small>levels</small></div>`;
+    box.innerHTML = `<div class="xp-card" aria-label="XP" aria-live="polite"><strong>${xp()} XP</strong></div><div class="completion-card" aria-label="Level completion"><strong>${n} / ${DAYS.length}</strong></div>`;
   }
   function trackable(d) { return d.blocks.filter((b) => ['practice', 'predict', 'errors', 'fixed', 'think', 'drill', 'mock'].includes(b.t) || (b.t === 'widget' && b.id)); }
   function isCleared(b) {
