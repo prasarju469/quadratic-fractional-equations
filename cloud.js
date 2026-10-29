@@ -52,7 +52,7 @@ const Cloud = (() => {
         return never();
       }
     }
-    C.email = email; C.name = user.displayName || email;window.LearningTracker?.start({subject:'maths',email,auth,db,role:C.role});
+    await window.PlayerProfile?.connect({auth,db,user,role:C.role});C.email = email; C.name = window.PlayerProfile?.name() || user.displayName || email;window.LearningTracker?.start({subject:'maths',email,auth,db,role:C.role});
   };
 
   /* Keep whichever copy (this browser or the cloud) was saved most recently. */

@@ -15,8 +15,8 @@ service cloud.firestore {
     match /users/{docEmail} {
       // Students read only their own. Teachers can read everyone's.
       allow read:  if isTeacher() || (isStudent() && me() == docEmail);
-      // Everyone writes only their own.
-      allow write: if (isTeacher() || isStudent()) && me() == docEmail;
+      // Approved accounts create/update only their own. Whole-record deletes are denied.
+      allow create, update: if (isTeacher() || isStudent()) && me() == docEmail;
     }
   }
 }
