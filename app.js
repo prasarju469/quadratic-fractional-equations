@@ -38,12 +38,7 @@
   window.kqRecord = (t, ok) => Store.record(t, ok);
   window.kqClear = (id) => Store.clear(id);
   const bump = () => window.dispatchEvent(new Event('kq-progress'));
-  const isTeacher = () => {
-    try {
-      if (Cloud.enabled) return Cloud.role === 'teacher' && localStorage.getItem('kq_view') !== 'student';
-      return localStorage.getItem('kq_teacher') === '1';
-    } catch (e) { return false; }
-  };
+  const isTeacher = () => false; // Parent analytics live in the separate dashboard.
   const setTeacher = (on) => {
     try {
       if (Cloud.enabled) { if (on) localStorage.removeItem('kq_view'); else localStorage.setItem('kq_view', 'student'); return; }
@@ -691,7 +686,7 @@
     const nav = document.querySelector('.top nav');
     if (!nav.querySelector('[data-lesson-tab]')) nav.insertAdjacentHTML('afterbegin', '<a href="#/" data-course-map>Map</a>'+DAYS.map(d=>`<a href="#/day/${d.n}" data-lesson-tab="${d.n}" title="Level ${d.n}: ${d.title}">${String(d.n).padStart(2,'0')} ${SHORT[d.n-1]}</a>`).join(''));
     if (!Cloud.enabled) return;
-    if (Cloud.role === 'teacher') nav.insertAdjacentHTML('beforeend', '<a href="#/coverage">📋 Coverage</a><a href="#/review">👀 Student</a>');
+
     nav.insertAdjacentHTML('beforeend', `<a href="#" id="signout" title="Signed in as ${Cloud.email}">Sign out</a>`);
     document.getElementById('signout').onclick = (e) => { e.preventDefault(); Cloud.signOut(); };
   }
@@ -703,14 +698,11 @@
     const h = location.hash.replace(/^#/, '') || '/';
     document.querySelectorAll('[data-lesson-tab],[data-course-map]').forEach(a=>{const selected=a.getAttribute('href')==='#'+h;a.classList.toggle('active',selected);if(selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     if (h === '/teacher' || h === '/student') { setTeacher(h === '/teacher'); location.hash = '#/'; return; }
-    let tb = document.getElementById('tbadge');
-    if (!tb) { tb = document.createElement('a'); tb.id = 'tbadge'; tb.href = '#/student'; tb.textContent = '🧑‍🏫 Teacher mode · switch to student view'; document.querySelector('.top nav').appendChild(tb); }
-    tb.hidden = !isTeacher();
     updateLessonNav();
     if (h.startsWith('/day/')) day(+h.split('/')[2]);
     else if (h === '/wake') wake();
     else if (h === '/progress') progress();
-    else if (h === '/review') review();
+    else if (h === '/review') home();
     else if (h === '/coverage') coverage();
     else if (h === '/mock') mockPage();
     else if (h === '/rules') rulesPage();
