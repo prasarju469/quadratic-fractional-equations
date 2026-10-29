@@ -52,11 +52,12 @@ const Cloud = (() => {
         return never();
       }
     }
-    await window.PlayerProfile?.connect({auth,db,user,role:C.role});C.email = email; C.name = window.PlayerProfile?.name() || user.displayName || email;window.LearningTracker?.start({subject:'maths',email,auth,db,role:C.role});
+    const view=await window.LearnerView?.select({auth,db,user});C.preview=!!view?.parent;if(!C.preview)await window.PlayerProfile?.connect({auth,db,user,role:C.role});C.email = email; C.name = C.preview?view.name:(window.PlayerProfile?.name() || user.displayName || email);if(!C.preview)window.LearningTracker?.start({subject:'maths',email,auth,db,role:C.role});
   };
 
   /* Keep whichever copy (this browser or the cloud) was saved most recently. */
   C.merge = async (Store) => {
+    if(C.preview){const d=window.LearnerView.data('maths');Store.d={v:2,stats:{},done:{},cleared:{},notes:{},checks:{},drills:[],avatar:'🦊',pos:0,...(d||{})};if(Store.migrate)Store.migrate(Store.d);return;}
     if (!C.enabled) return;
     try {
       const snap = await db.collection('users').doc(C.email).get();
@@ -71,7 +72,7 @@ const Cloud = (() => {
   };
 
   C.push = (d, now) => {
-    if (!C.enabled || !C.email || !db) return Promise.resolve();
+    if (C.preview || !C.enabled || !C.email || !db) return Promise.resolve();
     clearTimeout(timer);
     const go = () => { pending = null;const snapshot=JSON.parse(JSON.stringify(d));const task=window.SharedRewards.saveSubject(db,db.collection('users').doc(C.email),null,snapshot,window.MathsRewards,{name:C.name,role:C.role}).then(()=>{window.MathsRewards.merge(d,snapshot);try{localStorage.setItem('kq_v1_'+C.email,JSON.stringify(d));}catch{}}).catch((e)=>{console.warn('Cloud save failed',e);pending=go;});inFlight.add(task);task.finally(()=>inFlight.delete(task));return task; };
     if (now) return go();

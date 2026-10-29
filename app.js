@@ -16,7 +16,7 @@
       d.done = nd; d.v = 2; return d;
     },
     load() { try { const s = localStorage.getItem(this.key); if (s) Object.assign(this.d, this.migrate(JSON.parse(s))); } catch (e) { /* private mode */ } },
-    saveLocal() { try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (e) { /* ignore */ } },
+    saveLocal() { if(Cloud.preview)return;try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (e) { /* ignore */ } },
     save() { this.d.updated = Date.now(); this.saveLocal(); Cloud.push(this.d); },
     reset() {
       MathsRewards.ensure(this.d);const rewardLedger=JSON.parse(JSON.stringify(this.d.rewardLedger)),gameTokens=JSON.parse(JSON.stringify(this.d.gameTokens));
