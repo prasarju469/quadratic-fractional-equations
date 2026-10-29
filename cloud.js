@@ -4,7 +4,7 @@ const Cloud = (() => {
   const cfg = window.KQ_CONFIG || {};
   const norm = (e) => String(e || '').trim().toLowerCase();
   const C = { enabled: !!cfg.firebase, email: '', role: 'local', name: '' };
-  let auth, db, timer, pending = null;
+  let auth, db, timer, pending = null;const inFlight=new Set();
 
   const load = (src) => new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(s);
@@ -73,17 +73,19 @@ const Cloud = (() => {
   C.push = (d, now) => {
     if (!C.enabled || !C.email || !db) return Promise.resolve();
     clearTimeout(timer);
-    const go = () => { pending = null;const snapshot=JSON.parse(JSON.stringify(d));return window.SharedRewards.saveSubject(db,db.collection('users').doc(C.email),null,snapshot,window.MathsRewards,{name:C.name,role:C.role}).then(()=>{window.MathsRewards.merge(d,snapshot);try{localStorage.setItem('kq_v1_'+C.email,JSON.stringify(d));}catch{}}).catch((e)=>{console.warn('Cloud save failed',e);pending=go;}); };
+    const go = () => { pending = null;const snapshot=JSON.parse(JSON.stringify(d));const task=window.SharedRewards.saveSubject(db,db.collection('users').doc(C.email),null,snapshot,window.MathsRewards,{name:C.name,role:C.role}).then(()=>{window.MathsRewards.merge(d,snapshot);try{localStorage.setItem('kq_v1_'+C.email,JSON.stringify(d));}catch{}}).catch((e)=>{console.warn('Cloud save failed',e);pending=go;});inFlight.add(task);task.finally(()=>inFlight.delete(task));return task; };
     if (now) return go();
     pending = go; timer = setTimeout(go, 1500); return Promise.resolve();
   };
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && pending) { clearTimeout(timer); pending(); } });
+
+  C.flush=async()=>{clearTimeout(timer);if(pending)await pending();await Promise.all([...inFlight]);if(pending)throw new Error('Cloud save pending');};
 
   C.listStudents = async () => {
     const snap = await db.collection('users').get();
     return snap.docs.filter((x) => x.data().role !== 'teacher' && x.id !== C.email)
       .map((x) => Object.assign(JSON.parse(x.data().data || '{}'), { _name: x.data().name, _email: x.id }));
   };
-  C.signOut = async () => {await window.LearningTracker?.flush().catch(()=>{});window.LearningTracker?.stop();if(auth)await auth.signOut();location.reload();};
+  C.signOut = async () => {await window.LearningTracker?.flush().catch(()=>{});window.LearningTracker?.stop();await C.flush();if(auth)await auth.signOut();location.reload();};
   return C;
 })();
