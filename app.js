@@ -29,7 +29,7 @@
     },
     clear(id) {
       if (!id || this.d.cleared[id]) return;
-      MathsRewards.ensure(this.d);this.d.cleared[id] = true; this.save(); hud(); bump(); toast('⭐ Task cleared!');
+      const before=MathsRewards.total(this.d);this.d.cleared[id] = true; const earned=MathsRewards.total(this.d)-before;this.save(); hud(); bump(); toast(earned?'⭐ Practice complete! +'+earned+' XP':'⭐ Task cleared!');
     },
   };
   let booted = false;
@@ -406,7 +406,7 @@
         const reward=Cloud.role==='teacher'?0:MathsRewards.award(Store.d,b.id,score,b.n);
         Store.d.drills.push({ id: b.id, score, n: b.n, when: Date.now() }); Store.save(); bump();
         w.innerHTML = `<span class="tag">Result</span><h3>${b.title}</h3>${timeUp ? '<p class="muted">Time is up.</p>' : ''}
-          <div class="score">${score} / ${b.n}</div><p>+${reward} XP · improvements only</p>
+          <div class="score">${score} / ${b.n}</div><p>+${reward} XP · practice completed</p>
           ${b.pass ? (score >= b.pass ? `<p class="ok" style="color:var(--good);font-weight:800">✔ Passed! (pass mark ${b.pass})</p>` : `<p class="no" style="color:var(--bad);font-weight:700">Pass mark is ${b.pass}. Fix the topics below and try again.</p>`) : ''}
           ${missed.length ? `<p>Topics to revisit:</p><ul class="breakdown">${missed.map((m) => `<li>${m}</li>`).join('')}</ul>` : '<p><b>Perfect. No topics to revisit.</b></p>'}
           <div class="actions"><button class="btn primary">Try again with new questions</button></div>`;
@@ -502,7 +502,7 @@
         Store.d.drills.push({ id: b.id, score: earned, n: total, rewardCorrect:independent,rewardQuestions:questions, when: Date.now() }); Store.save(); bump();
         const passed = b.pass ? earned >= b.pass : null;
         w.innerHTML = `<span class="tag">Result</span><h3>${b.title}</h3>${timeUp ? '<p class="muted">Time is up.</p>' : ''}
-          <div class="score">${earned} / ${total}</div><p>+${reward} XP · independent answers · improvements only</p>
+          <div class="score">${earned} / ${total}</div><p>+${reward} XP · practice completed</p>
           ${b.pass ? (passed ? `<p style="color:var(--good);font-weight:800">✔ Passed (pass mark ${b.pass})</p>` : `<p style="color:var(--bad);font-weight:700">Pass mark is ${b.pass}. Review the worked solutions below and try a new paper.</p>`) : ''}
           ${missed.size ? `<p>Topics to revisit:</p><ul class="breakdown">${[...missed].map((m) => `<li>${m}</li>`).join('')}</ul>` : '<p><b>Full marks. Nothing to revisit.</b></p>'}
           <div class="actions"><button class="btn primary" id="again">Try a new paper</button></div>${rows}`;
