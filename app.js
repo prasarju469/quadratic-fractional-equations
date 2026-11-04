@@ -287,7 +287,7 @@
         const p = dayProgress(d), ready = p.frac >= 1;
         w.innerHTML = `<span class="tag">🏁 Finish line</span><p>${ready ? 'Every task is cleared. Grab the flag!' : `Clear every task to reach the flag: <b>${p.c} of ${p.n}</b> done.`}</p>
           <button class="btn primary big" ${ready || isTeacher() ? '' : 'disabled'}>🏁 Finish Level ${day}</button>${!ready && isTeacher() ? ' <span class="muted">(teacher override)</span>' : ''}`;
-        w.querySelector('button').onclick = () => { Store.d.done[day] = true; Store.save(); hud(); levelUp(day); };
+        w.querySelector('button').onclick = () => { Store.d.doneAt ||= {}; if(!Store.d.done[day])Store.d.doneAt[day] = Date.now(); Store.d.done[day] = true; Store.save(); hud(); levelUp(day); };
       }
       const h = () => { if (!w.isConnected) { window.removeEventListener('kq-progress', h); return; } if (!Store.d.done[day]) paint(); };
       window.addEventListener('kq-progress', h); paint(); return w;
