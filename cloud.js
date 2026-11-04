@@ -4,7 +4,7 @@ const Cloud = (() => {
   const cfg = window.KQ_CONFIG || {};
   const norm = (e) => String(e || '').trim().toLowerCase();
   const C = { enabled: !!cfg.firebase, email: '', role: 'local', name: '' };
-  let auth, db, timer, pending = null;const inFlight=new Set();
+  let auth, db, timer, pending = null, retryTimer=null, retryDelay=1500, lastData=null;const inFlight=new Set();
 
   const load = (src) => new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(s);
@@ -64,23 +64,31 @@ const Cloud = (() => {
       if (snap.exists) {
         const cloud = JSON.parse(snap.data().data || '{}');
         if (Store.migrate) Store.migrate(cloud);
-        if ((cloud.updated || 0) > (Store.d.updated || 0)) { window.MathsRewards.merge(cloud,Store.d);Object.assign(Store.d, cloud);Store.saveLocal();return; }
+        if ((cloud.updated || 0) > (Store.d.updated || 0)) { window.MathsRewards.merge(cloud,Store.d);Object.assign(Store.d, cloud);Store.saveLocal();await C.push(Store.d,true);return; }
         window.MathsRewards.merge(Store.d,cloud);
       }
       await C.push(Store.d, true);
-    } catch (e) { console.warn('Cloud sync failed', e); }
+    } catch (e) { console.warn('Cloud sync pending; retrying automatically',e);const identity=C.email;pending=()=>{pending=null;if(C.preview||C.email!==identity)return Promise.resolve();return C.merge(Store);};scheduleRetry(); }
   };
 
+  function scheduleRetry(){if(retryTimer||!pending||C.preview)return;retryTimer=setTimeout(()=>{retryTimer=null;if(pending){clearTimeout(timer);pending();}},retryDelay);retryDelay=Math.min(30000,retryDelay*2);retryTimer?.unref?.();}
   C.push = (d, now) => {
     if (C.preview || !C.enabled || !C.email || !db) return Promise.resolve();
-    clearTimeout(timer);
-    const go = () => { pending = null;const snapshot=JSON.parse(JSON.stringify(d));const task=window.SharedRewards.saveSubject(db,db.collection('users').doc(C.email),null,snapshot,window.MathsRewards,{name:C.name,role:C.role}).then(()=>{window.MathsRewards.merge(d,snapshot);try{localStorage.setItem('kq_v1_'+C.email,JSON.stringify(d));}catch{}}).catch((e)=>{console.warn('Cloud save failed',e);pending=go;});inFlight.add(task);task.finally(()=>inFlight.delete(task));return task; };
-    if (now) return go();
-    pending = go; timer = setTimeout(go, 1500); return Promise.resolve();
+    lastData=d;clearTimeout(timer);clearTimeout(retryTimer);retryTimer=null;
+    const identity=C.email;
+    const go = () => {
+      pending=null;if(C.preview||C.email!==identity||norm(auth.currentUser?.email)!==identity)return Promise.resolve();
+      const current=lastData||d;window.MathsRewards.ensure?.(current);const snapshot=JSON.parse(JSON.stringify(current)),policy={...window.MathsRewards,merge:window.MathsRewards.mergeSaved||window.MathsRewards.merge};
+      const task=window.SharedRewards.saveSubject(db,db.collection('users').doc(identity),null,snapshot,policy,{name:C.name,role:C.role}).then(()=>{if(C.email!==identity)return;(window.MathsRewards.mergeSaved||window.MathsRewards.merge)(current,snapshot);retryDelay=1500;try{localStorage.setItem('kq_v1_'+identity,JSON.stringify(current));}catch{}}).catch(e=>{console.warn('Cloud save pending; retrying automatically',e);if(C.email===identity&&!C.preview){if(!pending)pending=go;scheduleRetry();}});
+      inFlight.add(task);task.finally(()=>inFlight.delete(task));return task;
+    };
+    if(now)return go();pending=go;timer=setTimeout(go,1500);return Promise.resolve();
   };
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && pending) { clearTimeout(timer); pending(); } });
-
-  C.flush=async()=>{clearTimeout(timer);if(pending)await pending();await Promise.all([...inFlight]);if(pending)throw new Error('Cloud save pending');};
+  function retryPending(){if(pending&&!C.preview){clearTimeout(timer);clearTimeout(retryTimer);retryTimer=null;pending();}}
+  document.addEventListener('visibilitychange',retryPending);
+  window.addEventListener?.('online',retryPending);
+  window.addEventListener?.('focus',retryPending);
+  C.flush=async()=>{clearTimeout(timer);clearTimeout(retryTimer);retryTimer=null;if(pending)await pending();await Promise.all([...inFlight]);if(pending)throw new Error('Cloud save pending');};
 
   C.listStudents = async () => {
     const snap = await db.collection('users').get();

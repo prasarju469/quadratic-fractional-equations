@@ -17,7 +17,7 @@
     },
     load() { try { const s = localStorage.getItem(this.key); if (s) Object.assign(this.d, this.migrate(JSON.parse(s))); } catch (e) { /* private mode */ } },
     saveLocal() { if(Cloud.preview)return;try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (e) { /* ignore */ } },
-    save() { this.d.updated = Date.now(); this.saveLocal(); Cloud.push(this.d); },
+    save() { MathsRewards.ensure(this.d);this.d.updated = Date.now(); this.saveLocal(); Cloud.push(this.d); },
     reset() {
       MathsRewards.ensure(this.d);const rewardLedger=JSON.parse(JSON.stringify(this.d.rewardLedger)),gameTokens=JSON.parse(JSON.stringify(this.d.gameTokens));
       this.d = { v: 2, stats: {}, done: {}, cleared: {}, notes: {}, checks: {}, drills: [], avatar: this.d.avatar, pos: 0, updated: Date.now() };
