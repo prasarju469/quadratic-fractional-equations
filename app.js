@@ -692,13 +692,25 @@
   }
 
   /* ---------- router ---------- */
+  // Keep the actual question nodes and handlers when consulting reference pages.
+  const practiceViews = new Map();
+  let renderedRoute = null;
+  const isPracticeRoute = h => /^\/(?:day\/\d+|wake|mock)$/.test(h);
   function route() {
     if (!booted) return;
-    clearTimers();
     const h = location.hash.replace(/^#/, '') || '/';
     document.querySelectorAll('[data-lesson-tab],[data-course-map]').forEach(a=>{const selected=a.getAttribute('href')==='#'+h;a.classList.toggle('active',selected);if(selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     if (h === '/teacher' || h === '/student') { setTeacher(h === '/teacher'); location.hash = '#/'; return; }
     updateLessonNav();
+    if (renderedRoute && isPracticeRoute(renderedRoute) && renderedRoute !== h) {
+      practiceViews.set(renderedRoute, [...root.childNodes]);
+    }
+    const cached = practiceViews.get(h);
+    if (cached && renderedRoute !== h) {
+      root.replaceChildren(...cached);renderedRoute = h;
+      window.scrollTo(0, 0);hud();return;
+    }
+    renderedRoute = h;
     if (h.startsWith('/day/')) day(+h.split('/')[2]);
     else if (h === '/wake') wake();
     else if (h === '/progress') progress();
