@@ -388,6 +388,7 @@
 
   /* ---------- drill / test ---------- */
   function drillBlock(b) {
+    b={...b,studyGuide:true};
     const w = el('section', 'block drill');
     function intro() {
       w.innerHTML = `<span class="tag">${b.test ? '🔥 Boss fight' : '🧊 Cold start'}</span><h3>${b.title}</h3><p class="muted">${b.intro || ''}</p>
@@ -430,7 +431,7 @@
       if (b.minutes||b.studyGuide) {
         tick = setInterval(() => {
           left--;elapsed++; const t = w.querySelector('#tm'); if (t) t.textContent = b.studyGuide?(left>=0?'Time guide: '+mmss(left):'Extra time: +'+mmss(-left)):mmss(Math.max(left, 0));
-          if (!b.studyGuide&&left <= 0) { clearInterval(tick); for (let k = results.length; k < b.n; k++) results.push({ topic: qs[k].topic, ok: false }); end(true); }
+
         }, 1000);
         timers.push(tick);
       }
@@ -469,14 +470,15 @@
     function intro() {
       w.innerHTML = `<span class="tag">📄 Mock paper</span><h3>${b.title}</h3><p class="muted">${b.intro || ''}</p>
         <ul>${b.sections.map((sec) => `<li>${sec.name} <span class="muted">[${secMarks(sec)} marks]</span></li>`).join('')}</ul>
-        <p><b>${total} marks · ${b.minutes} minutes</b>${b.pass ? ` · pass mark ${b.pass}` : ''}. Work on paper, then type your final answers. Nothing is marked until you hand in.</p>
+        <p><b>${total} marks · flexible time guide</b>${b.pass ? ` · pass mark ${b.pass}` : ''}. Work on paper, then type your final answers. Take the time you need; nothing is marked until you hand in.</p>
         <button class="btn primary big">Start the paper</button>`;
       w.querySelector('button').onclick = start;
     }
     function start() {
-      let no = 0, left = b.minutes * 60, tick = null, done = false, armed = false;
+      let no = 0, tick = null, done = false, armed = false, elapsed=0;
       const paper = b.sections.map((sec) => ({ name: sec.name, items: sec.items.map((it) => ({ q: generate(it.pool[Math.floor(Math.random() * it.pool.length)]), marks: it.marks })) }));
-      w.innerHTML = `<div class="drillbar mockbar"><span class="tag">📄 ${b.title}</span><span class="timer" id="mtm">${mmss(left)}</span></div><div class="paper"></div>
+      const guideMinutes=Math.max(b.minutes||0,studySetMinutes(paper.flatMap(sec=>sec.items.map(it=>it.q))));let left=guideMinutes*60;
+      w.innerHTML = `<div class="drillbar mockbar"><span class="tag">📄 ${b.title}</span><span class="timer" id="mtm">Time guide: ${mmss(left)}</span></div><p class="muted">Allow about ${guideMinutes} minutes for this paper, including checking. You can continue after this guide expires; only Hand in the paper submits your answers.</p><div class="paper"></div>
         <div class="actions"><button class="btn primary big" id="handin">Hand in the paper</button></div>`;
       const host = w.querySelector('.paper');
       paper.forEach((sec) => {
@@ -500,7 +502,7 @@
             <details class="sol"><summary>Worked solution</summary>${it.q.solution}</details></div>`;
         }).join('')).join('');
         const reward=Cloud.role==='teacher'?0:MathsRewards.award(Store.d,b.id,independent,questions);
-        Store.d.drills.push({ id: b.id, score: earned, n: total, rewardCorrect:independent,rewardQuestions:questions, when: Date.now() }); Store.save(); bump();
+        Store.d.drills.push({ id: b.id, score: earned, n: total, rewardCorrect:independent,rewardQuestions:questions,guideMinutes,elapsedSeconds:elapsed, when: Date.now() }); Store.save(); bump();
         const passed = b.pass ? earned >= b.pass : null;
         w.innerHTML = `<span class="tag">Result</span><h3>${b.title}</h3>${timeUp ? '<p class="muted">Time is up.</p>' : ''}
           <div class="score">${earned} / ${total}</div><p>+${reward} XP · practice completed</p>
@@ -509,7 +511,7 @@
           <div class="actions"><button class="btn primary" id="again">Try a new paper</button></div>${rows}`;
         w.querySelector('#again').onclick = start; math(w);
       }
-      tick = setInterval(() => { left--; const t = w.querySelector('#mtm'); if (t) t.textContent = mmss(Math.max(left, 0)); if (left <= 0) finish(true); }, 1000);
+      tick = setInterval(() => { left--;elapsed++; const t = w.querySelector('#mtm'); if (t) t.textContent = left>=0?'Time guide: '+mmss(left):'Extra time: +'+mmss(-left); }, 1000);
       timers.push(tick);
       const hb = w.querySelector('#handin');
       hb.onclick = () => {

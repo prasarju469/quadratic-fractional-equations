@@ -498,8 +498,8 @@ const DAYS = [
         prompt: 'Race yourself. Pick any equation from Level 1. Time yourself solving it by factorising, then time yourself in equation mode. Write both times. Then say which you would use for a 2-mark "solve" question, and which for a 5-mark "solve by factorising" question, and why.',
         model: 'The calculator is usually much faster. For a 2-mark "solve" question, use the calculator and write the equation and answers. For a 5-mark question that says "by factorising", show the factorising line by line, because the marks are for the method, and use the calculator only to check your answers.' },
 
-      { t: 'drill', id: 'c2-speed', title: 'Calculator speed round', topics: ['calcneg', 'calcsub', 'calcfr', 'calceqn', 'calceqnd', 'calcfac', 'calcform'], n: 6, minutes: 6, pass: 5,
-        intro: 'Six questions in 6 minutes, no hints. Use your calculator for everything. Fast and accurate.' },
+      { t: 'drill', id: 'c2-speed', title: 'Calculator practice round', topics: ['calcneg', 'calcsub', 'calcfr', 'calceqn', 'calceqnd', 'calcfac', 'calcform'], n: 6, studyGuide: true, pass: 5,
+        intro: 'Six calculator questions. Work accurately and check each result; the time guide adjusts to the selected questions.' },
 
       { t: 'teachback', title: 'Teach-back (3 minutes)',
         prompt: 'Ask him to show you on <b>his own calculator</b>, without looking at the screen here: solve a quadratic in equation mode, and type \\(b^2-4ac\\) for a negative b.',
@@ -523,8 +523,8 @@ const DAYS = [
         <p>Babylonian scribes carved puzzles into clay tablets. One says: <i>"I took away the side of my square from its area and got 870."</i> In our notation, that is \\(x^2-x=870\\).</p>
         <p>They had no algebra, no formulas, not even the letter x. They solved it by <b>cutting and rearranging squares</b>, the exact trick you learn today. At the end of this mission you will crack their puzzle.</p>` },
 
-      { t: 'drill', id: 'd1-cold', title: 'Cold start: Level 1 without notes', maxDay: 1, n: 4, minutes: 5,
-        intro: 'Four factorising questions, no hints, 5 minutes. Use P and S.' },
+      { t: 'drill', id: 'd1-cold', title: 'Cold start: Level 1 without notes', maxDay: 1, n: 4, studyGuide: true,
+        intro: 'Four factorising questions. Use P and S, show your working and check your answers.' },
 
       { t: 'predict', id: 'd1-p1',
         q: 'Try to factorise \\(x^2+4x-3\\) into two brackets with whole numbers. What happens?',
@@ -615,8 +615,8 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏺 The hook</span><h3>3,000 years to find one formula</h3><p>Babylonian scribes solved quadratics with squares about 4,000 years ago. But one formula that works on <i>every</i> quadratic took roughly 3,000 more years to appear. In 2019, a maths professor, Po-Shen Loh, found a clever new way to see the same idea. So even this old topic is still being explored.</p><p>Today you will not <b>memorise</b> that formula. You will <b>build</b> it, then rebuild it on paper from nothing.</p>` },
 
-      { t: 'drill', id: 'd2-cold', title: 'Cold start: Levels 1 to 3', maxDay: 3, n: 4, minutes: 5,
-        intro: '4 questions, no hints, 5 minutes. This is how every day begins.' },
+      { t: 'drill', id: 'd2-cold', title: 'Cold start: Levels 1 to 3', maxDay: 3, n: 4, studyGuide: true,
+        intro: 'Four mixed questions. Work independently and take the time you need.' },
 
       { t: 'html', html: `
         <h3>Solve \\(x^2+4x-3=0\\)</h3>
@@ -750,8 +750,8 @@ const DAYS = [
           { text: 'Step 4: divide both sides by \\(a-b\\)', ok: true, why: 'Since \\(a=b\\), \\(a-b=0\\). You cannot divide by zero.' },
           { text: 'Step 6: divide by b', ok: false, why: 'This is fine as long as b is not 0.' } ],
         explain: 'The same trap sits inside fractional equations. If a denominator can be 0, some "solutions" are lies. That is why you will always check.' },
-      { t: 'drill', id: 'd3-cold', title: 'Cold start: Levels 1 to 4', maxDay: 4, n: 5, minutes: 7,
-        intro: '5 questions, no hints, 7 minutes.' },
+      { t: 'drill', id: 'd3-cold', title: 'Cold start: Levels 1 to 4', maxDay: 4, n: 5, studyGuide: true,
+        intro: '5 questions. Work independently, show your working and check your answers.' },
 
       { t: 'html', html: `<h3>The plan</h3>
         <p>We don't know how to solve an equation with x in a denominator directly. So we change it into an equation we <i>do</i> know how to solve, by multiplying <b>every term on both sides</b> by the common denominator.</p>
@@ -838,8 +838,8 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🌉 The hook</span><h3>The curve hiding everywhere</h3><p>A basketball shot, a bridge cable, a satellite dish, a fountain of water: all of them are <b>parabolas</b>, the graph of a quadratic. The turning point is the top of the arch, or the lowest point of the dish.</p><p>Today you will learn to find that point, and where the curve crosses the ground, <b>without plotting a single point</b>.</p>` },
 
-      { t: 'drill', id: 'd4-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 5, minutes: 8,
-        intro: '5 questions, no hints, 8 minutes.' },
+      { t: 'drill', id: 'd4-cold', title: 'Cold start: Levels 1 to 5', maxDay: 5, n: 5, studyGuide: true,
+        intro: '5 questions. Work independently, show your working and check your answers.' },
 
       { t: 'html', html: `<h3>Equation versus graph</h3>
         <p>Solving \\(2x^2-5x-6=0\\) means: <i>for which x does the height \\(y=2x^2-5x-6\\) equal 0?</i> The height is zero exactly where the curve crosses the x-axis. So <b>solutions are x-intercepts</b>.</p>
@@ -982,8 +982,8 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏀 The hook</span><h3>Every thrown ball is a quadratic</h3><p>Throw a ball, kick a football, shoot a basketball: the height over time follows a quadratic, always an upside-down U. The highest point is the turning point.</p><p>Engineers use this to aim fountains, and games programmers use it for jumps and cannons. Today you will build equations from stories, and then fire a few cannons yourself.</p>` },
 
-      { t: 'drill', id: 'd5-cold', title: 'Cold start: Levels 1 to 6', maxDay: 6, n: 6, minutes: 10,
-        intro: '6 questions, no hints, 10 minutes.' },
+      { t: 'drill', id: 'd5-cold', title: 'Cold start: Levels 1 to 6', maxDay: 6, n: 6, studyGuide: true,
+        intro: '6 questions. Work independently, show your working and check your answers.' },
 
       { t: 'html', html: `<h3>Four steps for every word problem</h3>
         <ol class="steps">
@@ -1075,8 +1075,8 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🧾 The hook</span><h3>One story, eight disguises</h3><p>Rice and dollars. Pumps and litres. Boats and rivers. Cakes and sugar. They look different, but almost every one hides the same sentence: <b>"the same amount is shared out two ways, and the two answers differ by a fixed amount."</b></p><p>That gives a fraction equation, and a fraction equation gives a quadratic. Once you see the pattern, the stories stop being scary.</p>` },
 
-      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 7', maxDay: 7, n: 6, minutes: 10,
-        intro: '6 questions, no hints, 10 minutes.' },
+      { t: 'drill', id: 'd6-cold', title: 'Cold start: Levels 1 to 7', maxDay: 7, n: 6, studyGuide: true,
+        intro: '6 questions. Work independently, show your working and check your answers.' },
 
       { t: 'html', html: `<h3>The one pattern</h3><table class="prog"><tr><th>Story</th><th>Amount</th><th>Rate</th><th>Result</th></tr>
         <tr><td>Rice</td><td>$360</td><td>$x per kg</td><td>\\(\\dfrac{360}{x}\\) kg</td></tr>
@@ -1148,17 +1148,17 @@ const DAYS = [
   /* ------------------------------------------------------------------ DAY 7 */
   {
     n: 9, title: 'Mixed test and mock paper', minutes: 110,
-    tagline: 'Everything, shuffled, then a full timed paper',
+    tagline: 'Everything, shuffled, then a full practice paper',
     blocks: [
       { t: 'goal', items: [
         'No hints. No topic labels. Questions in random order, like the real thing.',
-        'Score 12 out of 15 or higher in 30 minutes.',
-        'Then score 28 out of 40 or higher on the full mock paper in 60 minutes.' ] },
+        'Score 12 out of 15 or higher, checking your working carefully.',
+        'Then score 28 out of 40 or higher on the full mock paper; hand it in when you are ready.' ] },
       { t: 'html', html: `<span class="tag">🔥 Boss fight</span><h3>The guardian of the castle</h3><p>Fifteen questions stand between you and the castle. They come from every level, in random order, and the guardian gives <b>no hints</b>. Everything you built this week is your weapon.</p>` },
 
       { t: 'html', html: `<div class="callout">Rules: no notes, no phone, a calculator is allowed (like in school). Write your working on paper, then type the answer. If the score is below 12, tomorrow's session fixes the weak spots.</div>` },
-      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 8, n: 15, minutes: 30, test: true, pass: 12,
-        intro: '15 questions, 30 minutes. One try each. Pass mark: 12.' },
+      { t: 'drill', id: 'd7-test', title: 'Mixed test', maxDay: 8, n: 15, studyGuide: true, test: true, pass: 12,
+        intro: '15 mixed questions. Your first answer is recorded; the time guide adapts to the questions and allows extra time. Pass mark: 12.' },
 
       { t: 'mock', id: 'd7-mock', pass: 28, ...MOCK_PAPER },
 
