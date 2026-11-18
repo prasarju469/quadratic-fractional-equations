@@ -391,20 +391,21 @@
     const w = el('section', 'block drill');
     function intro() {
       w.innerHTML = `<span class="tag">${b.test ? '🔥 Boss fight' : '🧊 Cold start'}</span><h3>${b.title}</h3><p class="muted">${b.intro || ''}</p>
-        <button class="btn primary big">Start (${b.n} questions${b.minutes ? ', ' + b.minutes + ' min' : ''})</button>`;
+        <button class="btn primary big">Start (${b.n} questions${b.studyGuide ? ', time guide based on the questions' : b.minutes ? ', ' + b.minutes + ' min' : ''})</button>`;
       w.querySelector('button').onclick = start;
     }
     function start() {
       const pool = b.topics === 'weak' ? weakTopics() : b.topics || allTopics(b.maxDay);
       const qs = []; let bag = [];
       while (qs.length < b.n) { if (!bag.length) bag = shuffle(pool); qs.push(generate(bag.pop())); }
-      const results = []; let i = 0, left = (b.minutes || 0) * 60, tick = null;
+      const guideMinutes=b.studyGuide?studySetMinutes(qs):0;
+      const results = []; let i = 0, elapsed=0, left = (guideMinutes||b.minutes||0) * 60, tick = null;
       function end(timeUp) {
         if (tick) { clearInterval(tick); }
         const score = results.filter((r) => r.ok).length;
         const missed = [...new Set(results.filter((r) => !r.ok).map((r) => TOPICS[r.topic].name))];
         const reward=Cloud.role==='teacher'?0:MathsRewards.award(Store.d,b.id,score,b.n);
-        Store.d.drills.push({ id: b.id, score, n: b.n, when: Date.now() }); Store.save(); bump();
+        Store.d.drills.push({ id: b.id, score, n: b.n, when: Date.now(), ...(b.studyGuide?{guideMinutes,elapsedSeconds:elapsed}:{}) }); Store.save(); bump();
         w.innerHTML = `<span class="tag">Result</span><h3>${b.title}</h3>${timeUp ? '<p class="muted">Time is up.</p>' : ''}
           <div class="score">${score} / ${b.n}</div><p>+${reward} XP · practice completed</p>
           ${b.pass ? (score >= b.pass ? `<p class="ok" style="color:var(--good);font-weight:800">✔ Passed! (pass mark ${b.pass})</p>` : `<p class="no" style="color:var(--bad);font-weight:700">Pass mark is ${b.pass}. Fix the topics below and try again.</p>`) : ''}
@@ -414,7 +415,7 @@
       }
       function show() {
         if (i >= b.n) return end(false);
-        w.innerHTML = `<div class="drillbar"><span class="tag">${b.title}: question ${i + 1} of ${b.n}</span>${b.minutes ? `<span class="timer" id="tm">${mmss(left)}</span>` : ''}</div><div class="qhost"></div>`;
+        w.innerHTML = `<div class="drillbar"><span class="tag">${b.title}: question ${i + 1} of ${b.n}</span>${b.studyGuide||b.minutes ? `<span class="timer" id="tm">${b.studyGuide?(left>=0?'Time guide: '+mmss(left):'Extra time: +'+mmss(-left)):mmss(left)}</span>` : ''}</div>${b.studyGuide?`<p class="muted">Allow about ${guideMinutes} minutes for this mix, including checking. This is a guide, not a deadline: take the time you need to finish every question.</p>`:''}<div class="qhost"></div>`;
         mountQuestion(w.querySelector('.qhost'), qs[i], {
           drill: true, hints: false,
           onDone: (ok) => {
@@ -426,10 +427,10 @@
           },
         });
       }
-      if (b.minutes) {
+      if (b.minutes||b.studyGuide) {
         tick = setInterval(() => {
-          left--; const t = w.querySelector('#tm'); if (t) t.textContent = mmss(Math.max(left, 0));
-          if (left <= 0) { clearInterval(tick); for (let k = results.length; k < b.n; k++) results.push({ topic: qs[k].topic, ok: false }); end(true); }
+          left--;elapsed++; const t = w.querySelector('#tm'); if (t) t.textContent = b.studyGuide?(left>=0?'Time guide: '+mmss(left):'Extra time: +'+mmss(-left)):mmss(Math.max(left, 0));
+          if (!b.studyGuide&&left <= 0) { clearInterval(tick); for (let k = results.length; k < b.n; k++) results.push({ topic: qs[k].topic, ok: false }); end(true); }
         }, 1000);
         timers.push(tick);
       }
@@ -610,8 +611,8 @@
 
   function wake() {
     root.innerHTML = `<div class="wake"><h1>⏰ Wake-up mode</h1>
-      <p>Ten random questions from the whole chapter, ten minutes, no hints, no topic labels. Wake up, sit down, solve.</p></div>`;
-    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 8, n: 10, minutes: 10, test: true, intro: 'Questions come from every topic, shuffled. One try each.' }));
+      <p>Ten mixed questions from the whole chapter. Work through them independently, showing your working on paper and checking each answer. The time guide allows longer for multi-step problems; you can keep going when it runs out.</p></div>`;
+    root.appendChild(drillBlock({ id: 'wake', title: 'Wake-up test', maxDay: 8, n: 10, studyGuide: true, test: true, intro: 'Questions come from every topic, shuffled. Use the time you need; your first answer to each question is recorded.' }));
   }
 
   function progress() {

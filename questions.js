@@ -1312,4 +1312,10 @@ function checkAnswer(q, vals) {
   return { ok: !wrong.some(Boolean), wrong };
 }
 
-if (typeof module !== 'undefined') module.exports = { TOPICS, generate, checkAnswer, parseNum, fmt, poly, parseAlg, polyOfExpr, polyEq, isFullyFactored };
+// Generous practice guides, not exam mark-per-minute assumptions or deadlines.
+function questionStudyMinutes(q) {
+  const topic=TOPICS[q?.topic],base=({1:3,2:3,3:4,4:5,5:6,6:6,7:8,8:8})[topic?.day]||8;
+  return base+(topic?.stretch?2:0)+((q?.fields?.length||0)>=5?1:0);
+}
+function studySetMinutes(questions) { return 5+questions.reduce((n,q)=>n+questionStudyMinutes(q),0); }
+if (typeof module !== 'undefined') module.exports = { questionStudyMinutes, studySetMinutes, TOPICS, generate, checkAnswer, parseNum, fmt, poly, parseAlg, polyOfExpr, polyEq, isFullyFactored };

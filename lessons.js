@@ -1185,7 +1185,7 @@ const DAYS = [
         prompt: 'The student explains the chapter to you with no notes: "Everything in this chapter comes from completing the square." He should cover each link in the chain.',
         checks: ['Completing the square: add (b/2)², subtract it again', 'The formula is completing the square done once with letters', 'Fractional equations: multiply out, solve, then reject invalid roots', 'Roots are x-intercepts; completed-square form gives the turning point', 'Word problems: build the equation, solve it, reject what makes no sense'] },
 
-      { t: 'html', html: `<div class="callout key"><b>Finish with the wake-up test.</b> Use the <a href="#/wake">Wake-up mode</a> page. Ten random questions, ten minutes, no help. Ten random questions, ten minutes, no help. Be ready for anything, any time.</div>` },
+      { t: 'html', html: `<div class="callout key"><b>Finish with the wake-up test.</b> Use the <a href="#/wake">Wake-up mode</a> page. Ten mixed questions. Allow time for working and checking; the time guide adjusts to the questions selected. Finish carefully, even if you need extra time.</div>` },
 
       { t: 'done' },
     ],
