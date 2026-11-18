@@ -1178,8 +1178,8 @@ const DAYS = [
 
       { t: 'html', html: `<span class="tag">🏰 Final level</span><h3>Repair your armour</h3><p>The boss found the cracks in your armour. Now you repair them, then prove you can teach the whole chapter in one story, and take on the Wake-up test.</p>` },
 
-      { t: 'drill', id: 'd8-weak', title: 'Your weakest topics', topics: 'weak', n: 8, minutes: 12, pass: 6,
-        intro: 'These are picked from your own record in this app, lowest accuracy first.' },
+      { t: 'drill', id: 'd8-weak', title: 'Your weakest topics', topics: 'weak', n: 8, studyGuide: true, pass: 6,
+        intro: 'Eight questions picked from your own record, lowest accuracy first. Work carefully and check your answers. The time guide adjusts to the questions; there is no cutoff.' },
 
       { t: 'teachback', title: 'Teach the whole chapter (5 minutes)',
         prompt: 'The student explains the chapter to you with no notes: "Everything in this chapter comes from completing the square." He should cover each link in the chain.',
